@@ -1,0 +1,193 @@
+:root {
+  /* Core brand colors */
+  --brand-primary: #0056b3; /* Haak3 Blue Accent */
+  
+  /* Light mode tokens (Editor area) */
+  --color-bg-workspace: #f3f4f6; /* Neutral gray */
+  --color-bg-surface: #ffffff;
+  --color-text-primary: #111827;
+  --color-text-secondary: #4b5563;
+  --color-border: #e5e7eb;
+  
+  /* Dark mode tokens (Streaming Preview area) */
+  --color-bg-dark: #141414; /* Netflix dark gray */
+  --color-bg-dark-surface: #1f1f1f;
+  --color-text-dark: #ffffff;
+  --color-text-dark-secondary: #a3a3a3;
+  --color-border-dark: #333333;
+
+  /* Default theme (Editor is light by default) */
+  --color-bg: var(--color-bg-workspace);
+  --color-surface: var(--color-bg-surface);
+  --color-text: var(--color-text-primary);
+  --color-text-muted: var(--color-text-secondary);
+  --border-color: var(--color-border);
+  
+  --accent-color: var(--brand-primary);
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: var(--color-bg-dark);
+    --color-surface: var(--color-bg-dark-surface);
+    --color-text: var(--color-text-dark);
+    --color-text-muted: var(--color-text-dark-secondary);
+    --border-color: var(--color-border-dark);
+  }
+}
+
+/* Explicit class to force Dark Mode (Streaming Look) */
+.theme-streaming {
+  color-scheme: dark;
+  --color-bg: var(--color-bg-dark);
+  --color-surface: var(--color-bg-dark-surface);
+  --color-text: var(--color-text-dark);
+  --color-text-muted: var(--color-text-dark-secondary);
+  --border-color: var(--color-border-dark);
+  
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+/* Typography & Resets */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* Layout Utilities */
+.app-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.editor-sidebar {
+  width: 400px;
+  background-color: var(--color-surface);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  z-index: 10;
+}
+
+.preview-main {
+  flex: 1;
+  position: relative;
+  overflow-y: auto;
+  background-color: var(--color-bg-dark); /* Always dark */
+}
+
+/* Streaming specific styles */
+.streaming-hero {
+  position: relative;
+  min-height: 60vh;
+  display: flex;
+  align-items: flex-end;
+  padding: 3rem;
+  background-size: cover;
+  background-position: center;
+}
+
+.streaming-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, var(--color-bg-dark) 0%, transparent 100%);
+  z-index: 1;
+}
+
+.streaming-hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 600px;
+}
+
+.streaming-title {
+  font-size: 4rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.streaming-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.match-score {
+  color: #46d369; /* Netflix green match color */
+  font-weight: bold;
+}
+
+.age-rating {
+  border: 1px solid var(--color-text-dark-secondary);
+  padding: 0 0.4rem;
+}
+
+.streaming-desc {
+  font-size: 1.2rem;
+  margin-bottom: 1.5rem;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+.btn-play {
+  background-color: white;
+  color: black;
+  border: none;
+  padding: 0.8rem 2rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s;
+}
+
+.btn-play:hover {
+  background-color: rgba(255,255,255,0.7);
+}
+
+.btn-secondary {
+  background-color: rgba(109, 109, 110, 0.7);
+  color: white;
+  border: none;
+  padding: 0.8rem 2rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: 1rem;
+}
+
+.btn-secondary:hover {
+  background-color: rgba(109, 109, 110, 0.4);
+}
