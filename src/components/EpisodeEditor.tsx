@@ -32,54 +32,54 @@ export function EpisodeEditor({ episode, seasonId, index, total, onUpdate, onRem
           <button 
             onClick={() => onMove(seasonId, episode.id, 'up')} 
             disabled={index === 0}
-            style={{ background: 'transparent', border: '1px solid var(--border-color)', padding: '0.2rem', borderRadius: '4px', cursor: index === 0 ? 'not-allowed' : 'pointer' }}
+            style={{ background: 'transparent', border: '1px solid var(--border-color)', padding: '0.3rem', borderRadius: '6px', cursor: index === 0 ? 'not-allowed' : 'pointer', color: 'var(--color-text-muted)', transition: 'all 0.2s' }}
           >
             <ArrowUp size={16} />
           </button>
           <button 
             onClick={() => onMove(seasonId, episode.id, 'down')} 
             disabled={index === total - 1}
-            style={{ background: 'transparent', border: '1px solid var(--border-color)', padding: '0.2rem', borderRadius: '4px', cursor: index === total - 1 ? 'not-allowed' : 'pointer' }}
+            style={{ background: 'transparent', border: '1px solid var(--border-color)', padding: '0.3rem', borderRadius: '6px', cursor: index === total - 1 ? 'not-allowed' : 'pointer', color: 'var(--color-text-muted)', transition: 'all 0.2s' }}
           >
             <ArrowDown size={16} />
           </button>
           <button 
             onClick={() => onRemove(seasonId, episode.id)}
-            style={{ background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', padding: '0.2rem', borderRadius: '4px' }}
+            style={{ background: '#fef2f2', color: '#ef4444', border: '1px solid #fecaca', padding: '0.3rem', borderRadius: '6px', cursor: 'pointer', transition: 'all 0.2s' }}
           >
             <Trash2 size={16} />
           </button>
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <div>
-          <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.2rem' }}>Titel</label>
+          <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.3rem', fontWeight: 500 }}>Titel</label>
           <input 
             type="text" 
             value={episode.title}
             onChange={(e) => onUpdate(seasonId, episode.id, { title: e.target.value })}
-            style={{ width: '100%', padding: '0.4rem', borderRadius: '4px', border: '1px solid var(--border-color)' }}
+            style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid var(--border-color)' }}
           />
         </div>
         
         <div>
-          <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.2rem' }}>Beschreibung</label>
+          <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.3rem', fontWeight: 500 }}>Beschreibung</label>
           <textarea 
             value={episode.summary}
             onChange={(e) => onUpdate(seasonId, episode.id, { summary: e.target.value })}
             rows={2}
-            style={{ width: '100%', padding: '0.4rem', borderRadius: '4px', border: '1px solid var(--border-color)' }}
+            style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid var(--border-color)', resize: 'vertical' }}
           />
         </div>
 
         <div>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem', padding: '0.4rem', border: '1px dashed var(--border-color)', borderRadius: '4px', justifyContent: 'center', backgroundColor: '#fff' }}>
-            <ImageIcon size={16} /> Thumbnail wählen
+          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.95rem', fontWeight: 500, padding: '0.6rem', border: '1px dashed var(--color-border)', borderRadius: '6px', justifyContent: 'center', backgroundColor: 'var(--color-bg-surface)', transition: 'background-color 0.2s', color: 'var(--color-text-primary)' }}>
+            <ImageIcon size={18} /> Thumbnail wählen
             <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageUpload} />
           </label>
           {episode.thumbnailUrl && (
-            <img src={episode.thumbnailUrl} alt="Thumbnail preview" style={{ width: '100%', height: '80px', objectFit: 'cover', marginTop: '0.5rem', borderRadius: '4px' }} />
+            <img src={episode.thumbnailUrl} alt="Thumbnail preview" style={{ width: '100%', height: '80px', objectFit: 'cover', marginTop: '0.5rem', borderRadius: '6px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }} />
           )}
         </div>
       </div>

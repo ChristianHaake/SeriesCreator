@@ -6,6 +6,8 @@ import { EpisodeGrid } from './components/EpisodeGrid';
 import { PresentationMode } from './components/PresentationMode';
 import { PrintLayout } from './components/PrintLayout';
 import { exportProjectToPdf } from './components/PdfExport';
+import { AppHeader } from './components/AppHeader';
+import { AppFooter } from './components/AppFooter';
 import './index.css';
 
 function App() {
@@ -28,9 +30,11 @@ function App() {
   }
 
   return (
-    <div className="app-container">
-      {/* Hidden layout purely used for the high-res PDF snapshot */}
-      <PrintLayout data={data} />
+    <div className="app-shell">
+      <AppHeader />
+      <div className="app-main-content">
+        {/* Hidden layout purely used for the high-res PDF snapshot */}
+        <PrintLayout data={data} />
 
       {/* Sidebar Editor */}
       <aside className="editor-sidebar" style={{ padding: '2rem' }}>
@@ -46,7 +50,7 @@ function App() {
               type="text" 
               value={data.title} 
               onChange={(e) => updateData({ title: e.target.value })}
-              style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border-color)' }}
+              style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)' }}
             />
           </div>
 
@@ -56,7 +60,7 @@ function App() {
               value={data.description} 
               onChange={(e) => updateData({ description: e.target.value })}
               rows={4}
-              style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border-color)' }}
+              style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)', resize: 'vertical' }}
             />
           </div>
 
@@ -67,7 +71,7 @@ function App() {
                 type="text" 
                 value={data.ageRating} 
                 onChange={(e) => updateData({ ageRating: e.target.value })}
-                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border-color)' }}
+                style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)' }}
               />
             </div>
             <div style={{ flex: 1 }}>
@@ -76,7 +80,7 @@ function App() {
                 type="number" 
                 value={data.matchPercentage} 
                 onChange={(e) => updateData({ matchPercentage: Number(e.target.value) })}
-                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border-color)' }}
+                style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)' }}
               />
             </div>
           </div>
@@ -88,7 +92,7 @@ function App() {
                 type="text" 
                 value={data.genre} 
                 onChange={(e) => updateData({ genre: e.target.value })}
-                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border-color)' }}
+                style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)' }}
               />
             </div>
             <div style={{ flex: 1 }}>
@@ -97,7 +101,7 @@ function App() {
                 type="text" 
                 value={data.cast} 
                 onChange={(e) => updateData({ cast: e.target.value })}
-                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border-color)' }}
+                style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)' }}
               />
             </div>
           </div>
@@ -109,7 +113,7 @@ function App() {
             <select 
               value={activeSeasonId} 
               onChange={(e) => setActiveSeasonId(e.target.value)}
-              style={{ padding: '0.4rem', borderRadius: '4px', border: '1px solid var(--border-color)' }}
+              style={{ padding: '0.4rem', border: '1px solid var(--border-color)' }}
             >
               {data.seasons.map(s => (
                 <option key={s.id} value={s.id}>{s.title}</option>
@@ -132,7 +136,9 @@ function App() {
 
           <button 
             onClick={() => addEpisode(activeSeason.id)}
-            style={{ width: '100%', padding: '0.8rem', backgroundColor: 'var(--color-bg-workspace)', border: '1px dashed var(--color-text-muted)', borderRadius: '4px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+            style={{ width: '100%', padding: '0.8rem', backgroundColor: 'var(--color-bg-surface)', border: '1px dashed var(--color-border)', borderRadius: '6px', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', cursor: 'pointer', transition: 'background-color 0.2s', color: 'var(--color-text-primary)' }}
+            onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'var(--color-bg-workspace)'}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'var(--color-bg-surface)'}
           >
             <Plus size={16} /> Episode hinzufügen
           </button>
@@ -243,7 +249,9 @@ function App() {
             </div>
           )}
         </section>
-      </main>
+        </main>
+      </div>
+      <AppFooter />
     </div>
   );
 }
