@@ -100,7 +100,21 @@ export function EpisodeEditor({ episode, seasonId, index, total, onUpdate, onRem
             <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageUpload} />
           </label>
           {episode.thumbnailUrl && (
-            <img src={episode.thumbnailUrl} alt="Thumbnail preview" style={{ width: '100%', height: '80px', objectFit: 'cover', marginTop: '0.5rem', borderRadius: '6px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }} />
+            <div style={{ marginTop: '0.5rem' }}>
+              <img src={episode.thumbnailUrl} alt={episode.altText || "Thumbnail Vorschau"} style={{ width: '100%', height: '80px', objectFit: 'cover', borderRadius: '6px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }} />
+              <div style={{ marginTop: '0.5rem' }}>
+                <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.3rem', fontWeight: 500 }}>Alternativtext (Barrierefreiheit)</label>
+                <input 
+                  type="text" 
+                  value={episode.altText || ''}
+                  onChange={(e) => onUpdate(seasonId, episode.id, { altText: e.target.value })}
+                  maxLength={125}
+                  placeholder="Beschreibe das Bild in max. 125 Zeichen..."
+                  required
+                  style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid var(--border-color)' }}
+                />
+              </div>
+            </div>
           )}
         </div>
       </div>

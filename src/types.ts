@@ -5,6 +5,7 @@ export interface Episode {
   notes?: string;
   duration?: string;
   thumbnailUrl?: string; // Optional image URL or base64
+  altText?: string; // Alt text for accessibility
 }
 
 export interface Season {

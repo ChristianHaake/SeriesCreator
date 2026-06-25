@@ -1,14 +1,17 @@
-export function AppFooter() {
+import { translations, type Language } from '../translations';
+
+export function AppFooter({ lang }: { lang: Language }) {
+  const t = translations[lang];
   return (
     <footer className="app-footer">
-      <span className="app-footer__privacy">Daten bleiben auf deinem Gerät</span>
+      <span className="app-footer__privacy">{t.footerPrivacy}</span>
       <div className="app-footer__right" style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
         <nav aria-label="Footer Navigation">
-          <a href="#/hilfe">Hilfe</a>
-          <a href="#/ueber">Über</a>
-          <a href="#/lehrkraefte">Lehrkräfte</a>
-          <a href="#/datenschutz">Datenschutz</a>
-          <a href="#/impressum">Impressum</a>
+          <a href="#/hilfe">{t.footerHelp}</a>
+          <a href="#/ueber">{t.footerAbout}</a>
+          <a href="#/lehrkraefte">{t.footerTeachers}</a>
+          <a href="#/datenschutz">{t.footerPrivacyPolicy}</a>
+          <a href="#/impressum">{t.footerImprint}</a>
           <a
             className="github-link"
             href="https://github.com/ChristianHaake/SeriesCreator"
@@ -32,7 +35,7 @@ export function AppFooter() {
           <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
             <path d="M20 3H4v10c0 2.21 1.79 4 4 4h6c2.21 0 4-1.79 4-4v-3h2c1.11 0 2-.89 2-2V5c0-1.11-.89-2-2-2zm-2 5h-2V5h2v3zM4 19h16v2H4z"/>
           </svg>
-          <span>Buy me a coffee</span>
+          <span>{t.coffee}</span>
         </a>
       </div>
     </footer>
