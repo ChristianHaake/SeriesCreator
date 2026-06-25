@@ -37,7 +37,7 @@ export const de = {
   tabSources: "QUELLEN",
   noReflection: "Noch keine Lernziele oder Reflexionen eingetragen.",
   noSources: "Noch keine Quellen eingetragen.",
-  btnPdf: "Als PDF speichern",
+  btnPdf: "Drucken / als PDF",
   footerPrivacy: "Daten bleiben auf deinem Gerät",
   footerHelp: "Hilfe",
   footerAbout: "Über",
