@@ -80,8 +80,7 @@ perception? Which designs encourage impulsive reactions?
 ### Are entries uploaded?
 
 No. Text, images, and configurations are processed locally. Cloudflare
-processes technical connection data when serving the site and statistical
-usage data through Cloudflare Web Analytics.
+processes technical connection data when serving the website.
 
 ### May I use images from the internet?
 

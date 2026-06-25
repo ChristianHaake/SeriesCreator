@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Episode } from '../types';
 import { ArrowUp, ArrowDown, Trash2, Image as ImageIcon } from 'lucide-react';
-import { fieldLimits } from '../domain/constraints';
+import { fieldLimits, resourceLimits } from '../domain/constraints';
 
 interface Props {
   episode: Episode;
@@ -16,34 +16,73 @@ interface Props {
 export function EpisodeEditor({ episode, seasonId, index, total, onUpdate, onRemove, onMove }: Props) {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          let width = img.width;
-          let height = img.height;
-          const MAX_WIDTH = 800;
-          
-          if (width > MAX_WIDTH) {
-            height = Math.round((height * MAX_WIDTH) / width);
-            width = MAX_WIDTH;
-          }
-          
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          if (ctx) {
-            ctx.drawImage(img, 0, 0, width, height);
-            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
-            onUpdate(seasonId, episode.id, { thumbnailUrl: compressedBase64 });
-          }
-        };
-        img.src = reader.result as string;
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+      alert('Bitte wähle ein PNG-, JPG- oder WebP-Bild.');
+      e.target.value = '';
+      return;
     }
+
+    if (file.size > resourceLimits.imageFileBytes) {
+      alert('Das Bild ist zu groß. Maximal erlaubt sind 5 MB.');
+      e.target.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (typeof reader.result !== 'string') {
+        alert('Das Bild konnte nicht gelesen werden.');
+        e.target.value = '';
+        return;
+      }
+
+      const img = new Image();
+      img.onload = () => {
+        if (
+          img.width > resourceLimits.imageMaxEdge ||
+          img.height > resourceLimits.imageMaxEdge
+        ) {
+          alert('Das Bild ist zu groß. Maximal erlaubt sind 4096 Pixel pro Kante.');
+          e.target.value = '';
+          return;
+        }
+
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        if (width > resourceLimits.imageOutputWidth) {
+          height = Math.round((height * resourceLimits.imageOutputWidth) / width);
+          width = resourceLimits.imageOutputWidth;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          alert('Das Bild konnte nicht verarbeitet werden.');
+          e.target.value = '';
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, width, height);
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+        onUpdate(seasonId, episode.id, { thumbnailUrl: compressedBase64 });
+        e.target.value = '';
+      };
+      img.onerror = () => {
+        alert('Das Bildformat konnte nicht verarbeitet werden.');
+        e.target.value = '';
+      };
+      img.src = reader.result;
+    };
+    reader.onerror = () => {
+      alert('Das Bild konnte nicht gelesen werden.');
+      e.target.value = '';
+    };
+    reader.readAsDataURL(file);
   };
 
   return (

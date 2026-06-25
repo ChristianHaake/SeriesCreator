@@ -1,19 +1,7 @@
-# Über {{APP_NAME}}
+# Über SeriesCreator
 
-## Zweck
+SeriesCreator ist eine browserbasierte Simulationsumgebung für fiktive
+Streaming-Serienprojekte im Unterricht.
 
-Beschreibe den Bildungszweck und die Zielgruppe.
-
-## Funktionsweise
-
-Erkläre die wichtigsten Funktionen und die lokale Verarbeitung.
-
-## Open Source
-
-Der Quellcode ist unter {{REPOSITORY_URL}} veröffentlicht.
-
-Die Software steht unter der GNU General Public License v3.0 only.
-
-## Verantwortlich
-
-Ergänze Projektverantwortung und Kontakt.
+Der Quellcode ist unter
+https://github.com/ChristianHaake/SeriesCreator veröffentlicht.

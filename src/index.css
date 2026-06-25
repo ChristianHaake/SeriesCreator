@@ -59,7 +59,7 @@
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background-color: var(--color-bg);
   color: var(--color-text);
   line-height: 1.5;
@@ -70,7 +70,7 @@ body {
 h1, h2, h3, h4 {
   font-weight: 700;
   line-height: 1.2;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
 }
 
 button {
@@ -87,11 +87,18 @@ button {
   overflow: hidden;
 }
 
+.app-shell--content-route {
+  height: auto;
+  min-height: 100vh;
+  overflow: visible;
+}
+
 .app-main-content {
   display: flex;
   flex: 1;
   overflow: hidden;
   position: relative;
+  min-height: 0;
 }
 
 .editor-sidebar {
@@ -115,7 +122,7 @@ button {
 /* Global Form Styles for Editor */
 input[type="text"], input[type="number"], textarea, select {
   transition: border-color 0.2s, box-shadow 0.2s;
-  font-family: 'Inter', sans-serif;
+  font-family: inherit;
   border-radius: 6px !important;
 }
 
@@ -157,8 +164,134 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
   font-weight: 800;
   margin-bottom: 1rem;
   text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
   line-height: 1.1;
+}
+
+.preview-header {
+  align-items: center;
+  display: flex;
+  inset: 0 0 auto 0;
+  padding: 1.5rem 3rem;
+  position: absolute;
+  z-index: 10;
+}
+
+.preview-header__brand {
+  color: #E50914;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-right: 2rem;
+  text-shadow: 1px 1px 2px rgb(0 0 0 / 80%);
+}
+
+.preview-header__nav {
+  display: flex;
+  flex: 1;
+  font-weight: 500;
+  gap: 1.5rem;
+  text-shadow: 1px 1px 2px rgb(0 0 0 / 80%);
+}
+
+.preview-header__print {
+  align-items: center;
+  background: rgb(255 255 255 / 10%);
+  border: 1px solid rgb(255 255 255 / 20%);
+  border-radius: 4px;
+  color: white;
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+}
+
+.streaming-actions {
+  margin-bottom: 2rem;
+}
+
+.streaming-facts {
+  color: var(--color-text-dark-secondary);
+  font-size: 1rem;
+  text-shadow: 1px 1px 2px rgb(0 0 0 / 80%);
+}
+
+.streaming-facts span {
+  color: white;
+}
+
+.preview-section {
+  padding: 0 3rem 3rem;
+}
+
+.preview-tabs {
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  font-size: 1.2rem;
+  font-weight: 700;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+}
+
+.preview-tabs button {
+  background: transparent;
+  border: 0;
+  border-top: 4px solid transparent;
+  color: var(--color-text-dark-secondary);
+  font-size: inherit;
+  font-weight: inherit;
+  margin-top: -1rem;
+  padding-top: 1rem;
+}
+
+.preview-tabs button[aria-selected="true"] {
+  border-top-color: #E50914;
+  color: white;
+}
+
+.season-selector {
+  margin-bottom: 2rem;
+}
+
+.season-selector select {
+  background-color: #333;
+  border: 1px solid #555;
+  border-radius: 4px;
+  color: white;
+  font-size: 1.2rem;
+  padding: 0.5rem 1rem;
+}
+
+.preview-text-panel {
+  color: var(--color-text-dark-secondary);
+}
+
+.preview-text-panel h3 {
+  color: white;
+  margin-bottom: 1rem;
+}
+
+.preview-text-panel p {
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.content-page {
+  color: var(--color-text);
+  flex: 1;
+  margin: 0 auto;
+  max-width: 800px;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 4rem;
+  width: 100%;
+}
+
+.content-page__back {
+  color: #E50914;
+  display: inline-block;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  text-decoration: none;
 }
 
 .streaming-meta {

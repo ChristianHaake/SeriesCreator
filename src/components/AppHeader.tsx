@@ -2,6 +2,8 @@ import React from 'react';
 import { GraduationCap, Download, Upload, Trash2 } from "lucide-react";
 import type { ProjectData } from "../types";
 import { useTranslation } from "../i18n";
+import { parseProjectJson, PROJECT_FILE_EXTENSION } from '../domain/projectCodec';
+import { resourceLimits } from '../domain/constraints';
 
 interface Props {
   onExport?: () => void;
@@ -15,19 +17,26 @@ export function AppHeader({ onExport, onImport, onReset }: Props) {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    if (file.size > resourceLimits.projectFileBytes) {
+      alert(locale === 'de' ? 'Projektdatei ist zu groß.' : 'Project file is too large.');
+      event.target.value = '';
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (e) => {
-      try {
-        const content = e.target?.result as string;
-        const parsed = JSON.parse(content);
-        if (parsed && typeof parsed === 'object' && 'title' in parsed && 'seasons' in parsed) {
-          if (onImport) onImport(parsed);
-        } else {
-          alert('Ungültiges Projektformat.');
-        }
-      } catch (err) {
-        alert('Fehler beim Lesen der Datei.');
+      const content = typeof e.target?.result === 'string' ? e.target.result : '';
+      const parsed = parseProjectJson(content);
+      if (parsed.ok) {
+        onImport?.(parsed.data);
+      } else {
+        alert(parsed.message);
       }
+      event.target.value = '';
+    };
+    reader.onerror = () => {
+      alert(locale === 'de' ? 'Datei konnte nicht gelesen werden.' : 'File could not be read.');
+      event.target.value = '';
     };
     reader.readAsText(file);
   };
@@ -57,10 +66,15 @@ export function AppHeader({ onExport, onImport, onReset }: Props) {
           <label className="btn-header" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }} title={t.btnLoad}>
             <Upload size={20} />
             <span>{t.btnLoad}</span>
-            <input type="file" accept=".json" style={{ display: 'none' }} onChange={handleFileUpload} />
+            <input
+              type="file"
+              accept={`.${PROJECT_FILE_EXTENSION},.json,application/json`}
+              style={{ display: 'none' }}
+              onChange={handleFileUpload}
+            />
           </label>
         )}
-        <a href="#/lehrkraefte" className="btn-header" aria-label={t.btnTeachers} title={t.btnTeachers} style={{ textDecoration: 'none' }}>
+        <a href="/lehrkraefte" className="btn-header" aria-label={t.btnTeachers} title={t.btnTeachers} style={{ textDecoration: 'none' }}>
           <GraduationCap size={20} />
           <span>{t.btnTeachers}</span>
         </a>
