@@ -18,7 +18,28 @@ export function EpisodeEditor({ episode, seasonId, index, total, onUpdate, onRem
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        onUpdate(seasonId, episode.id, { thumbnailUrl: reader.result as string });
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const MAX_WIDTH = 800;
+          
+          if (width > MAX_WIDTH) {
+            height = Math.round((height * MAX_WIDTH) / width);
+            width = MAX_WIDTH;
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+            onUpdate(seasonId, episode.id, { thumbnailUrl: compressedBase64 });
+          }
+        };
+        img.src = reader.result as string;
       };
       reader.readAsDataURL(file);
     }
