@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useProjectStore } from './store/useProjectStore';
 import { Play, Plus, Download } from 'lucide-react';
 import { EpisodeEditor } from './components/EpisodeEditor';
@@ -10,11 +10,30 @@ import { AppHeader } from './components/AppHeader';
 import { AppFooter } from './components/AppFooter';
 import './index.css';
 
+function ContentPage({ title }: { title: string }) {
+  return (
+    <div style={{ flex: 1, padding: '4rem', maxWidth: '800px', margin: '0 auto', color: 'var(--color-text)', overflowY: 'auto', width: '100%' }}>
+      <a href="#" style={{ color: '#E50914', textDecoration: 'none', marginBottom: '2rem', display: 'inline-block', fontWeight: 'bold' }}>← Zurück zur App</a>
+      <h1 style={{ marginBottom: '2rem', fontSize: '2.5rem' }}>{title}</h1>
+      <p style={{ lineHeight: 1.6, fontSize: '1.2rem', color: 'var(--color-text-muted)' }}>
+        Hier entsteht in Kürze die inhaltliche Dokumentation. Laut Standard wird dieser Text später dynamisch aus einer Markdown-Datei geladen.
+      </p>
+    </div>
+  );
+}
+
 function App() {
   const { data, updateData, addEpisode, updateEpisode, removeEpisode, moveEpisode } = useProjectStore();
   const [activeSeasonId, setActiveSeasonId] = useState(data.seasons[0]?.id || '');
   const [activeTab, setActiveTab] = useState<'EPISODEN' | 'DETAILS' | 'QUELLEN'>('EPISODEN');
   const [showPresentation, setShowPresentation] = useState(false);
+  const [currentHash, setCurrentHash] = useState(window.location.hash);
+
+  useEffect(() => {
+    const handleHashChange = () => setCurrentHash(window.location.hash);
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
 
   const activeSeason = data.seasons.find(s => s.id === activeSeasonId) || data.seasons[0];
@@ -26,6 +45,12 @@ function App() {
   if (showPresentation) {
     return <PresentationMode data={data} onClose={() => setShowPresentation(false)} />;
   }
+
+  if (currentHash === '#/hilfe') return <div className="app-shell"><AppHeader /><ContentPage title="Hilfe" /><AppFooter /></div>;
+  if (currentHash === '#/ueber') return <div className="app-shell"><AppHeader /><ContentPage title="Über das Projekt" /><AppFooter /></div>;
+  if (currentHash === '#/lehrkraefte') return <div className="app-shell"><AppHeader /><ContentPage title="Für Lehrkräfte" /><AppFooter /></div>;
+  if (currentHash === '#/datenschutz') return <div className="app-shell"><AppHeader /><ContentPage title="Datenschutzerklärung" /><AppFooter /></div>;
+  if (currentHash === '#/impressum') return <div className="app-shell"><AppHeader /><ContentPage title="Impressum" /><AppFooter /></div>;
 
   return (
     <div className="app-shell">
