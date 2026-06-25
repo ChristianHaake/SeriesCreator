@@ -29,12 +29,13 @@ function ContentPage({ pathname }: { pathname: ContentPath }) {
 }
 
 function App() {
-  const { data, updateData, resetData } = useProjectStore();
+  const store = useProjectStore();
+  const { data, updateData, resetData } = store;
   const [activeSeasonId, setActiveSeasonId] = useState(data.seasons[0]?.id || '');
   const [activeTab, setActiveTab] = useState<'EPISODEN' | 'DETAILS' | 'QUELLEN'>('EPISODEN');
   const [showPresentation, setShowPresentation] = useState(false);
   const [currentPath, setCurrentPath] = useState(window.location.pathname.replace(/\/+$/, "") || "/");
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
 
   useEffect(() => {
     const handlePopState = () => setCurrentPath(window.location.pathname.replace(/\/+$/, "") || "/");
@@ -74,6 +75,7 @@ function App() {
           a.download = `${data.title || 'SeriesCreator_Projekt'}.json`;
           a.click();
           URL.revokeObjectURL(url);
+          alert(locale === 'de' ? 'Das Projekt wurde erfolgreich heruntergeladen.' : 'The project was successfully downloaded.');
         }}
         onImport={(importedData) => updateData(importedData)}
         onReset={() => {
@@ -90,6 +92,7 @@ function App() {
       <EditorSidebar 
         activeSeasonId={activeSeasonId} 
         setActiveSeasonId={setActiveSeasonId} 
+        store={store}
       />
 
       {/* Main Preview (Streaming Look) */}

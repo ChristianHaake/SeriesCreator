@@ -8,10 +8,11 @@ import { useTranslation } from '../i18n';
 interface Props {
   activeSeasonId: string;
   setActiveSeasonId: (id: string) => void;
+  store: ReturnType<typeof useProjectStore>;
 }
 
-export function EditorSidebar({ activeSeasonId, setActiveSeasonId }: Props) {
-  const { data, updateData, addEpisode, updateEpisode, removeEpisode, moveEpisode, updateSeason, removeSeason } = useProjectStore();
+export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Props) {
+  const { data, updateData, addEpisode, updateEpisode, removeEpisode, moveEpisode, updateSeason, removeSeason } = store;
   const [editorStep, setEditorStep] = useState<1 | 2 | 3>(1);
   const { t } = useTranslation();
 
