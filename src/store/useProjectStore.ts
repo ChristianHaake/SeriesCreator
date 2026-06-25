@@ -37,7 +37,10 @@ export function useProjectStore() {
 
   // Autosave
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    const timeoutId = setTimeout(() => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }, 500);
+    return () => clearTimeout(timeoutId);
   }, [data]);
 
   const updateData = (updates: Partial<ProjectData>) => {

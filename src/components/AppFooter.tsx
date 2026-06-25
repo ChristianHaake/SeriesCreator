@@ -1,17 +1,17 @@
-import { translations, type Language } from '../translations';
+import { useTranslation } from '../i18n';
 
-export function AppFooter({ lang }: { lang: Language }) {
-  const t = translations[lang];
+export function AppFooter() {
+  const { t } = useTranslation();
   return (
     <footer className="app-footer">
       <span className="app-footer__privacy">{t.footerPrivacy}</span>
       <div className="app-footer__right" style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-        <nav aria-label="Footer Navigation">
-          <a href="#/hilfe">{t.footerHelp}</a>
-          <a href="#/ueber">{t.footerAbout}</a>
-          <a href="#/lehrkraefte">{t.footerTeachers}</a>
-          <a href="#/datenschutz">{t.footerPrivacyPolicy}</a>
-          <a href="#/impressum">{t.footerImprint}</a>
+        <nav className="app-footer__nav" aria-label="Footer Navigation">
+          <a href="/hilfe">{t.footerHelp}</a>
+          <a href="/ueber">{t.footerAbout}</a>
+          <a href="/lehrkraefte">{t.footerTeachers}</a>
+          <a href="/datenschutz">{t.footerPrivacyPolicy}</a>
+          <a href="/impressum">{t.footerImprint}</a>
           <a
             className="github-link"
             href="https://github.com/ChristianHaake/SeriesCreator"

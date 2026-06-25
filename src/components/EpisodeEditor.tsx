@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Episode } from '../types';
 import { ArrowUp, ArrowDown, Trash2, Image as ImageIcon } from 'lucide-react';
+import { fieldLimits } from '../domain/constraints';
 
 interface Props {
   episode: Episode;
@@ -80,6 +81,7 @@ export function EpisodeEditor({ episode, seasonId, index, total, onUpdate, onRem
             type="text" 
             value={episode.title}
             onChange={(e) => onUpdate(seasonId, episode.id, { title: e.target.value })}
+            maxLength={fieldLimits.episodeTitle}
             style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid var(--border-color)' }}
           />
         </div>
@@ -90,6 +92,7 @@ export function EpisodeEditor({ episode, seasonId, index, total, onUpdate, onRem
             value={episode.summary}
             onChange={(e) => onUpdate(seasonId, episode.id, { summary: e.target.value })}
             rows={2}
+            maxLength={fieldLimits.episodeSummary}
             style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid var(--border-color)', resize: 'vertical' }}
           />
         </div>
@@ -108,7 +111,7 @@ export function EpisodeEditor({ episode, seasonId, index, total, onUpdate, onRem
                   type="text" 
                   value={episode.altText || ''}
                   onChange={(e) => onUpdate(seasonId, episode.id, { altText: e.target.value })}
-                  maxLength={125}
+                  maxLength={fieldLimits.altText}
                   placeholder="Beschreibe das Bild in max. 125 Zeichen..."
                   required
                   style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid var(--border-color)' }}
