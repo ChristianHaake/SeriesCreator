@@ -68,7 +68,7 @@ export function PresentationMode({ data, onClose }: Props) {
               {allEpisodes[currentIndex]?.thumbnailUrl ? (
                 <img 
                   src={allEpisodes[currentIndex].thumbnailUrl} 
-                  alt="Thumbnail" 
+                  alt={allEpisodes[currentIndex].altText || "Thumbnail"} 
                   style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover', borderRadius: '8px', boxShadow: '0 10px 25px rgba(0,0,0,0.5)' }} 
                 />
               ) : (

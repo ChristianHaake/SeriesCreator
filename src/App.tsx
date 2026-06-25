@@ -1,20 +1,46 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useProjectStore } from './store/useProjectStore';
 import { Play, Plus, Download } from 'lucide-react';
-import { EpisodeEditor } from './components/EpisodeEditor';
+import { EditorSidebar } from './components/EditorSidebar';
 import { EpisodeGrid } from './components/EpisodeGrid';
 import { PresentationMode } from './components/PresentationMode';
 import { PrintLayout } from './components/PrintLayout';
 
 import { AppHeader } from './components/AppHeader';
 import { AppFooter } from './components/AppFooter';
+import { useTranslation } from './i18n';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { contentPages, type ContentPath, isContentPath } from './content';
 import './index.css';
 
+function ContentPage({ pathname }: { pathname: ContentPath }) {
+  const { locale } = useTranslation();
+  const page = contentPages[locale][pathname];
+  
+  return (
+    <div style={{ flex: 1, padding: '4rem', maxWidth: '800px', margin: '0 auto', color: 'var(--color-text)', overflowY: 'auto', width: '100%' }}>
+      <a href="/" style={{ color: '#E50914', textDecoration: 'none', marginBottom: '2rem', display: 'inline-block', fontWeight: 'bold' }}>← Zurück zur App</a>
+      <div className="markdown-content">
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>{page.content}</ReactMarkdown>
+      </div>
+    </div>
+  );
+}
+
 function App() {
-  const { data, updateData, addEpisode, updateEpisode, removeEpisode, moveEpisode } = useProjectStore();
+  const { data, updateData, resetData } = useProjectStore();
   const [activeSeasonId, setActiveSeasonId] = useState(data.seasons[0]?.id || '');
   const [activeTab, setActiveTab] = useState<'EPISODEN' | 'DETAILS' | 'QUELLEN'>('EPISODEN');
   const [showPresentation, setShowPresentation] = useState(false);
+  const [currentPath, setCurrentPath] = useState(window.location.pathname.replace(/\/+$/, "") || "/");
+  const { t } = useTranslation();
+
+  useEffect(() => {
+    const handlePopState = () => setCurrentPath(window.location.pathname.replace(/\/+$/, "") || "/");
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
 
   const activeSeason = data.seasons.find(s => s.id === activeSeasonId) || data.seasons[0];
@@ -25,6 +51,16 @@ function App() {
 
   if (showPresentation) {
     return <PresentationMode data={data} onClose={() => setShowPresentation(false)} />;
+  }
+
+  if (isContentPath(currentPath)) {
+    return (
+      <div className="app-shell">
+        <AppHeader />
+        <ContentPage pathname={currentPath} />
+        <AppFooter />
+      </div>
+    );
   }
 
   return (
@@ -40,163 +76,21 @@ function App() {
           URL.revokeObjectURL(url);
         }}
         onImport={(importedData) => updateData(importedData)}
+        onReset={() => {
+          if (window.confirm(t.confirmReset)) {
+            resetData();
+          }
+        }}
       />
       <div className="app-main-content">
         {/* Hidden layout purely used for the high-res PDF snapshot */}
         <PrintLayout data={data} />
 
       {/* Sidebar Editor */}
-      <aside className="editor-sidebar" style={{ padding: '2rem' }}>
-        <h2>SeriesCreator Editor</h2>
-        <p style={{ marginBottom: '2rem', color: 'var(--color-text-muted)' }}>
-          Bearbeite die Metadaten deiner Serie.
-        </p>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
-          <div>
-            <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>Serientitel</label>
-            <input 
-              type="text" 
-              value={data.title} 
-              onChange={(e) => updateData({ title: e.target.value })}
-              style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)' }}
-            />
-          </div>
-
-          <div>
-            <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>Beschreibung</label>
-            <textarea 
-              value={data.description} 
-              onChange={(e) => updateData({ description: e.target.value })}
-              rows={4}
-              style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)', resize: 'vertical' }}
-            />
-          </div>
-
-          <div style={{ display: 'flex', gap: '1rem' }}>
-            <div style={{ flex: 1 }}>
-              <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>Klassenstufe</label>
-              <input 
-                type="text" 
-                value={data.ageRating} 
-                onChange={(e) => updateData({ ageRating: e.target.value })}
-                style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)' }}
-              />
-            </div>
-            <div style={{ flex: 1 }}>
-              <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>Match %</label>
-              <input 
-                type="number" 
-                value={data.matchPercentage} 
-                onChange={(e) => updateData({ matchPercentage: Math.max(0, Math.min(100, Number(e.target.value))) })}
-                min="0"
-                max="100"
-                style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)' }}
-              />
-            </div>
-          </div>
-          
-          <div style={{ display: 'flex', gap: '1rem' }}>
-            <div style={{ flex: 1 }}>
-              <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>Genre</label>
-              <select 
-                value={data.genre} 
-                onChange={(e) => updateData({ genre: e.target.value })}
-                style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)', backgroundColor: 'var(--color-bg-surface)', color: 'var(--color-text-primary)' }}
-              >
-                <option value="Placeholder 1">Placeholder 1</option>
-                <option value="Placeholder 2">Placeholder 2</option>
-                <option value="Placeholder 3">Placeholder 3</option>
-              </select>
-            </div>
-            <div style={{ flex: 1 }}>
-              <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>Cast (Mitwirkende)</label>
-              <input 
-                type="text" 
-                value={data.cast} 
-                onChange={(e) => updateData({ cast: e.target.value })}
-                required
-                style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)' }}
-              />
-            </div>
-          </div>
-
-          <div>
-            <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem', marginTop: '1rem' }}>Lernziele & Reflexion (Hintergrund)</label>
-            <textarea 
-              value={data.reflection || ''} 
-              onChange={(e) => updateData({ reflection: e.target.value })}
-              rows={3}
-              style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)', resize: 'vertical' }}
-            />
-          </div>
-
-          <div>
-            <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem', marginTop: '1rem' }}>Quellenverzeichnis</label>
-            <textarea 
-              value={data.sources || ''} 
-              onChange={(e) => updateData({ sources: e.target.value })}
-              rows={3}
-              style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)', resize: 'vertical' }}
-            />
-          </div>
-        </div>
-
-        <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '2rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h3 style={{ margin: 0 }}>Episoden</h3>
-            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-              <select 
-                value={activeSeasonId} 
-                onChange={(e) => setActiveSeasonId(e.target.value)}
-                style={{ padding: '0.4rem', border: '1px solid var(--border-color)' }}
-              >
-                {data.seasons.map(s => (
-                  <option key={s.id} value={s.id}>{s.title}</option>
-                ))}
-              </select>
-              <button
-                onClick={() => {
-                  const newSeasonId = `s${data.seasons.length + 1}`;
-                  updateData({
-                    seasons: [
-                      ...data.seasons,
-                      { id: newSeasonId, title: `Staffel ${data.seasons.length + 1}`, episodes: [] }
-                    ]
-                  });
-                  setActiveSeasonId(newSeasonId);
-                }}
-                style={{ padding: '0.4rem', backgroundColor: 'var(--color-bg-surface)', border: '1px solid var(--border-color)', borderRadius: '4px', cursor: 'pointer' }}
-                title="Staffel hinzufügen"
-              >
-                <Plus size={16} />
-              </button>
-            </div>
-          </div>
-
-          {activeSeason?.episodes.map((ep, index) => (
-            <EpisodeEditor 
-              key={ep.id} 
-              episode={ep} 
-              seasonId={activeSeason.id} 
-              index={index} 
-              total={activeSeason.episodes.length}
-              onUpdate={updateEpisode}
-              onRemove={removeEpisode}
-              onMove={moveEpisode}
-            />
-          ))}
-
-          <button 
-            onClick={() => addEpisode(activeSeason.id)}
-            style={{ width: '100%', padding: '0.8rem', backgroundColor: 'var(--color-bg-surface)', border: '1px dashed var(--color-border)', borderRadius: '6px', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', cursor: 'pointer', transition: 'background-color 0.2s', color: 'var(--color-text-primary)' }}
-            onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'var(--color-bg-workspace)'}
-            onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'var(--color-bg-surface)'}
-          >
-            <Plus size={16} /> Episode hinzufügen
-          </button>
-        </div>
-      </aside>
+      <EditorSidebar 
+        activeSeasonId={activeSeasonId} 
+        setActiveSeasonId={setActiveSeasonId} 
+      />
 
       {/* Main Preview (Streaming Look) */}
       <main className="preview-main theme-streaming">
@@ -212,7 +106,7 @@ function App() {
             style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '4px', cursor: 'pointer' }}
           >
             <Download size={16} />
-            Als PDF speichern
+            {t.btnPdf}
           </button>
         </header>
 
@@ -224,7 +118,7 @@ function App() {
               <span className="match-score">{data.matchPercentage}% Match</span>
               <span>{new Date().getFullYear()}</span>
               <span className="age-rating">{data.ageRating || "Klasse"}</span>
-              <span>{data.seasons.length} {data.seasons.length === 1 ? 'Staffel' : 'Staffeln'}</span>
+              <span>{data.seasons.length} {t.season}{data.seasons.length === 1 ? '' : 'n'}</span>
             </div>
 
             <p className="streaming-desc">
@@ -233,16 +127,16 @@ function App() {
 
             <div style={{ marginBottom: '2rem' }}>
               <button className="btn-play" onClick={() => setShowPresentation(true)}>
-                <Play fill="black" size={24} /> Präsentieren
+                <Play fill="black" size={24} /> {t.btnPlay}
               </button>
               <button className="btn-secondary">
-                <Plus size={24} /> Meine Liste
+                <Plus size={24} /> {t.myList}
               </button>
             </div>
 
             <div style={{ fontSize: '1rem', color: 'var(--color-text-dark-secondary)', textShadow: '1px 1px 2px rgba(0,0,0,0.8)' }}>
-              <p><span style={{ color: 'white' }}>Mitwirkende:</span> {data.cast}</p>
-              <p><span style={{ color: 'white' }}>Genre:</span> {data.genre}</p>
+              <p><span style={{ color: 'white' }}>{t.castPrefix}</span> {data.cast}</p>
+              <p><span style={{ color: 'white' }}>{t.genrePrefix}</span> {data.genre}</p>
             </div>
           </div>
         </section>
@@ -253,19 +147,19 @@ function App() {
               onClick={() => setActiveTab('EPISODEN')}
               style={{ cursor: 'pointer', borderTop: activeTab === 'EPISODEN' ? '4px solid #E50914' : '4px solid transparent', paddingTop: '1rem', marginTop: '-1rem', color: activeTab === 'EPISODEN' ? 'white' : 'var(--color-text-dark-secondary)' }}
             >
-              EPISODEN
+              {t.tabEpisodes}
             </span>
             <span 
               onClick={() => setActiveTab('DETAILS')}
               style={{ cursor: 'pointer', borderTop: activeTab === 'DETAILS' ? '4px solid #E50914' : '4px solid transparent', paddingTop: '1rem', marginTop: '-1rem', color: activeTab === 'DETAILS' ? 'white' : 'var(--color-text-dark-secondary)' }}
             >
-              HINTERGRUND
+              {t.tabBackground}
             </span>
             <span 
               onClick={() => setActiveTab('QUELLEN')}
               style={{ cursor: 'pointer', borderTop: activeTab === 'QUELLEN' ? '4px solid #E50914' : '4px solid transparent', paddingTop: '1rem', marginTop: '-1rem', color: activeTab === 'QUELLEN' ? 'white' : 'var(--color-text-dark-secondary)' }}
             >
-              QUELLEN
+              {t.tabSources}
             </span>
           </div>
 
@@ -290,14 +184,14 @@ function App() {
           {activeTab === 'DETAILS' && (
             <div style={{ color: 'var(--color-text-dark-secondary)' }}>
               <h3 style={{ color: 'white', marginBottom: '1rem' }}>Lernziele & Reflexion</h3>
-              <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>{data.reflection || "Noch keine Lernziele oder Reflexionen eingetragen."}</p>
+              <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>{data.reflection || t.noReflection}</p>
             </div>
           )}
 
           {activeTab === 'QUELLEN' && (
             <div style={{ color: 'var(--color-text-dark-secondary)' }}>
               <h3 style={{ color: 'white', marginBottom: '1rem' }}>Quellenverzeichnis</h3>
-              <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>{data.sources || "Noch keine Quellen eingetragen."}</p>
+              <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>{data.sources || t.noSources}</p>
             </div>
           )}
         </section>

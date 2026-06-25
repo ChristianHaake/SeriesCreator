@@ -1,3 +1,4 @@
+import React from 'react';
 import type { ProjectData } from '../types';
 
 interface Props {
@@ -5,7 +6,7 @@ interface Props {
 }
 
 // This component is rendered hidden in the DOM purely for the PDF export
-export function PrintLayout({ data }: Props) {
+export const PrintLayout = React.memo(function PrintLayout({ data }: Props) {
   const allEpisodes = data.seasons.flatMap(s => s.episodes);
 
   return (
@@ -76,4 +77,4 @@ export function PrintLayout({ data }: Props) {
       </div>
     </div>
   );
-}
+});

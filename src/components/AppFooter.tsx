@@ -1,14 +1,17 @@
+import { useTranslation } from '../i18n';
+
 export function AppFooter() {
+  const { t } = useTranslation();
   return (
     <footer className="app-footer">
-      <span className="app-footer__privacy">Daten bleiben auf deinem Gerät</span>
-      <div className="app-footer__right">
-        <nav aria-label="Footer Navigation">
-          <a href="/hilfe">Hilfe</a>
-          <a href="/ueber">Über</a>
-          <a href="/lehrkraefte">Lehrkräfte</a>
-          <a href="/datenschutz">Datenschutz</a>
-          <a href="/impressum">Impressum</a>
+      <span className="app-footer__privacy">{t.footerPrivacy}</span>
+      <div className="app-footer__right" style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
+        <nav className="app-footer__nav" aria-label="Footer Navigation">
+          <a href="/hilfe">{t.footerHelp}</a>
+          <a href="/ueber">{t.footerAbout}</a>
+          <a href="/lehrkraefte">{t.footerTeachers}</a>
+          <a href="/datenschutz">{t.footerPrivacyPolicy}</a>
+          <a href="/impressum">{t.footerImprint}</a>
           <a
             className="github-link"
             href="https://github.com/ChristianHaake/SeriesCreator"
@@ -22,6 +25,18 @@ export function AppFooter() {
             <span>GitHub</span>
           </a>
         </nav>
+        <a
+          className="app-footer__coffee"
+          href="https://buymeacoffee.com/christianhaake"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', textDecoration: 'none', color: '#FFDD00', fontWeight: 'bold' }}
+        >
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20 3H4v10c0 2.21 1.79 4 4 4h6c2.21 0 4-1.79 4-4v-3h2c1.11 0 2-.89 2-2V5c0-1.11-.89-2-2-2zm-2 5h-2V5h2v3zM4 19h16v2H4z"/>
+          </svg>
+          <span>{t.coffee}</span>
+        </a>
       </div>
     </footer>
   );

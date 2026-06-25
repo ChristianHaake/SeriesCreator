@@ -3,6 +3,25 @@ import type { ProjectData, Episode } from '../types';
 
 const STORAGE_KEY = 'series_creator_data';
 
+const INITIAL_DATA: ProjectData = {
+  title: "Meine Neue Serie",
+  subject: "",
+  topic: "",
+  author: "",
+  description: "Eine fesselnde Reise durch das Thema...",
+  matchPercentage: 99,
+  ageRating: "ab 12",
+  genre: "Dokumentation",
+  cast: "Die Klasse",
+  seasons: [
+    {
+      id: "s1",
+      title: "Staffel 1",
+      episodes: []
+    }
+  ],
+};
+
 export function useProjectStore() {
   const [data, setData] = useState<ProjectData>(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -13,29 +32,15 @@ export function useProjectStore() {
         console.error("Error parsing saved project data", e);
       }
     }
-    return {
-      title: "Meine Neue Serie",
-      subject: "",
-      topic: "",
-      author: "",
-      description: "Eine fesselnde Reise durch das Thema...",
-      matchPercentage: 99,
-      ageRating: "Klasse 8+",
-      genre: "Dokumentation",
-      cast: "Die Klasse",
-      seasons: [
-        {
-          id: "s1",
-          title: "Staffel 1",
-          episodes: []
-        }
-      ],
-    } as ProjectData;
+    return INITIAL_DATA;
   });
 
   // Autosave
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    const timeoutId = setTimeout(() => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }, 500);
+    return () => clearTimeout(timeoutId);
   }, [data]);
 
   const updateData = (updates: Partial<ProjectData>) => {
@@ -111,5 +116,27 @@ export function useProjectStore() {
     }));
   };
 
-  return { data, updateData, addEpisode, updateEpisode, removeEpisode, moveEpisode };
+  const updateSeason = (seasonId: string, title: string) => {
+    setData(prev => ({
+      ...prev,
+      seasons: prev.seasons.map(s => s.id === seasonId ? { ...s, title } : s)
+    }));
+  };
+
+  const removeSeason = (seasonId: string) => {
+    setData(prev => {
+      const newSeasons = prev.seasons.filter(s => s.id !== seasonId);
+      // Ensure at least one season remains
+      if (newSeasons.length === 0) {
+        newSeasons.push({ id: `s_${Date.now()}`, title: "Staffel 1", episodes: [] });
+      }
+      return { ...prev, seasons: newSeasons };
+    });
+  };
+
+  const resetData = () => {
+    setData(INITIAL_DATA);
+  };
+
+  return { data, updateData, addEpisode, updateEpisode, removeEpisode, moveEpisode, resetData, updateSeason, removeSeason };
 }
