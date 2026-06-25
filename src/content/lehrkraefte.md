@@ -90,8 +90,7 @@ Kennzahlen die Wahrnehmung? Welche Gestaltung fördert vorschnelle Reaktionen?
 ### Werden Eingaben hochgeladen?
 
 Nein. Texte, Bilder und Konfigurationen werden lokal verarbeitet. Beim Abruf
-der Website verarbeitet Cloudflare technische Verbindungsdaten und über
-Cloudflare Web Analytics statistische Nutzungsdaten.
+der Website verarbeitet Cloudflare technische Verbindungsdaten.
 
 ### Darf ich Bilder aus dem Internet verwenden?
 

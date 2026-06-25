@@ -1,44 +1,41 @@
 import { useState, useEffect } from 'react';
 import type { ProjectData, Episode } from '../types';
+import { initialProjectData } from '../types';
+import { normalizeProject, serializeProject } from '../domain/projectCodec';
 
 const STORAGE_KEY = 'series_creator_data';
 
-const INITIAL_DATA: ProjectData = {
-  title: "Meine Neue Serie",
-  subject: "",
-  topic: "",
-  author: "",
-  description: "Eine fesselnde Reise durch das Thema...",
-  matchPercentage: 99,
-  ageRating: "ab 12",
-  genre: "Dokumentation",
-  cast: "Die Klasse",
-  seasons: [
-    {
-      id: "s1",
-      title: "Staffel 1",
-      episodes: []
-    }
-  ],
-};
+export function loadStoredProject(storage: Storage): ProjectData {
+  try {
+    const saved = storage.getItem(STORAGE_KEY);
+    if (!saved) return initialProjectData;
+
+    const parsed = normalizeProject(JSON.parse(saved));
+    if (parsed.ok) return parsed.data;
+  } catch {
+    // Blocked storage or corrupt JSON falls back to a fresh local project.
+  }
+
+  return initialProjectData;
+}
+
+export function saveStoredProject(storage: Storage, data: ProjectData) {
+  try {
+    storage.setItem(STORAGE_KEY, serializeProject(data));
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 export function useProjectStore() {
   const [data, setData] = useState<ProjectData>(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        console.error("Error parsing saved project data", e);
-      }
-    }
-    return INITIAL_DATA;
+    return loadStoredProject(window.localStorage);
   });
 
-  // Autosave
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      saveStoredProject(window.localStorage, data);
     }, 500);
     return () => clearTimeout(timeoutId);
   }, [data]);
@@ -135,8 +132,23 @@ export function useProjectStore() {
   };
 
   const resetData = () => {
-    setData(INITIAL_DATA);
+    setData(initialProjectData);
   };
 
-  return { data, updateData, addEpisode, updateEpisode, removeEpisode, moveEpisode, resetData, updateSeason, removeSeason };
+  const replaceData = (nextData: ProjectData) => {
+    setData(nextData);
+  };
+
+  return {
+    data,
+    updateData,
+    replaceData,
+    addEpisode,
+    updateEpisode,
+    removeEpisode,
+    moveEpisode,
+    resetData,
+    updateSeason,
+    removeSeason,
+  };
 }

@@ -1,0 +1,112 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e6]:
+      - strong [ref=e7]: SeriesCreator
+      - generic [ref=e8]: Design Streaming Projects
+    - generic [ref=e9]:
+      - link "For Teachers" [ref=e10] [cursor=pointer]:
+        - /url: /lehrkraefte
+        - img [ref=e11]
+        - generic [ref=e14]: For Teachers
+      - generic [ref=e16]:
+        - button "DE" [ref=e17] [cursor=pointer]
+        - button "EN" [ref=e18] [cursor=pointer]
+  - main [ref=e19]:
+    - link "← Zurück zur App" [ref=e20] [cursor=pointer]:
+      - /url: /
+    - generic [ref=e21]:
+      - paragraph [ref=e22]: SeriesCreator is an educational simulation environment. This page supports legally and pedagogically informed use but does not constitute legal advice.
+      - heading "Suitable classroom uses" [level=2] [ref=e23]
+      - paragraph [ref=e24]: The tool supports source criticism, media analysis, role play, conflict prevention, and investigation of platform mechanics. Use only fictional names, profiles, images, and situations.
+      - heading "Risks and limitations" [level=2] [ref=e25]
+      - list [ref=e26]:
+        - listitem [ref=e27]: Exports can be misunderstood outside their classroom context.
+        - listitem [ref=e28]: Real names, images, or private messages may violate personality rights.
+        - listitem [ref=e29]: Third-party images and text require appropriate permission.
+        - listitem [ref=e30]: Visible labeling reduces confusion but cannot technically prevent misuse.
+        - listitem [ref=e31]: Educators remain responsible for the task, supervision, and publication.
+      - heading "Privacy and personality rights" [level=2] [ref=e32]
+      - paragraph [ref=e33]: User content is processed locally in the browser. Even so, do not use real personal data, private conversations, or images of real people. Before sharing, check copyright, image rights, consent, and applicable school rules.
+      - 'heading "Scenario 1: Checking sources" [level=2] [ref=e34]'
+      - paragraph [ref=e35]:
+        - strong [ref=e36]: "Learning objective:"
+        - text: Distinguish claims, sources, and evidence.
+      - paragraph [ref=e37]:
+        - strong [ref=e38]: "Process:"
+        - text: One group creates a fictional microblog post containing a disputed claim. Other groups add questions, check two independent sources, and revise the post.
+      - paragraph [ref=e39]:
+        - strong [ref=e40]: "Reflection:"
+        - text: Which source was reliable? What was missing? How did context and date change the assessment?
+      - 'heading "Scenario 2: Recognizing cyberbullying" [level=2] [ref=e41]'
+      - paragraph [ref=e42]:
+        - strong [ref=e43]: "Learning objective:"
+        - text: Recognize escalation patterns and develop responses.
+      - paragraph [ref=e44]:
+        - strong [ref=e45]: "Process:"
+        - text: A fully fictional comment thread contains demeaning reactions. Learners identify boundary violations and draft de-escalating replies and reporting routes.
+      - paragraph [ref=e46]:
+        - strong [ref=e47]: "Reflection:"
+        - text: When does criticism become abuse? Who is responsible? Which response protects affected people?
+      - 'heading "Scenario 3: Privacy" [level=2] [ref=e48]'
+      - paragraph [ref=e49]:
+        - strong [ref=e50]: "Learning objective:"
+        - text: Assess which details allow conclusions about people.
+      - paragraph [ref=e51]:
+        - strong [ref=e52]: "Process:"
+        - text: A fictional photo feed deliberately contains excessive location, time, and daily-life details. Learners identify risks and create a data-minimizing version.
+      - paragraph [ref=e53]:
+        - strong [ref=e54]: "Reflection:"
+        - text: Which details seem harmless alone? What emerges when they are combined? Who could use them differently?
+      - 'heading "Scenario 4: Conflict in chat" [level=2] [ref=e55]'
+      - paragraph [ref=e56]:
+        - strong [ref=e57]: "Learning objective:"
+        - text: Investigate misunderstandings in written communication.
+      - paragraph [ref=e58]:
+        - strong [ref=e59]: "Process:"
+        - text: A fictional messenger chat stops at a point of conflict. Groups develop different continuations and compare wording, timestamps, and seen status.
+      - paragraph [ref=e60]:
+        - strong [ref=e61]: "Reflection:"
+        - text: Which signals were inferred? Which wording de-escalates? When would another communication channel be better?
+      - 'heading "Scenario 5: Platform mechanics" [level=2] [ref=e62]'
+      - paragraph [ref=e63]:
+        - strong [ref=e64]: "Learning objective:"
+        - text: Reflect on the effects of metrics and presentation.
+      - paragraph [ref=e65]:
+        - strong [ref=e66]: "Process:"
+        - text: The same fictional content is presented as a photo post, microblog, and chat. Likes, views, and comment counts are then varied.
+      - paragraph [ref=e67]:
+        - strong [ref=e68]: "Reflection:"
+        - text: What appears credible or important? How do metrics affect perception? Which designs encourage impulsive reactions?
+      - heading "FAQ" [level=2] [ref=e69]
+      - heading "Are entries uploaded?" [level=3] [ref=e70]
+      - paragraph [ref=e71]: No. Text, images, and configurations are processed locally. Cloudflare processes technical connection data when serving the website.
+      - heading "May I use images from the internet?" [level=3] [ref=e72]
+      - paragraph [ref=e73]: Only when the license or consent permits the intended use. Prefer original, public-domain, or explicitly licensed fictional material.
+      - heading "May real people be depicted?" [level=3] [ref=e74]
+      - paragraph [ref=e75]: School simulations should use fictional people. Depicting real people requires a valid legal basis and potentially consent, with particular caution for minors.
+      - heading "Can results be published?" [level=3] [ref=e76]
+      - paragraph [ref=e77]: Only after review and in compliance with personality rights, copyright, and school rules. The export label is not permission to publish.
+      - heading "Which age groups is the tool suitable for?" [level=3] [ref=e78]
+      - paragraph [ref=e79]: Suitability depends on the task, guidance, and prior knowledge. Conflict and bullying scenarios require age-appropriate preparation and debriefing.
+  - contentinfo [ref=e80]:
+    - generic [ref=e81]: Data stays on your device
+    - generic [ref=e82]:
+      - navigation "Footer Navigation" [ref=e83]:
+        - link "Help" [ref=e84] [cursor=pointer]:
+          - /url: /hilfe
+        - link "About" [ref=e85] [cursor=pointer]:
+          - /url: /ueber
+        - link "Teachers" [ref=e86] [cursor=pointer]:
+          - /url: /lehrkraefte
+        - link "Privacy Policy" [ref=e87] [cursor=pointer]:
+          - /url: /datenschutz
+        - link "Imprint" [ref=e88] [cursor=pointer]:
+          - /url: /impressum
+        - link "GitHub Repository" [ref=e89] [cursor=pointer]:
+          - /url: https://github.com/ChristianHaake/SeriesCreator
+          - img [ref=e90]
+          - generic [ref=e92]: GitHub
+      - link "Buy me a coffee" [ref=e93] [cursor=pointer]:
+        - /url: https://buymeacoffee.com/christianhaake
+        - img [ref=e94]
+        - generic [ref=e96]: Buy me a coffee

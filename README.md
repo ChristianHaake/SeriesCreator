@@ -1,73 +1,50 @@
-# React + TypeScript + Vite
+# SeriesCreator
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+SeriesCreator ist eine browserbasierte Simulationsumgebung für schulische
+Streaming-Serienprojekte. Lernende planen fiktive Serien, strukturieren
+Episoden, ergänzen Quellen und Reflexionsnotizen und präsentieren das Ergebnis
+in einer Streaming-ähnlichen Oberfläche.
 
-Currently, two official plugins are available:
+## Status
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Live URL: noch nicht als finale Produktionsadresse dokumentiert
+- Repository: https://github.com/ChristianHaake/SeriesCreator
+- Deployment: Cloudflare Workers Assets
+- License: GPL-3.0-only
 
-## React Compiler
+## Datenschutz und Speicherung
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Die Kernfunktionen laufen ohne Login vollständig im Browser. SeriesCreator
+speichert den aktuellen Entwurf und die Spracheinstellung in `localStorage`.
+Projektbackups werden als versionierte `.seriescreator`-Dateien lokal
+heruntergeladen und beim Import vollständig validiert, bevor sie den aktuellen
+Entwurf ersetzen.
 
-## Expanding the ESLint configuration
+## Entwicklung
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Verifikation
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run lint
+npm run typecheck
+npm run test
+npm run build
+npm run verify
+npm audit --audit-level=low
 ```
+
+`npm run verify` ist das lokale Release-Gate und führt Lint, Typecheck, Tests
+und Build aus.
+
+## Bekannte Grenzen
+
+- PDF-Ausgabe nutzt die Druckfunktion des Browsers und muss vor einem Release
+  manuell in Zielbrowsern geprüft werden.
+- Die Content-Security-Policy erlaubt aktuell inline Styles, weil die
+  bestehende React-Oberfläche noch umfangreich mit `style`-Props arbeitet.
+  Diese Ausnahme ist in `docs/standard-conformance.md` dokumentiert.

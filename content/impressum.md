@@ -1,24 +1,10 @@
 # Impressum
 
-> Vorlage: Vor Veröffentlichung mit den tatsächlichen Betreiberangaben
-> ausfüllen und rechtlich prüfen.
+Die aktive Impressumsseite wird aus `src/content/impressum.md` gebundelt.
 
-## Angaben gemäß § 5 DDG
+Christian Haake  
+Alte Ziegelei 7  
+26197 Großenkneten  
+Deutschland
 
-{{OPERATOR_NAME}}
-
-{{OPERATOR_ADDRESS}}
-
-## Kontakt
-
-E-Mail: {{OPERATOR_EMAIL}}
-
-## Verantwortlich für den Inhalt
-
-{{CONTENT_RESPONSIBLE}}
-
-{{CONTENT_RESPONSIBLE_ADDRESS}}
-
-## Haftung und Urheberrecht
-
-Ergänze nur rechtlich geprüfte, für dieses Angebot zutreffende Angaben.
+E-Mail: [christianhaake@gmail.com](mailto:christianhaake@gmail.com)

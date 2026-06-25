@@ -15,6 +15,7 @@ export interface Season {
 }
 
 export interface ProjectData {
+  schemaVersion: number;
   title: string;
   subject: string;
   topic: string;
@@ -36,6 +37,7 @@ export interface ProjectData {
 }
 
 export const initialProjectData: ProjectData = {
+  schemaVersion: 1,
   title: "Meine Neue Serie",
   subject: "",
   topic: "",

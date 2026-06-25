@@ -27,10 +27,9 @@ https://github.com/ChristianHaake/haak3-webapp-standard
 
 ## App-specific rules
 
-- App name: `{{APP_NAME}}`
-- Live URL: `{{APP_URL}}`
-- Repository: `{{REPOSITORY_URL}}`
-- Add further project-specific instructions here.
+- App name: `SeriesCreator`
+- Live URL: not finalized for release
+- Repository: `https://github.com/ChristianHaake/SeriesCreator`
 
 ## Verification
 

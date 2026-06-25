@@ -1,46 +1,36 @@
+# Help
+
 ## Quick start
 
-1. Choose a communication format.
-2. Adjust text, numbers, and display options in the editor.
-3. Select local images if needed.
-4. Check the result in the live preview.
-5. Save the finished mockup as PNG, JPG, or PDF.
+1. Enter the title, description, age/class note, genre, and cast.
+2. Add seasons and episodes.
+3. Add thumbnails with alternative text if needed.
+4. Review the preview and presentation mode.
+5. Save an editable project backup or print the preview as PDF.
 
-Each module supports Light, Dim, and Dark modes. Photo posts support carousels
-and simulated videos. Comments can contain direct replies and use a dedicated
-comments view. Messenger uses two editable profiles.
+## Save and load projects
 
-Photo and microblog projects can contain up to 50 posts. Every post requires a
-date; time is optional. The timeline is sorted automatically. Under
-**Appearance**, choose whether the newest or oldest posts appear first.
+**Save** downloads a versioned `.seriescreator` file. It contains text, settings,
+seasons, episodes, and embedded optimized thumbnail images.
 
-Microblog timelines can use separate feed entries or a connected thread.
-Editor sections can be expanded and collapsed through their headings.
-
-## Save project
-
-**Save** downloads an `.smc` project archive for the active module. It contains
-text, settings, and optimized copies of selected images. Loading restores the
-project and its images together.
-
-Legacy JSON configurations in versions 5 and 6 remain importable. Because they
-contain no images, importing one clears existing images for that module.
+**Load** accepts `.seriescreator` and older JSON files. Imported data is fully
+validated. If validation fails, the current project remains unchanged.
 
 ## Supported images
 
 PNG, JPG/JPEG, and WebP files up to 5 MB and 4096 pixels per edge are accepted.
-Saving scales images to at most 2048 pixels per edge and normally stores them
-as WebP. Browsers without WebP encoding use PNG. Uncompressed project data is
-limited to 25 MB. Processing stays in the browser.
+Images are scaled to at most 800 pixels wide for the preview and stored locally
+as JPEG data.
 
-## Verify image
+## Present and PDF
 
-PNG and JPG exports contain a local origin marker. The
-[verification page](/verifizieren) checks whether the marker exists and remains
-unchanged. It is an educational origin indicator, not tamper-proof evidence of
-authenticity.
+**Present** opens a fullscreen view with keyboard navigation. Use arrow keys or
+space to continue and `Escape` to close.
+
+**Print / Save as PDF** uses the browser print workflow. Check the result in the
+target browser before sharing.
 
 ## Privacy-conscious use
 
-Use fictional names, content, and metrics. Do not upload private chats, photos
-of uninvolved people, or other personal data.
+Use fictional names, content, and images. Do not use private photos, real
+personal data, or material without permission.

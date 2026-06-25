@@ -1,60 +1,37 @@
+# Hilfe
+
 ## Schnellstart
 
-1. Wähle ein Kommunikationsformat aus.
-2. Passe Texte, Zahlen und Anzeigeoptionen im Editor an.
-3. Wähle bei Bedarf lokale Bilder aus.
-4. Prüfe das Ergebnis in der Live-Vorschau.
-5. Speichere das fertige Mockup als PNG, JPG oder PDF.
+1. Trage Titel, Beschreibung, Alters-/Klassenhinweis, Genre und Mitwirkende ein.
+2. Lege Staffeln und Episoden an.
+3. Ergänze optional Thumbnails mit Alternativtext.
+4. Prüfe die Vorschau und den Präsentationsmodus.
+5. Speichere ein editierbares Projektbackup oder drucke die Vorschau als PDF.
 
-Für jedes Modul kann zwischen Light, Dim und Dark gewechselt werden.
-Foto-Posts unterstützen Karussells und Video-Simulationen. Kommentare können
-direkte Antworten enthalten und in einer eigenen Kommentaransicht dargestellt
-werden. Der Messenger verwendet zwei frei editierbare Profile.
+## Projekt speichern und laden
 
-Foto- und Mikroblog-Projekte können bis zu 50 Beiträge enthalten. Neue Beiträge
-benötigen ein Datum; die Uhrzeit ist optional. Die Reihenfolge wird automatisch
-aus diesen Angaben berechnet. Unter **Darstellung** legst du fest, ob die
-neuesten oder ältesten Beiträge zuerst erscheinen.
+**Speichern** lädt eine versionierte `.seriescreator`-Datei herunter. Sie enthält
+Texte, Einstellungen, Staffeln, Episoden und eingebettete optimierte
+Thumbnail-Bilder.
 
-Im Mikroblog-Modul kann die Timeline als Feed mit getrennten Beiträgen oder als
-zusammenhängender Thread mit Verbindungslinie dargestellt werden.
-Editorbereiche lassen sich über ihre Überschriften ein- und ausklappen.
-
-## Projekt speichern
-
-Mit **Speichern** wird ein `.smc`-Projektarchiv für das aktive Modul
-heruntergeladen. Es enthält Texte, Einstellungen und optimierte Kopien der
-ausgewählten Bilder. Beim Laden werden Projekt und Bilder gemeinsam
-wiederhergestellt.
-
-Ältere JSON-Konfigurationen der Versionen 5 und 6 können weiterhin geladen
-werden. Da sie keine Bilder enthalten, werden vorhandene Bilder des importierten
-Moduls entfernt.
+**Laden** akzeptiert `.seriescreator` und ältere JSON-Dateien. Importierte Daten
+werden vollständig validiert. Bei Fehlern bleibt das aktuelle Projekt erhalten.
 
 ## Unterstützte Bilder
 
 Akzeptiert werden PNG, JPG/JPEG und WebP bis maximal 5 MB und 4096 Pixel pro
-Kante. Beim Speichern werden Bilder auf höchstens 2048 Pixel pro Kante
-verkleinert und normalerweise als WebP gespeichert. Browser ohne
-WebP-Kodierung verwenden PNG. Ein Projekt darf unkomprimiert höchstens 25 MB
-enthalten. Die Verarbeitung erfolgt direkt im Browser.
+Kante. Bilder werden für die Vorschau auf höchstens 800 Pixel Breite verkleinert
+und lokal als JPEG-Daten gespeichert.
 
-## Bild verifizieren
+## Präsentieren und PDF
 
-PNG- und JPG-Exporte enthalten einen lokalen Herkunftsmarker. Unter
-[Bild verifizieren](/verifizieren) kann geprüft werden, ob dieser Marker
-vorhanden und unverändert ist. Er ist ein pädagogischer Herkunftshinweis und
-kein fälschungssicherer Echtheitsbeweis.
+**Präsentieren** öffnet eine Vollbildansicht mit Tastatursteuerung. Nutze
+Pfeiltasten oder Leertaste zum Weitergehen und `Escape` zum Schließen.
+
+**Drucken / als PDF** verwendet die Druckfunktion des Browsers. Prüfe das
+Ergebnis vor der Weitergabe im Zielbrowser.
 
 ## Datenschutzgerechte Nutzung
 
-Verwende fiktive Namen, Inhalte und Kennzahlen. Lade keine privaten Chats,
-Fotos unbeteiligter Personen oder andere personenbezogene Daten hoch.
-
-## Probleme
-
-Wenn ein Export nicht funktioniert, aktualisiere zunächst den Browser und
-versuche es erneut. Unterstützt werden aktuelle Versionen moderner Browser.
-Technische Fehler können im
-[GitHub-Repository](https://github.com/ChristianHaake/SeriesCreator/issues)
-gemeldet werden.
+Nutze fiktive Namen, Inhalte und Bilder. Lade keine privaten Fotos, realen
+personenbezogenen Daten oder nicht freigegebenen Materialien hoch.
