@@ -5,7 +5,7 @@ import { EpisodeEditor } from './components/EpisodeEditor';
 import { EpisodeGrid } from './components/EpisodeGrid';
 import { PresentationMode } from './components/PresentationMode';
 import { PrintLayout } from './components/PrintLayout';
-import { exportProjectToPdf } from './components/PdfExport';
+
 import { AppHeader } from './components/AppHeader';
 import { AppFooter } from './components/AppFooter';
 import './index.css';
@@ -15,14 +15,12 @@ function App() {
   const [activeSeasonId, setActiveSeasonId] = useState(data.seasons[0]?.id || '');
   const [activeTab, setActiveTab] = useState<'EPISODEN' | 'DETAILS' | 'QUELLEN'>('EPISODEN');
   const [showPresentation, setShowPresentation] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
+
 
   const activeSeason = data.seasons.find(s => s.id === activeSeasonId) || data.seasons[0];
 
-  const handleExport = async () => {
-    setIsExporting(true);
-    await exportProjectToPdf(data, 'print-layout-container');
-    setIsExporting(false);
+  const handleExport = () => {
+    window.print();
   };
 
   if (showPresentation) {
@@ -31,7 +29,18 @@ function App() {
 
   return (
     <div className="app-shell">
-      <AppHeader />
+      <AppHeader 
+        onExport={() => {
+          const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${data.title || 'SeriesCreator_Projekt'}.json`;
+          a.click();
+          URL.revokeObjectURL(url);
+        }}
+        onImport={(importedData) => updateData(importedData)}
+      />
       <div className="app-main-content">
         {/* Hidden layout purely used for the high-res PDF snapshot */}
         <PrintLayout data={data} />
@@ -79,7 +88,9 @@ function App() {
               <input 
                 type="number" 
                 value={data.matchPercentage} 
-                onChange={(e) => updateData({ matchPercentage: Number(e.target.value) })}
+                onChange={(e) => updateData({ matchPercentage: Math.max(0, Math.min(100, Number(e.target.value))) })}
+                min="0"
+                max="100"
                 style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)' }}
               />
             </div>
@@ -88,12 +99,15 @@ function App() {
           <div style={{ display: 'flex', gap: '1rem' }}>
             <div style={{ flex: 1 }}>
               <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>Genre</label>
-              <input 
-                type="text" 
+              <select 
                 value={data.genre} 
                 onChange={(e) => updateData({ genre: e.target.value })}
-                style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)' }}
-              />
+                style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)', backgroundColor: 'var(--color-bg-surface)', color: 'var(--color-text-primary)' }}
+              >
+                <option value="Placeholder 1">Placeholder 1</option>
+                <option value="Placeholder 2">Placeholder 2</option>
+                <option value="Placeholder 3">Placeholder 3</option>
+              </select>
             </div>
             <div style={{ flex: 1 }}>
               <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>Cast (Mitwirkende)</label>
@@ -101,24 +115,63 @@ function App() {
                 type="text" 
                 value={data.cast} 
                 onChange={(e) => updateData({ cast: e.target.value })}
+                required
                 style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)' }}
               />
             </div>
+          </div>
+
+          <div>
+            <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem', marginTop: '1rem' }}>Lernziele & Reflexion (Hintergrund)</label>
+            <textarea 
+              value={data.reflection || ''} 
+              onChange={(e) => updateData({ reflection: e.target.value })}
+              rows={3}
+              style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)', resize: 'vertical' }}
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem', marginTop: '1rem' }}>Quellenverzeichnis</label>
+            <textarea 
+              value={data.sources || ''} 
+              onChange={(e) => updateData({ sources: e.target.value })}
+              rows={3}
+              style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)', resize: 'vertical' }}
+            />
           </div>
         </div>
 
         <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <h3 style={{ margin: 0 }}>Episoden</h3>
-            <select 
-              value={activeSeasonId} 
-              onChange={(e) => setActiveSeasonId(e.target.value)}
-              style={{ padding: '0.4rem', border: '1px solid var(--border-color)' }}
-            >
-              {data.seasons.map(s => (
-                <option key={s.id} value={s.id}>{s.title}</option>
-              ))}
-            </select>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <select 
+                value={activeSeasonId} 
+                onChange={(e) => setActiveSeasonId(e.target.value)}
+                style={{ padding: '0.4rem', border: '1px solid var(--border-color)' }}
+              >
+                {data.seasons.map(s => (
+                  <option key={s.id} value={s.id}>{s.title}</option>
+                ))}
+              </select>
+              <button
+                onClick={() => {
+                  const newSeasonId = `s${data.seasons.length + 1}`;
+                  updateData({
+                    seasons: [
+                      ...data.seasons,
+                      { id: newSeasonId, title: `Staffel ${data.seasons.length + 1}`, episodes: [] }
+                    ]
+                  });
+                  setActiveSeasonId(newSeasonId);
+                }}
+                style={{ padding: '0.4rem', backgroundColor: 'var(--color-bg-surface)', border: '1px solid var(--border-color)', borderRadius: '4px', cursor: 'pointer' }}
+                title="Staffel hinzufügen"
+              >
+                <Plus size={16} />
+              </button>
+            </div>
           </div>
 
           {activeSeason?.episodes.map((ep, index) => (
@@ -156,11 +209,10 @@ function App() {
           </nav>
           <button 
             onClick={handleExport}
-            disabled={isExporting}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '4px', cursor: isExporting ? 'wait' : 'pointer' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '4px', cursor: 'pointer' }}
           >
             <Download size={16} />
-            {isExporting ? 'Exportiert...' : 'PDF Export'}
+            Als PDF speichern
           </button>
         </header>
 
@@ -238,14 +290,14 @@ function App() {
           {activeTab === 'DETAILS' && (
             <div style={{ color: 'var(--color-text-dark-secondary)' }}>
               <h3 style={{ color: 'white', marginBottom: '1rem' }}>Lernziele & Reflexion</h3>
-              <p>Hier können die Schüler später ihre Reflexion und Lernziele dokumentieren (WIP).</p>
+              <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>{data.reflection || "Noch keine Lernziele oder Reflexionen eingetragen."}</p>
             </div>
           )}
 
           {activeTab === 'QUELLEN' && (
             <div style={{ color: 'var(--color-text-dark-secondary)' }}>
               <h3 style={{ color: 'white', marginBottom: '1rem' }}>Quellenverzeichnis</h3>
-              <p>Auflistung der verwendeten Materialien und Quellen (WIP).</p>
+              <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>{data.sources || "Noch keine Quellen eingetragen."}</p>
             </div>
           )}
         </section>

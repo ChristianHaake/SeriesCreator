@@ -12,12 +12,14 @@ export function PresentationMode({ data, onClose }: Props) {
   const allEpisodes = data.seasons.flatMap(s => s.episodes);
   const [currentIndex, setCurrentIndex] = useState(-1); // -1 is the title screen
 
+  const maxIndex = allEpisodes.length + 2;
+
   // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
       if (e.key === 'ArrowRight' || e.key === ' ') {
-        setCurrentIndex(prev => Math.min(prev + 1, allEpisodes.length - 1));
+        setCurrentIndex(prev => Math.min(prev + 1, maxIndex));
       }
       if (e.key === 'ArrowLeft') {
         setCurrentIndex(prev => Math.max(prev - 1, -1));
@@ -25,7 +27,7 @@ export function PresentationMode({ data, onClose }: Props) {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [allEpisodes.length, onClose]);
+  }, [maxIndex, onClose]);
 
   // Request fullscreen on mount
   useEffect(() => {
@@ -59,7 +61,7 @@ export function PresentationMode({ data, onClose }: Props) {
             <h1 style={{ fontSize: '4rem', marginBottom: '1rem', textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>{data.title}</h1>
             <p style={{ fontSize: '1.5rem', color: 'var(--color-text-dark-secondary)' }}>{data.description}</p>
           </div>
-        ) : (
+        ) : currentIndex < allEpisodes.length ? (
           // Episode Screen
           <div style={{ display: 'flex', gap: '4rem', alignItems: 'center', maxWidth: '1000px', width: '100%' }}>
             <div style={{ flex: 1 }}>
@@ -81,6 +83,35 @@ export function PresentationMode({ data, onClose }: Props) {
               <p style={{ fontSize: '1.5rem', lineHeight: 1.6 }}>{allEpisodes[currentIndex]?.summary}</p>
             </div>
           </div>
+        ) : currentIndex === allEpisodes.length ? (
+          // Details / Reflexion
+          <div style={{ textAlign: 'center', maxWidth: '800px' }}>
+            <h1 style={{ fontSize: '3rem', marginBottom: '2rem', color: '#E50914' }}>Hintergrund & Lernziele</h1>
+            <p style={{ fontSize: '1.5rem', lineHeight: 1.6, whiteSpace: 'pre-wrap', textAlign: 'left' }}>
+              {data.reflection || "Keine Reflexion hinterlegt."}
+            </p>
+          </div>
+        ) : currentIndex === allEpisodes.length + 1 ? (
+          // Sources
+          <div style={{ textAlign: 'center', maxWidth: '800px' }}>
+            <h1 style={{ fontSize: '3rem', marginBottom: '2rem', color: '#E50914' }}>Quellenverzeichnis</h1>
+            <p style={{ fontSize: '1.5rem', lineHeight: 1.6, whiteSpace: 'pre-wrap', textAlign: 'left' }}>
+              {data.sources || "Keine Quellen hinterlegt."}
+            </p>
+          </div>
+        ) : (
+          // Credits
+          <div style={{ textAlign: 'center', maxWidth: '800px', animation: 'scrollUp 20s linear infinite' }}>
+            <h1 style={{ fontSize: '4rem', marginBottom: '3rem' }}>{data.title}</h1>
+            
+            <h2 style={{ fontSize: '2rem', color: 'var(--color-text-dark-secondary)', marginBottom: '1rem' }}>Eine Produktion von</h2>
+            <p style={{ fontSize: '2.5rem', marginBottom: '3rem', fontWeight: 'bold' }}>{data.cast || "Der Klasse"}</p>
+            
+            <h2 style={{ fontSize: '2rem', color: 'var(--color-text-dark-secondary)', marginBottom: '1rem' }}>Genre</h2>
+            <p style={{ fontSize: '2.5rem', marginBottom: '3rem', fontWeight: 'bold' }}>{data.genre}</p>
+            
+            <div style={{ marginTop: '5rem', color: '#E50914', fontWeight: 'bold', fontSize: '2rem' }}>haak3 STREAM</div>
+          </div>
         )}
 
       </div>
@@ -94,9 +125,9 @@ export function PresentationMode({ data, onClose }: Props) {
           <ChevronLeft size={48} />
         </button>
         <button 
-          onClick={() => setCurrentIndex(prev => Math.min(prev + 1, allEpisodes.length - 1))}
-          disabled={currentIndex === allEpisodes.length - 1}
-          style={{ background: 'transparent', border: 'none', color: currentIndex === allEpisodes.length - 1 ? '#333' : 'white', cursor: currentIndex === allEpisodes.length - 1 ? 'default' : 'pointer' }}
+          onClick={() => setCurrentIndex(prev => Math.min(prev + 1, maxIndex))}
+          disabled={currentIndex === maxIndex}
+          style={{ background: 'transparent', border: 'none', color: currentIndex === maxIndex ? '#333' : 'white', cursor: currentIndex === maxIndex ? 'default' : 'pointer' }}
         >
           <ChevronRight size={48} />
         </button>
