@@ -1,13 +1,29 @@
 import React from 'react';
 import type { ProjectData } from '../types';
+import { displayCompletion } from '../domain/completion';
 
 interface Props {
   data: ProjectData;
+  completionLabel: string;
+  castLabel: string;
+  genreLabel: string;
+  episodesLabel: string;
+  noCoverLabel: string;
+  noImageLabel: string;
 }
 
 // This component is rendered hidden in the DOM purely for the PDF export
-export const PrintLayout = React.memo(function PrintLayout({ data }: Props) {
+export const PrintLayout = React.memo(function PrintLayout({
+  data,
+  completionLabel,
+  castLabel,
+  genreLabel,
+  episodesLabel,
+  noCoverLabel,
+  noImageLabel,
+}: Props) {
   const allEpisodes = data.seasons.flatMap(s => s.episodes);
+  const completion = displayCompletion(data);
 
   return (
     <div 
@@ -33,7 +49,7 @@ export const PrintLayout = React.memo(function PrintLayout({ data }: Props) {
           <img src={data.coverUrl} alt="Cover" style={{ width: '400px', height: '600px', objectFit: 'cover', borderRadius: '8px' }} />
         ) : (
           <div style={{ width: '400px', height: '600px', backgroundColor: '#333', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ color: '#666', fontSize: '24px' }}>Kein Cover</span>
+            <span style={{ color: '#666', fontSize: '24px' }}>{noCoverLabel}</span>
           </div>
         )}
         
@@ -41,7 +57,7 @@ export const PrintLayout = React.memo(function PrintLayout({ data }: Props) {
           <h1 style={{ fontSize: '64px', margin: '0 0 20px 0', fontWeight: 'bold' }}>{data.title}</h1>
           
           <div style={{ display: 'flex', gap: '20px', fontSize: '24px', fontWeight: 'bold', marginBottom: '30px', alignItems: 'center' }}>
-            <span style={{ color: '#46d369' }}>{data.matchPercentage}% Match</span>
+            <span style={{ color: '#fb923c' }}>{completionLabel} {completion}%</span>
             <span>{new Date().getFullYear()}</span>
             <span style={{ border: '2px solid #a3a3a3', padding: '4px 10px', borderRadius: '4px' }}>{data.ageRating}</span>
           </div>
@@ -49,14 +65,14 @@ export const PrintLayout = React.memo(function PrintLayout({ data }: Props) {
           <p style={{ fontSize: '28px', lineHeight: '1.4', marginBottom: '40px' }}>{data.description}</p>
           
           <div style={{ fontSize: '24px', color: '#a3a3a3' }}>
-            <p style={{ margin: '10px 0' }}><strong style={{ color: 'white' }}>Starring:</strong> {data.cast}</p>
-            <p style={{ margin: '10px 0' }}><strong style={{ color: 'white' }}>Genre:</strong> {data.genre}</p>
+            <p style={{ margin: '10px 0' }}><strong style={{ color: 'white' }}>{castLabel}</strong> {data.cast}</p>
+            <p style={{ margin: '10px 0' }}><strong style={{ color: 'white' }}>{genreLabel}</strong> {data.genre}</p>
           </div>
         </div>
       </div>
 
       {/* Episodes Grid */}
-      <h2 style={{ fontSize: '48px', borderBottom: '4px solid #E50914', display: 'inline-block', paddingBottom: '10px', marginBottom: '40px' }}>Episoden</h2>
+      <h2 style={{ fontSize: '48px', borderBottom: '4px solid #fb923c', display: 'inline-block', paddingBottom: '10px', marginBottom: '40px' }}>{episodesLabel}</h2>
       
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '40px' }}>
         {allEpisodes.map((ep, index) => (
@@ -65,7 +81,7 @@ export const PrintLayout = React.memo(function PrintLayout({ data }: Props) {
               {ep.thumbnailUrl ? (
                 <img src={ep.thumbnailUrl} alt={ep.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
-                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666' }}>Kein Bild</div>
+                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666' }}>{noImageLabel}</div>
               )}
             </div>
             <div>

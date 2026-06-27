@@ -27,7 +27,7 @@ describe('App', () => {
     const user = userEvent.setup();
     renderApp();
 
-    const backgroundTab = screen.getByRole('tab', { name: 'BACKGROUND' });
+    const backgroundTab = screen.getByRole('tab', { name: 'Concept' });
     await user.click(backgroundTab);
 
     expect(backgroundTab).toHaveAttribute('aria-selected', 'true');

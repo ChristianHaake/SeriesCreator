@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { memo } from 'react';
 import type { Episode } from '../types';
 import { ArrowUp, ArrowDown, Trash2, Image as ImageIcon } from 'lucide-react';
 import { fieldLimits, resourceLimits } from '../domain/constraints';
+import { useTranslation } from '../i18n';
 
 interface Props {
   episode: Episode;
@@ -13,19 +14,20 @@ interface Props {
   onMove: (seasonId: string, episodeId: string, direction: 'up' | 'down') => void;
 }
 
-export function EpisodeEditor({ episode, seasonId, index, total, onUpdate, onRemove, onMove }: Props) {
+export const EpisodeEditor = memo(function EpisodeEditor({ episode, seasonId, index, total, onUpdate, onRemove, onMove }: Props) {
+  const { t, locale } = useTranslation();
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
-      alert('Bitte wähle ein PNG-, JPG- oder WebP-Bild.');
+      alert(locale === 'de' ? 'Bitte wähle ein PNG-, JPG- oder WebP-Bild.' : 'Choose a PNG, JPG, or WebP image.');
       e.target.value = '';
       return;
     }
 
     if (file.size > resourceLimits.imageFileBytes) {
-      alert('Das Bild ist zu groß. Maximal erlaubt sind 5 MB.');
+      alert(locale === 'de' ? 'Das Bild ist zu groß. Maximal erlaubt sind 5 MB.' : 'The image is too large. Maximum size is 5 MB.');
       e.target.value = '';
       return;
     }
@@ -33,7 +35,7 @@ export function EpisodeEditor({ episode, seasonId, index, total, onUpdate, onRem
     const reader = new FileReader();
     reader.onloadend = () => {
       if (typeof reader.result !== 'string') {
-        alert('Das Bild konnte nicht gelesen werden.');
+        alert(locale === 'de' ? 'Das Bild konnte nicht gelesen werden.' : 'The image could not be read.');
         e.target.value = '';
         return;
       }
@@ -44,7 +46,7 @@ export function EpisodeEditor({ episode, seasonId, index, total, onUpdate, onRem
           img.width > resourceLimits.imageMaxEdge ||
           img.height > resourceLimits.imageMaxEdge
         ) {
-          alert('Das Bild ist zu groß. Maximal erlaubt sind 4096 Pixel pro Kante.');
+          alert(locale === 'de' ? 'Das Bild ist zu groß. Maximal erlaubt sind 4096 Pixel pro Kante.' : 'The image is too large. Maximum size is 4096 pixels per edge.');
           e.target.value = '';
           return;
         }
@@ -62,7 +64,7 @@ export function EpisodeEditor({ episode, seasonId, index, total, onUpdate, onRem
         canvas.height = height;
         const ctx = canvas.getContext('2d');
         if (!ctx) {
-          alert('Das Bild konnte nicht verarbeitet werden.');
+          alert(locale === 'de' ? 'Das Bild konnte nicht verarbeitet werden.' : 'The image could not be processed.');
           e.target.value = '';
           return;
         }
@@ -73,13 +75,13 @@ export function EpisodeEditor({ episode, seasonId, index, total, onUpdate, onRem
         e.target.value = '';
       };
       img.onerror = () => {
-        alert('Das Bildformat konnte nicht verarbeitet werden.');
+        alert(locale === 'de' ? 'Das Bildformat konnte nicht verarbeitet werden.' : 'The image format could not be processed.');
         e.target.value = '';
       };
       img.src = reader.result;
     };
     reader.onerror = () => {
-      alert('Das Bild konnte nicht gelesen werden.');
+      alert(locale === 'de' ? 'Das Bild konnte nicht gelesen werden.' : 'The image could not be read.');
       e.target.value = '';
     };
     reader.readAsDataURL(file);
@@ -91,22 +93,28 @@ export function EpisodeEditor({ episode, seasonId, index, total, onUpdate, onRem
         <h4 style={{ margin: 0 }}>Episode {index + 1}</h4>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <button 
+            type="button"
             onClick={() => onMove(seasonId, episode.id, 'up')} 
             disabled={index === 0}
-            style={{ background: 'transparent', border: '1px solid var(--border-color)', padding: '0.3rem', borderRadius: '6px', cursor: index === 0 ? 'not-allowed' : 'pointer', color: 'var(--color-text-muted)', transition: 'all 0.2s' }}
+            className="ui-icon-button"
+            aria-label={t.episodeMoveUp}
           >
             <ArrowUp size={16} />
           </button>
           <button 
+            type="button"
             onClick={() => onMove(seasonId, episode.id, 'down')} 
             disabled={index === total - 1}
-            style={{ background: 'transparent', border: '1px solid var(--border-color)', padding: '0.3rem', borderRadius: '6px', cursor: index === total - 1 ? 'not-allowed' : 'pointer', color: 'var(--color-text-muted)', transition: 'all 0.2s' }}
+            className="ui-icon-button"
+            aria-label={t.episodeMoveDown}
           >
             <ArrowDown size={16} />
           </button>
           <button 
+            type="button"
             onClick={() => onRemove(seasonId, episode.id)}
-            style={{ background: '#fef2f2', color: '#ef4444', border: '1px solid #fecaca', padding: '0.3rem', borderRadius: '6px', cursor: 'pointer', transition: 'all 0.2s' }}
+            className="ui-icon-button ui-icon-button--danger"
+            aria-label={t.episodeDelete}
           >
             <Trash2 size={16} />
           </button>
@@ -115,7 +123,7 @@ export function EpisodeEditor({ episode, seasonId, index, total, onUpdate, onRem
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <div>
-          <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.3rem', fontWeight: 500 }}>Titel</label>
+          <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.3rem', fontWeight: 500 }}>{t.episodeTitleLabel}</label>
           <input 
             type="text" 
             value={episode.title}
@@ -126,7 +134,7 @@ export function EpisodeEditor({ episode, seasonId, index, total, onUpdate, onRem
         </div>
         
         <div>
-          <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.3rem', fontWeight: 500 }}>Beschreibung</label>
+          <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.3rem', fontWeight: 500 }}>{t.episodeDescriptionLabel}</label>
           <textarea 
             value={episode.summary}
             onChange={(e) => onUpdate(seasonId, episode.id, { summary: e.target.value })}
@@ -138,7 +146,7 @@ export function EpisodeEditor({ episode, seasonId, index, total, onUpdate, onRem
 
         <div>
           <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.95rem', fontWeight: 500, padding: '0.6rem', border: '1px dashed var(--color-border)', borderRadius: '6px', justifyContent: 'center', backgroundColor: 'var(--color-bg-surface)', transition: 'background-color 0.2s', color: 'var(--color-text-primary)' }}>
-            <ImageIcon size={18} /> Thumbnail wählen
+            <ImageIcon size={18} /> {t.btnChooseThumbnail}
             <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageUpload} />
           </label>
           {episode.thumbnailUrl && (
@@ -162,4 +170,4 @@ export function EpisodeEditor({ episode, seasonId, index, total, onUpdate, onRem
       </div>
     </div>
   );
-}
+});

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { ProjectData, Episode } from '../types';
 import { initialProjectData } from '../types';
 import { normalizeProject, serializeProject } from '../domain/projectCodec';
@@ -40,13 +40,13 @@ export function useProjectStore() {
     return () => clearTimeout(timeoutId);
   }, [data]);
 
-  const updateData = (updates: Partial<ProjectData>) => {
+  const updateData = useCallback((updates: Partial<ProjectData>) => {
     setData(prev => ({ ...prev, ...updates }));
-  };
+  }, []);
 
-  const addEpisode = (seasonId: string) => {
+  const addEpisode = useCallback((seasonId: string) => {
     setData(prev => {
-      const newId = `ep_${Date.now()}`;
+      const newId = `ep_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
       return {
         ...prev,
         seasons: prev.seasons.map(s => {
@@ -60,9 +60,9 @@ export function useProjectStore() {
         })
       };
     });
-  };
+  }, []);
 
-  const updateEpisode = (seasonId: string, episodeId: string, updates: Partial<Episode>) => {
+  const updateEpisode = useCallback((seasonId: string, episodeId: string, updates: Partial<Episode>) => {
     setData(prev => ({
       ...prev,
       seasons: prev.seasons.map(s => {
@@ -75,9 +75,9 @@ export function useProjectStore() {
         return s;
       })
     }));
-  };
+  }, []);
 
-  const removeEpisode = (seasonId: string, episodeId: string) => {
+  const removeEpisode = useCallback((seasonId: string, episodeId: string) => {
     setData(prev => ({
       ...prev,
       seasons: prev.seasons.map(s => {
@@ -90,9 +90,9 @@ export function useProjectStore() {
         return s;
       })
     }));
-  };
+  }, []);
 
-  const moveEpisode = (seasonId: string, episodeId: string, direction: 'up' | 'down') => {
+  const moveEpisode = useCallback((seasonId: string, episodeId: string, direction: 'up' | 'down') => {
     setData(prev => ({
       ...prev,
       seasons: prev.seasons.map(s => {
@@ -111,16 +111,16 @@ export function useProjectStore() {
         return s;
       })
     }));
-  };
+  }, []);
 
-  const updateSeason = (seasonId: string, title: string) => {
+  const updateSeason = useCallback((seasonId: string, title: string) => {
     setData(prev => ({
       ...prev,
       seasons: prev.seasons.map(s => s.id === seasonId ? { ...s, title } : s)
     }));
-  };
+  }, []);
 
-  const removeSeason = (seasonId: string) => {
+  const removeSeason = useCallback((seasonId: string) => {
     setData(prev => {
       const newSeasons = prev.seasons.filter(s => s.id !== seasonId);
       // Ensure at least one season remains
@@ -129,17 +129,17 @@ export function useProjectStore() {
       }
       return { ...prev, seasons: newSeasons };
     });
-  };
+  }, []);
 
-  const resetData = () => {
+  const resetData = useCallback(() => {
     setData(initialProjectData);
-  };
+  }, []);
 
-  const replaceData = (nextData: ProjectData) => {
+  const replaceData = useCallback((nextData: ProjectData) => {
     setData(nextData);
-  };
+  }, []);
 
-  return {
+  return useMemo(() => ({
     data,
     updateData,
     replaceData,
@@ -150,5 +150,16 @@ export function useProjectStore() {
     resetData,
     updateSeason,
     removeSeason,
-  };
+  }), [
+    data,
+    updateData,
+    replaceData,
+    addEpisode,
+    updateEpisode,
+    removeEpisode,
+    moveEpisode,
+    resetData,
+    updateSeason,
+    removeSeason,
+  ]);
 }

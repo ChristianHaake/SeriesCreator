@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import type { ProjectData } from '../types';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -9,7 +9,7 @@ interface Props {
 
 export function PresentationMode({ data, onClose }: Props) {
   // Collect all episodes across seasons
-  const allEpisodes = data.seasons.flatMap(s => s.episodes);
+  const allEpisodes = useMemo(() => data.seasons.flatMap(s => s.episodes), [data.seasons]);
   const [currentIndex, setCurrentIndex] = useState(-1); // -1 is the title screen
 
   const maxIndex = allEpisodes.length + 2;
@@ -44,7 +44,9 @@ export function PresentationMode({ data, onClose }: Props) {
   return (
     <div style={{ position: 'fixed', inset: 0, backgroundColor: 'var(--color-bg-dark)', color: 'white', zIndex: 100, display: 'flex', flexDirection: 'column' }}>
       <button 
+        type="button"
         onClick={onClose}
+        aria-label="Präsentation schließen"
         style={{ position: 'absolute', top: '2rem', right: '2rem', background: 'rgba(0,0,0,0.5)', border: 'none', color: 'white', padding: '0.5rem', borderRadius: '50%', cursor: 'pointer', zIndex: 110 }}
       >
         <X size={24} />
@@ -86,7 +88,7 @@ export function PresentationMode({ data, onClose }: Props) {
         ) : currentIndex === allEpisodes.length ? (
           // Details / Reflexion
           <div style={{ textAlign: 'center', maxWidth: '800px' }}>
-            <h1 style={{ fontSize: '3rem', marginBottom: '2rem', color: '#E50914' }}>Hintergrund & Lernziele</h1>
+            <h1 style={{ fontSize: '3rem', marginBottom: '2rem', color: '#fb923c' }}>Hintergrund & Lernziele</h1>
             <p style={{ fontSize: '1.5rem', lineHeight: 1.6, whiteSpace: 'pre-wrap', textAlign: 'left' }}>
               {data.reflection || "Keine Reflexion hinterlegt."}
             </p>
@@ -94,7 +96,7 @@ export function PresentationMode({ data, onClose }: Props) {
         ) : currentIndex === allEpisodes.length + 1 ? (
           // Sources
           <div style={{ textAlign: 'center', maxWidth: '800px' }}>
-            <h1 style={{ fontSize: '3rem', marginBottom: '2rem', color: '#E50914' }}>Quellenverzeichnis</h1>
+            <h1 style={{ fontSize: '3rem', marginBottom: '2rem', color: '#fb923c' }}>Quellenverzeichnis</h1>
             <p style={{ fontSize: '1.5rem', lineHeight: 1.6, whiteSpace: 'pre-wrap', textAlign: 'left' }}>
               {data.sources || "Keine Quellen hinterlegt."}
             </p>
@@ -110,7 +112,7 @@ export function PresentationMode({ data, onClose }: Props) {
             <h2 style={{ fontSize: '2rem', color: 'var(--color-text-dark-secondary)', marginBottom: '1rem' }}>Genre</h2>
             <p style={{ fontSize: '2.5rem', marginBottom: '3rem', fontWeight: 'bold' }}>{data.genre}</p>
             
-            <div style={{ marginTop: '5rem', color: '#E50914', fontWeight: 'bold', fontSize: '2rem' }}>haak3 STREAM</div>
+            <div style={{ marginTop: '5rem', color: '#fb923c', fontWeight: 'bold', fontSize: '2rem' }}>{data.previewBrand || 'SeriesCreator'}</div>
           </div>
         )}
 
@@ -118,15 +120,19 @@ export function PresentationMode({ data, onClose }: Props) {
 
       <div style={{ position: 'absolute', bottom: '2rem', left: 0, right: 0, display: 'flex', justifyContent: 'center', gap: '2rem' }}>
         <button 
+          type="button"
           onClick={() => setCurrentIndex(prev => Math.max(prev - 1, -1))}
           disabled={currentIndex === -1}
+          aria-label="Vorherige Folie"
           style={{ background: 'transparent', border: 'none', color: currentIndex === -1 ? '#333' : 'white', cursor: currentIndex === -1 ? 'default' : 'pointer' }}
         >
           <ChevronLeft size={48} />
         </button>
         <button 
+          type="button"
           onClick={() => setCurrentIndex(prev => Math.min(prev + 1, maxIndex))}
           disabled={currentIndex === maxIndex}
+          aria-label="Nächste Folie"
           style={{ background: 'transparent', border: 'none', color: currentIndex === maxIndex ? '#333' : 'white', cursor: currentIndex === maxIndex ? 'default' : 'pointer' }}
         >
           <ChevronRight size={48} />

@@ -1,9 +1,10 @@
-import { useState } from 'react';
-import { Plus, Edit2, Trash2 } from 'lucide-react';
+import { useState, useMemo, type ChangeEvent } from 'react';
+import { Plus, Edit2, Image as ImageIcon, Trash2, X } from 'lucide-react';
 import { EpisodeEditor } from './EpisodeEditor';
 import { useProjectStore } from '../store/useProjectStore';
-import { fieldLimits } from '../domain/constraints';
+import { fieldLimits, resourceLimits } from '../domain/constraints';
 import { useTranslation } from '../i18n';
+import { calculateProjectCompletion } from '../domain/completion';
 
 interface Props {
   activeSeasonId: string;
@@ -14,9 +15,92 @@ interface Props {
 export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Props) {
   const { data, updateData, addEpisode, updateEpisode, removeEpisode, moveEpisode, updateSeason, removeSeason } = store;
   const [editorStep, setEditorStep] = useState<1 | 2 | 3>(1);
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
 
   const activeSeason = data.seasons.find(s => s.id === activeSeasonId) || data.seasons[0];
+  const calculatedCompletion = useMemo(() => calculateProjectCompletion(data), [data]);
+  const hasCustomCompletion = typeof data.completionOverride === 'number';
+  const alertText = {
+    unsupportedImage: locale === 'de' ? 'Bitte wähle ein PNG-, JPG- oder WebP-Bild.' : 'Choose a PNG, JPG, or WebP image.',
+    imageTooLarge: locale === 'de' ? 'Das Bild ist zu groß. Maximal erlaubt sind 5 MB.' : 'The image is too large. Maximum size is 5 MB.',
+    imageReadFailed: locale === 'de' ? 'Das Bild konnte nicht gelesen werden.' : 'The image could not be read.',
+    imageEdgeTooLarge: locale === 'de' ? 'Das Bild ist zu groß. Maximal erlaubt sind 4096 Pixel pro Kante.' : 'The image is too large. Maximum size is 4096 pixels per edge.',
+    imageProcessFailed: locale === 'de' ? 'Das Bild konnte nicht verarbeitet werden.' : 'The image could not be processed.',
+  };
+
+  const handleCoverUpload = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const resetInput = () => {
+      event.target.value = '';
+    };
+
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+      alert(alertText.unsupportedImage);
+      resetInput();
+      return;
+    }
+
+    if (file.size > resourceLimits.imageFileBytes) {
+      alert(alertText.imageTooLarge);
+      resetInput();
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (typeof reader.result !== 'string') {
+        alert(alertText.imageReadFailed);
+        resetInput();
+        return;
+      }
+
+      const image = new Image();
+      image.onload = () => {
+        if (
+          image.width > resourceLimits.imageMaxEdge ||
+          image.height > resourceLimits.imageMaxEdge
+        ) {
+          alert(alertText.imageEdgeTooLarge);
+          resetInput();
+          return;
+        }
+
+        const canvas = document.createElement('canvas');
+        let width = image.width;
+        let height = image.height;
+
+        if (width > resourceLimits.imageOutputWidth) {
+          height = Math.round((height * resourceLimits.imageOutputWidth) / width);
+          width = resourceLimits.imageOutputWidth;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const context = canvas.getContext('2d');
+        if (!context) {
+          alert(alertText.imageProcessFailed);
+          resetInput();
+          return;
+        }
+
+        context.drawImage(image, 0, 0, width, height);
+        updateData({ coverUrl: canvas.toDataURL('image/jpeg', 0.78) });
+        resetInput();
+      };
+      image.onerror = () => {
+        alert(alertText.imageProcessFailed);
+        resetInput();
+      };
+      image.src = reader.result;
+    };
+    reader.onerror = () => {
+      alert(alertText.imageReadFailed);
+      resetInput();
+    };
+    reader.readAsDataURL(file);
+  };
 
   return (
     <aside className="editor-sidebar" style={{ padding: '2rem' }}>
@@ -27,18 +111,29 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
 
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
         {[1, 2, 3].map(step => (
-          <div key={step} style={{ flex: 1, height: '4px', backgroundColor: editorStep >= step ? '#E50914' : 'var(--border-color)', borderRadius: '2px', transition: 'background-color 0.3s' }} />
+          <div key={step} style={{ flex: 1, height: '4px', backgroundColor: editorStep >= step ? '#f97316' : 'var(--border-color)', borderRadius: '2px', transition: 'background-color 0.3s' }} />
         ))}
       </div>
 
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem' }}>
-        <button onClick={() => setEditorStep(1)} style={{ flex: 1, padding: '0.5rem', background: editorStep === 1 ? 'var(--color-bg-surface)' : 'transparent', border: '1px solid var(--border-color)', borderRadius: '4px', color: editorStep === 1 ? 'white' : 'var(--color-text-muted)', cursor: 'pointer', fontWeight: editorStep === 1 ? 'bold' : 'normal' }}>{t.stepInfo}</button>
-        <button onClick={() => setEditorStep(2)} style={{ flex: 1, padding: '0.5rem', background: editorStep === 2 ? 'var(--color-bg-surface)' : 'transparent', border: '1px solid var(--border-color)', borderRadius: '4px', color: editorStep === 2 ? 'white' : 'var(--color-text-muted)', cursor: 'pointer', fontWeight: editorStep === 2 ? 'bold' : 'normal' }}>{t.stepEpisodes}</button>
-        <button onClick={() => setEditorStep(3)} style={{ flex: 1, padding: '0.5rem', background: editorStep === 3 ? 'var(--color-bg-surface)' : 'transparent', border: '1px solid var(--border-color)', borderRadius: '4px', color: editorStep === 3 ? 'white' : 'var(--color-text-muted)', cursor: 'pointer', fontWeight: editorStep === 3 ? 'bold' : 'normal' }}>{t.stepDetails}</button>
+        <button type="button" onClick={() => setEditorStep(1)} className={`ui-button editor-step-button${editorStep === 1 ? ' is-active' : ''}`}>{t.stepInfo}</button>
+        <button type="button" onClick={() => setEditorStep(2)} className={`ui-button editor-step-button${editorStep === 2 ? ' is-active' : ''}`}>{t.stepEpisodes}</button>
+        <button type="button" onClick={() => setEditorStep(3)} className={`ui-button editor-step-button${editorStep === 3 ? ' is-active' : ''}`}>{t.stepDetails}</button>
       </div>
 
       {editorStep === 1 && (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
+        <div>
+          <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblPreviewBrand}</label>
+          <input 
+            type="text" 
+            value={data.previewBrand} 
+            onChange={(e) => updateData({ previewBrand: e.target.value })}
+            maxLength={fieldLimits.previewBrand}
+            style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)' }}
+          />
+        </div>
+
         <div>
           <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblTitle}</label>
           <input 
@@ -48,6 +143,39 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
             maxLength={fieldLimits.title}
             style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)' }}
           />
+        </div>
+
+        <div>
+          <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblCoverArt}</label>
+          <div className="cover-art-field">
+            <div className="cover-art-field__actions">
+              <label className="ui-button cover-art-field__upload">
+                <ImageIcon size={16} />
+                <span>{t.btnChooseCover}</span>
+                <input type="file" accept="image/png,image/jpeg,image/webp" onChange={handleCoverUpload} />
+              </label>
+              {data.coverUrl && (
+                <button
+                  type="button"
+                  className="ui-button ui-button--danger"
+                  onClick={() => updateData({ coverUrl: undefined })}
+                >
+                  <X size={16} />
+                  <span>{t.btnRemoveCover}</span>
+                </button>
+              )}
+            </div>
+            <div className="cover-art-field__preview">
+              {data.coverUrl ? (
+                <img src={data.coverUrl} alt={t.lblCoverArt} />
+              ) : (
+                <div className="cover-art-field__placeholder">
+                  <ImageIcon size={22} />
+                  <span>{t.noCover}</span>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         <div>
@@ -61,8 +189,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
           />
         </div>
 
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          <div style={{ flex: 1 }}>
+        <div style={{ maxWidth: '18rem' }}>
             <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblAge}</label>
             <select 
               value={data.ageRating} 
@@ -75,17 +202,36 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
               <option value="ab 16">ab 16</option>
               <option value="ab 18">ab 18</option>
             </select>
-          </div>
-          <div style={{ flex: 1 }}>
-            <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblMatch}</label>
-            <input 
-              type="number" 
-              value={data.matchPercentage} 
-              onChange={(e) => updateData({ matchPercentage: Math.max(0, Math.min(100, Number(e.target.value))) })}
-              min="0"
-              max="100"
-              style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)' }}
-            />
+        </div>
+
+        <div>
+          <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblCompletion}</label>
+          <div className="completion-control">
+            <div className="completion-control__auto" aria-live="polite">
+              <span>{t.lblCompletionAuto}</span>
+              <strong>{calculatedCompletion}%</strong>
+            </div>
+            <label className="completion-control__toggle">
+              <input
+                type="checkbox"
+                checked={hasCustomCompletion}
+                onChange={(e) => updateData({ completionOverride: e.target.checked ? calculatedCompletion : undefined })}
+              />
+              <span>{t.lblCompletionUseCustom}</span>
+            </label>
+            {hasCustomCompletion && (
+              <label className="completion-control__custom">
+                <span>{t.lblCompletionCustom}</span>
+                <input 
+                  type="number" 
+                  value={data.completionOverride} 
+                  onChange={(e) => updateData({ completionOverride: Math.max(0, Math.min(100, Number(e.target.value))) })}
+                  min="0"
+                  max="100"
+                  aria-label={t.lblCompletionCustom}
+                />
+              </label>
+            )}
           </div>
         </div>
         
@@ -159,8 +305,9 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
               ))}
             </select>
             <button
+              type="button"
               onClick={() => {
-                const newSeasonId = `s${data.seasons.length + 1}`;
+                const newSeasonId = crypto.randomUUID();
                 updateData({
                   seasons: [
                     ...data.seasons,
@@ -169,12 +316,13 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
                 });
                 setActiveSeasonId(newSeasonId);
               }}
-              style={{ padding: '0.4rem', backgroundColor: 'var(--color-bg-surface)', border: '1px solid var(--border-color)', borderRadius: '4px', cursor: 'pointer' }}
+              className="ui-icon-button"
               title={t.addSeason}
             >
               <Plus size={16} />
             </button>
             <button
+              type="button"
               onClick={() => {
                 const currentTitle = activeSeason?.title || '';
                 const newTitle = window.prompt(t.promptRename, currentTitle);
@@ -182,12 +330,13 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
                   updateSeason(activeSeasonId, newTitle.trim());
                 }
               }}
-              style={{ padding: '0.4rem', backgroundColor: 'var(--color-bg-surface)', border: '1px solid var(--border-color)', borderRadius: '4px', cursor: 'pointer', color: 'var(--color-text-primary)' }}
+              className="ui-icon-button"
               title={t.renameSeason}
             >
               <Edit2 size={16} />
             </button>
             <button
+              type="button"
               onClick={() => {
                 if (activeSeason?.episodes.length > 0) {
                   alert(t.errorDeleteSeason);
@@ -198,7 +347,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
                   setActiveSeasonId(data.seasons.find(s => s.id !== activeSeasonId)?.id || '');
                 }
               }}
-              style={{ padding: '0.4rem', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '4px', cursor: 'pointer', color: '#ef4444' }}
+              className="ui-icon-button ui-icon-button--danger"
               title={t.deleteSeason}
             >
               <Trash2 size={16} />
@@ -218,11 +367,11 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
           />
         ))}
 
-        <button 
-          onClick={() => addEpisode(activeSeason.id)}
-          style={{ width: '100%', padding: '0.8rem', backgroundColor: 'var(--color-bg-surface)', border: '1px dashed var(--color-border)', borderRadius: '6px', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', cursor: 'pointer', transition: 'background-color 0.2s', color: 'var(--color-text-primary)' }}
-          onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'var(--color-bg-workspace)'}
-          onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'var(--color-bg-surface)'}
+        <button
+          type="button"
+          onClick={() => activeSeason && addEpisode(activeSeason.id)}
+          disabled={!activeSeason}
+          className="ui-button ui-button--full ui-button--dashed"
         >
           <Plus size={16} /> {t.addEpisode}
         </button>

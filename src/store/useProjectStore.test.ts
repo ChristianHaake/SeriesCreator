@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import { renderHook, act } from '@testing-library/react';
 import { initialProjectData } from '../types';
-import { loadStoredProject, saveStoredProject } from './useProjectStore';
+import { loadStoredProject, saveStoredProject, useProjectStore } from './useProjectStore';
 
 class MemoryStorage implements Storage {
   private values = new Map<string, string>();
@@ -54,5 +55,31 @@ describe('project storage', () => {
     } as unknown as Storage;
 
     expect(saveStoredProject(blockedStorage, initialProjectData)).toBe(false);
+  });
+});
+
+describe('useProjectStore hook mutations', () => {
+  it('adds and removes episodes', () => {
+    const { result } = renderHook(() => useProjectStore());
+    
+    act(() => {
+      result.current.resetData();
+    });
+    
+    const initialSeasonId = result.current.data.seasons[0].id;
+    const initialEpisodesCount = result.current.data.seasons[0].episodes.length;
+    
+    act(() => {
+      result.current.addEpisode(initialSeasonId);
+    });
+    
+    expect(result.current.data.seasons[0].episodes.length).toBe(initialEpisodesCount + 1);
+    const newEpisodeId = result.current.data.seasons[0].episodes[initialEpisodesCount].id;
+    
+    act(() => {
+      result.current.removeEpisode(initialSeasonId, newEpisodeId);
+    });
+    
+    expect(result.current.data.seasons[0].episodes.length).toBe(initialEpisodesCount);
   });
 });
