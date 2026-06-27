@@ -1,5 +1,6 @@
 export const fieldLimits = {
   title: 100,
+  previewBrand: 60,
   description: 2000,
   cast: 200,
   episodeTitle: 100,

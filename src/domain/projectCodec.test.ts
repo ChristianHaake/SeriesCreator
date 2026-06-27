@@ -6,6 +6,7 @@ import {
   serializeProject,
 } from './projectCodec';
 import { initialProjectData } from '../types';
+import { calculateProjectCompletion, displayCompletion } from './completion';
 
 describe('projectCodec', () => {
   it('normalizes legacy project JSON without replacing it blindly', () => {
@@ -25,6 +26,7 @@ describe('projectCodec', () => {
     if (result.ok) {
       expect(result.data.schemaVersion).toBe(PROJECT_SCHEMA_VERSION);
       expect(result.data.title).toBe('Legacy');
+      expect(result.data.previewBrand).toBe('SeriesCreator');
       expect(result.data.matchPercentage).toBe(89);
     }
   });
@@ -57,6 +59,11 @@ describe('projectCodec', () => {
     };
 
     expect(serialized.schemaVersion).toBe(PROJECT_SCHEMA_VERSION);
+  });
+
+  it('calculates project completion and respects custom completion override', () => {
+    expect(calculateProjectCompletion(initialProjectData)).toBe(60);
+    expect(displayCompletion({ ...initialProjectData, completionOverride: 72 })).toBe(72);
   });
 
   it('creates stable SeriesCreator backup filenames', () => {

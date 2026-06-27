@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useProjectStore } from './store/useProjectStore';
-import { Play, Download } from 'lucide-react';
+import { Download, Presentation } from 'lucide-react';
 import { EditorSidebar } from './components/EditorSidebar';
 import { EpisodeGrid } from './components/EpisodeGrid';
 import { PresentationMode } from './components/PresentationMode';
@@ -17,6 +17,7 @@ import {
   PROJECT_FILE_MIME_TYPE,
   serializeProject,
 } from './domain/projectCodec';
+import { displayCompletion } from './domain/completion';
 import './index.css';
 
 function ContentPage({ pathname }: { pathname: ContentPath }) {
@@ -52,6 +53,7 @@ function App() {
 
 
   const activeSeason = data.seasons.find(s => s.id === activeSeasonId) || data.seasons[0];
+  const completion = displayCompletion(data);
 
   const handleExport = () => {
     window.print();
@@ -98,7 +100,15 @@ function App() {
       />
       <div className="app-main-content">
         {/* Hidden layout purely used for the high-res PDF snapshot */}
-        <PrintLayout data={data} />
+        <PrintLayout
+          data={data}
+          completionLabel={t.completionMeta}
+          castLabel={t.castPrefix}
+          genreLabel={t.genrePrefix}
+          episodesLabel={t.tabEpisodes}
+          noCoverLabel={t.noCover}
+          noImageLabel={t.noImage}
+        />
 
       {/* Sidebar Editor */}
       <EditorSidebar 
@@ -107,16 +117,16 @@ function App() {
         store={store}
       />
 
-      {/* Main Preview (Streaming Look) */}
-      <main className="preview-main theme-streaming">
+        {/* Main Preview */}
+        <main className="preview-main theme-streaming">
         <header className="preview-header">
-          <div className="preview-header__brand">haak3 STREAM</div>
+          <div className="preview-header__brand">{data.previewBrand || 'SeriesCreator'}</div>
           <nav className="preview-header__nav">
             <span>Startseite</span>
             <strong>Serien</strong>
             <span>Klassenprojekte</span>
           </nav>
-          <button className="preview-header__print" onClick={handleExport}>
+          <button type="button" className="preview-header__print" onClick={handleExport}>
             <Download size={16} />
             {t.btnPdf}
           </button>
@@ -127,7 +137,7 @@ function App() {
             <h1 className="streaming-title">{data.title || "Titel der Serie"}</h1>
             
             <div className="streaming-meta">
-              <span className="match-score">{data.matchPercentage}% Match</span>
+              <span className="completion-score">{t.completionMeta} {completion}%</span>
               <span>{new Date().getFullYear()}</span>
               <span className="age-rating">{data.ageRating || "Klasse"}</span>
               <span>{data.seasons.length} {t.season}{data.seasons.length === 1 ? '' : 'n'}</span>
@@ -138,8 +148,8 @@ function App() {
             </p>
 
             <div className="streaming-actions">
-              <button className="btn-play" onClick={() => setShowPresentation(true)}>
-                <Play fill="black" size={24} /> {t.btnPlay}
+              <button type="button" className="btn-play" onClick={() => setShowPresentation(true)}>
+                <Presentation size={24} /> {t.btnPlay}
               </button>
             </div>
 

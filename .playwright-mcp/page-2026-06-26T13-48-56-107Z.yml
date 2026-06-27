@@ -1,0 +1,169 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - img [ref=e7]
+      - generic [ref=e13]:
+        - strong [ref=e14]: SeriesCreator
+        - generic [ref=e15]: Design Streaming Projects
+    - generic [ref=e16]:
+      - generic [ref=e17]:
+        - group "Select language" [ref=e18]:
+          - button "DE" [ref=e19] [cursor=pointer]
+          - button "EN" [pressed] [ref=e20] [cursor=pointer]
+        - generic [ref=e21]:
+          - img [ref=e22]
+          - generic [ref=e25]: Local processing in browser
+      - toolbar "Project actions" [ref=e26]:
+        - button "New / Clear" [ref=e27] [cursor=pointer]:
+          - img [ref=e28]
+          - generic [ref=e31]: New / Clear
+        - button "Save" [ref=e32] [cursor=pointer]:
+          - img [ref=e33]
+          - generic [ref=e36]: Save
+        - generic "Load" [ref=e37] [cursor=pointer]:
+          - img [ref=e38]
+          - generic [ref=e41]: Load
+        - link "For Teachers" [ref=e42] [cursor=pointer]:
+          - /url: /lehrkraefte
+          - img [ref=e43]
+          - generic [ref=e46]: For Teachers
+  - generic [ref=e47]:
+    - generic:
+      - generic:
+        - generic:
+          - generic: No cover
+        - generic:
+          - heading "Meine Neue Serie" [level=1]
+          - generic:
+            - generic: Completion 70%
+            - generic: "2026"
+            - generic: Klasse 8+
+          - paragraph: Eine fesselnde Reise durch das Thema...
+          - generic:
+            - paragraph:
+              - strong: "Cast:"
+              - text: Die Klasse
+            - paragraph:
+              - strong: "Genre:"
+              - text: Dokumentation
+      - heading "Episodes" [level=2]
+      - generic:
+        - generic:
+          - generic:
+            - generic: No image
+          - generic:
+            - heading "1. Neue Episode" [level=3]
+            - paragraph
+    - complementary [ref=e48]:
+      - heading "SeriesCreator Editor" [level=2] [ref=e49]
+      - paragraph [ref=e50]: Edit the metadata of your series.
+      - generic [ref=e55]:
+        - button "1. Info" [ref=e56] [cursor=pointer]
+        - button "2. Episodes" [ref=e57] [cursor=pointer]
+        - button "3. Details" [ref=e58] [cursor=pointer]
+      - generic [ref=e59]:
+        - generic [ref=e60]:
+          - generic [ref=e61]: Series Title
+          - textbox [ref=e62]: Meine Neue Serie
+        - generic [ref=e63]:
+          - generic [ref=e64]: Provider
+          - textbox [ref=e65]: SeriesCreator
+        - generic [ref=e66]:
+          - generic [ref=e67]: Cover art
+          - generic [ref=e68]:
+            - generic [ref=e70]:
+              - img [ref=e71]
+              - generic [ref=e75]: No cover
+            - generic [ref=e77] [cursor=pointer]:
+              - img [ref=e78]
+              - generic [ref=e82]: Choose cover
+        - generic [ref=e83]:
+          - generic [ref=e84]: Description
+          - textbox [ref=e85]: Eine fesselnde Reise durch das Thema...
+        - generic [ref=e86]:
+          - generic [ref=e87]:
+            - generic [ref=e88]: Age Rating
+            - combobox [ref=e89]:
+              - option "ab 0" [selected]
+              - option "ab 6"
+              - option "ab 12"
+              - option "ab 16"
+              - option "ab 18"
+          - generic [ref=e90]:
+            - generic [ref=e91]: Completion
+            - spinbutton [disabled] [ref=e92]: "70"
+            - generic [ref=e93]:
+              - checkbox "Calculated automatically" [ref=e94]
+              - text: Calculated automatically
+        - generic [ref=e95]:
+          - generic [ref=e96]:
+            - generic [ref=e97]: Genre
+            - combobox [ref=e98]:
+              - option "Placeholder 1" [selected]
+              - option "Placeholder 2"
+              - option "Placeholder 3"
+          - generic [ref=e99]:
+            - generic [ref=e100]: Cast
+            - textbox [ref=e101]: Die Klasse
+    - main [ref=e102]:
+      - generic [ref=e103]:
+        - generic [ref=e104]: SeriesCreator
+        - navigation [ref=e105]:
+          - generic [ref=e106]: Startseite
+          - strong [ref=e107]: Serien
+          - generic [ref=e108]: Klassenprojekte
+        - button "Print / Save as PDF" [ref=e109] [cursor=pointer]:
+          - img [ref=e110]
+          - text: Print / Save as PDF
+      - generic [ref=e114]:
+        - heading "Meine Neue Serie" [level=1] [ref=e115]
+        - generic [ref=e116]:
+          - generic [ref=e117]: Completion 70%
+          - generic [ref=e118]: "2026"
+          - generic [ref=e119]: Klasse 8+
+          - generic [ref=e120]: 1 Season
+        - paragraph [ref=e121]: Eine fesselnde Reise durch das Thema...
+        - button "Present" [ref=e123] [cursor=pointer]:
+          - img [ref=e124]
+          - text: Present
+        - generic [ref=e127]:
+          - paragraph [ref=e128]: "Cast: Die Klasse"
+          - paragraph [ref=e129]: "Genre: Dokumentation"
+      - generic [ref=e130]:
+        - tablist "Serienbereich" [ref=e131]:
+          - tab "Episodes" [selected] [ref=e132] [cursor=pointer]
+          - tab "Concept" [ref=e133] [cursor=pointer]
+          - tab "Sources" [ref=e134] [cursor=pointer]
+        - combobox [ref=e136]:
+          - option "Staffel 1" [selected]
+        - generic [ref=e138] [cursor=pointer]:
+          - generic [ref=e139]:
+            - generic [ref=e140]:
+              - img [ref=e141]
+              - generic [ref=e145]: Kein Bild
+            - generic [ref=e146]: "1"
+          - generic [ref=e147]:
+            - heading "1. Neue Episode" [level=3] [ref=e148]
+            - paragraph [ref=e149]: Keine Beschreibung verfügbar.
+  - contentinfo [ref=e150]:
+    - generic [ref=e151]: Data stays on your device
+    - generic [ref=e152]:
+      - navigation "Footer Navigation" [ref=e153]:
+        - link "Help" [ref=e154] [cursor=pointer]:
+          - /url: /hilfe
+        - link "About" [ref=e155] [cursor=pointer]:
+          - /url: /ueber
+        - link "Teachers" [ref=e156] [cursor=pointer]:
+          - /url: /lehrkraefte
+        - link "Privacy Policy" [ref=e157] [cursor=pointer]:
+          - /url: /datenschutz
+        - link "Imprint" [ref=e158] [cursor=pointer]:
+          - /url: /impressum
+        - link "GitHub Repository" [ref=e159] [cursor=pointer]:
+          - /url: https://github.com/ChristianHaake/SeriesCreator
+          - img [ref=e160]
+          - generic [ref=e162]: GitHub
+      - link "Buy me a coffee" [ref=e163] [cursor=pointer]:
+        - /url: https://buymeacoffee.com/christianhaake
+        - img [ref=e164]
+        - generic [ref=e166]: Buy me a coffee

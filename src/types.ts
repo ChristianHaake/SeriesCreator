@@ -22,9 +22,11 @@ export interface ProjectData {
   author: string;
   description: string;
   coverUrl?: string;
+  previewBrand: string;
   
-  // New meta fields from Streaming concept
+  // Legacy meta field retained for older project backups.
   matchPercentage: number;
+  completionOverride?: number;
   ageRating: string; // e.g. "Klasse 8+"
   genre: string;
   cast: string;
@@ -43,6 +45,7 @@ export const initialProjectData: ProjectData = {
   topic: "",
   author: "",
   description: "Eine fesselnde Reise durch das Thema...",
+  previewBrand: "SeriesCreator",
   matchPercentage: 99,
   ageRating: "Klasse 8+",
   genre: "Dokumentation",

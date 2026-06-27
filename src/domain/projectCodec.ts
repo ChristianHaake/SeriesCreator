@@ -29,6 +29,11 @@ function asOptionalImageUrl(value: unknown) {
   return value;
 }
 
+function asOptionalPercentage(value: unknown) {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return undefined;
+  return Math.max(0, Math.min(100, Math.round(value)));
+}
+
 function normalizeEpisode(value: unknown, index: number): Episode | null {
   if (!isRecord(value)) return null;
   if (typeof value.title !== 'string' || typeof value.summary !== 'string') {
@@ -36,8 +41,8 @@ function normalizeEpisode(value: unknown, index: number): Episode | null {
   }
 
   return {
-    id: limitText(value.id, 80, `ep_${index + 1}`),
-    title: limitText(value.title, fieldLimits.episodeTitle, 'Neue Episode'),
+    id: limitText(value.id, 80) || `ep_${index + 1}`,
+    title: limitText(value.title, fieldLimits.episodeTitle) || 'Neue Episode',
     summary: limitText(value.summary, fieldLimits.episodeSummary),
     notes: limitText(value.notes, fieldLimits.episodeSummary) || undefined,
     duration: limitText(value.duration, 40) || undefined,
@@ -55,8 +60,8 @@ function normalizeSeason(value: unknown, index: number): Season | null {
   if (episodes.some((episode) => episode === null)) return null;
 
   return {
-    id: limitText(value.id, 80, `s_${index + 1}`),
-    title: limitText(value.title, fieldLimits.seasonTitle, `Staffel ${index + 1}`),
+    id: limitText(value.id, 80) || `s_${index + 1}`,
+    title: limitText(value.title, fieldLimits.seasonTitle) || `Staffel ${index + 1}`,
     episodes: episodes as Episode[],
   };
 }
@@ -87,7 +92,7 @@ export function normalizeProject(value: unknown): ProjectParseResult {
 
   const seasons = value.seasons.map(normalizeSeason);
   if (seasons.some((season) => season === null)) {
-    return { ok: false, message: 'Projektdatei enthält ungültige Episoden.' };
+    return { ok: false, message: 'Projektdatei enthält ungültige Staffeln oder Episoden.' };
   }
 
   const data: ProjectData = {
@@ -103,10 +108,13 @@ export function normalizeProject(value: unknown): ProjectParseResult {
       initialProjectData.description,
     ),
     coverUrl: asOptionalImageUrl(value.coverUrl),
-    matchPercentage:
-      typeof value.matchPercentage === 'number'
-        ? Math.max(0, Math.min(100, Math.round(value.matchPercentage)))
-        : initialProjectData.matchPercentage,
+    previewBrand: limitText(
+      value.previewBrand,
+      fieldLimits.previewBrand,
+      initialProjectData.previewBrand,
+    ),
+    matchPercentage: asOptionalPercentage(value.matchPercentage) ?? initialProjectData.matchPercentage,
+    completionOverride: asOptionalPercentage(value.completionOverride),
     ageRating: limitText(value.ageRating, 40, initialProjectData.ageRating),
     genre: limitText(value.genre, 80, initialProjectData.genre),
     cast: limitText(value.cast, fieldLimits.cast, initialProjectData.cast),
