@@ -18,8 +18,8 @@ validated. If validation fails, the current project remains unchanged.
 
 ## Supported images
 
-PNG, JPG/JPEG, and WebP files up to 5 MB and 4096 pixels per edge are accepted.
-Images are scaled to at most 800 pixels wide for the preview and stored locally
+PNG, JPG/JPEG, and WebP files are accepted. Large images are automatically
+scaled down (up to 1920 pixels wide for covers, 800 pixels for episodes) and stored locally
 as JPEG data.
 
 ## Present and PDF

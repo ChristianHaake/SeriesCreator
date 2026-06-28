@@ -19,9 +19,8 @@ werden vollständig validiert. Bei Fehlern bleibt das aktuelle Projekt erhalten.
 
 ## Unterstützte Bilder
 
-Akzeptiert werden PNG, JPG/JPEG und WebP bis maximal 5 MB und 4096 Pixel pro
-Kante. Bilder werden für die Vorschau auf höchstens 800 Pixel Breite verkleinert
-und lokal als JPEG-Daten gespeichert.
+Akzeptiert werden PNG, JPG/JPEG und WebP. Große Bilder werden automatisch
+verkleinert (Cover bis 1920 Pixel, Episodenbilder bis 800 Pixel Breite) und lokal als JPEG-Daten gespeichert.
 
 ## Präsentieren und PDF
 

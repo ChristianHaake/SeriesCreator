@@ -26,12 +26,6 @@ export const EpisodeEditor = memo(function EpisodeEditor({ episode, seasonId, in
       return;
     }
 
-    if (file.size > resourceLimits.imageFileBytes) {
-      alert(locale === 'de' ? 'Das Bild ist zu groß. Maximal erlaubt sind 5 MB.' : 'The image is too large. Maximum size is 5 MB.');
-      e.target.value = '';
-      return;
-    }
-
     const reader = new FileReader();
     reader.onloadend = () => {
       if (typeof reader.result !== 'string') {
@@ -42,22 +36,14 @@ export const EpisodeEditor = memo(function EpisodeEditor({ episode, seasonId, in
 
       const img = new Image();
       img.onload = () => {
-        if (
-          img.width > resourceLimits.imageMaxEdge ||
-          img.height > resourceLimits.imageMaxEdge
-        ) {
-          alert(locale === 'de' ? 'Das Bild ist zu groß. Maximal erlaubt sind 4096 Pixel pro Kante.' : 'The image is too large. Maximum size is 4096 pixels per edge.');
-          e.target.value = '';
-          return;
-        }
 
         const canvas = document.createElement('canvas');
         let width = img.width;
         let height = img.height;
 
-        if (width > resourceLimits.imageOutputWidth) {
-          height = Math.round((height * resourceLimits.imageOutputWidth) / width);
-          width = resourceLimits.imageOutputWidth;
+        if (width > resourceLimits.episodeOutputWidth) {
+          height = Math.round((height * resourceLimits.episodeOutputWidth) / width);
+          width = resourceLimits.episodeOutputWidth;
         }
 
         canvas.width = width;
