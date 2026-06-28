@@ -13,9 +13,8 @@ export const fieldLimits = {
 
 export const resourceLimits = {
   projectFileBytes: 2_000_000,
-  imageFileBytes: 5_000_000,
-  imageMaxEdge: 4096,
-  imageOutputWidth: 800,
+  coverOutputWidth: 1920,
+  episodeOutputWidth: 800,
   dataUrlLength: 1_500_000,
   minSeasons: 1,
   maxSeasons: 20,

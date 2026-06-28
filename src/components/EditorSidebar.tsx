@@ -22,9 +22,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
   const hasCustomCompletion = typeof data.completionOverride === 'number';
   const alertText = {
     unsupportedImage: locale === 'de' ? 'Bitte wähle ein PNG-, JPG- oder WebP-Bild.' : 'Choose a PNG, JPG, or WebP image.',
-    imageTooLarge: locale === 'de' ? 'Das Bild ist zu groß. Maximal erlaubt sind 5 MB.' : 'The image is too large. Maximum size is 5 MB.',
     imageReadFailed: locale === 'de' ? 'Das Bild konnte nicht gelesen werden.' : 'The image could not be read.',
-    imageEdgeTooLarge: locale === 'de' ? 'Das Bild ist zu groß. Maximal erlaubt sind 4096 Pixel pro Kante.' : 'The image is too large. Maximum size is 4096 pixels per edge.',
     imageProcessFailed: locale === 'de' ? 'Das Bild konnte nicht verarbeitet werden.' : 'The image could not be processed.',
   };
 
@@ -42,12 +40,6 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
       return;
     }
 
-    if (file.size > resourceLimits.imageFileBytes) {
-      alert(alertText.imageTooLarge);
-      resetInput();
-      return;
-    }
-
     const reader = new FileReader();
     reader.onloadend = () => {
       if (typeof reader.result !== 'string') {
@@ -58,22 +50,14 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
 
       const image = new Image();
       image.onload = () => {
-        if (
-          image.width > resourceLimits.imageMaxEdge ||
-          image.height > resourceLimits.imageMaxEdge
-        ) {
-          alert(alertText.imageEdgeTooLarge);
-          resetInput();
-          return;
-        }
 
         const canvas = document.createElement('canvas');
         let width = image.width;
         let height = image.height;
 
-        if (width > resourceLimits.imageOutputWidth) {
-          height = Math.round((height * resourceLimits.imageOutputWidth) / width);
-          width = resourceLimits.imageOutputWidth;
+        if (width > resourceLimits.coverOutputWidth) {
+          height = Math.round((height * resourceLimits.coverOutputWidth) / width);
+          width = resourceLimits.coverOutputWidth;
         }
 
         canvas.width = width;
