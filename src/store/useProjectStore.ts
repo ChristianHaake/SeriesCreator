@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { ProjectData, Episode } from '../types';
 import { initialProjectData } from '../types';
 import { normalizeProject, serializeProject } from '../domain/projectCodec';
+import { useTranslation } from '../i18n';
 
 const STORAGE_KEY = 'series_creator_data';
 
@@ -29,6 +30,7 @@ export function saveStoredProject(storage: Storage, data: ProjectData) {
 }
 
 export function useProjectStore() {
+  const { t } = useTranslation();
   const [data, setData] = useState<ProjectData>(() => {
     return loadStoredProject(window.localStorage);
   });
@@ -53,14 +55,14 @@ export function useProjectStore() {
           if (s.id === seasonId) {
             return {
               ...s,
-              episodes: [...s.episodes, { id: newId, title: "Neue Episode", summary: "" }]
+              episodes: [...s.episodes, { id: newId, title: t.newEpisode, summary: "" }]
             };
           }
           return s;
         })
       };
     });
-  }, []);
+  }, [t.newEpisode]);
 
   const updateEpisode = useCallback((seasonId: string, episodeId: string, updates: Partial<Episode>) => {
     setData(prev => ({
@@ -125,11 +127,11 @@ export function useProjectStore() {
       const newSeasons = prev.seasons.filter(s => s.id !== seasonId);
       // Ensure at least one season remains
       if (newSeasons.length === 0) {
-        newSeasons.push({ id: `s_${Date.now()}`, title: "Staffel 1", episodes: [] });
+        newSeasons.push({ id: `s_${Date.now()}`, title: `${t.lblSeasonN}1`, episodes: [] });
       }
       return { ...prev, seasons: newSeasons };
     });
-  }, []);
+  }, [t.lblSeasonN]);
 
   const resetData = useCallback(() => {
     setData(initialProjectData);

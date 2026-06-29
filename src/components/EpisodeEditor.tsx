@@ -76,7 +76,7 @@ export const EpisodeEditor = memo(function EpisodeEditor({ episode, seasonId, in
   return (
     <div style={{ border: '1px solid var(--border-color)', borderRadius: '6px', padding: '1rem', backgroundColor: 'var(--color-bg-workspace)', marginBottom: '1rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <h4 style={{ margin: 0 }}>Episode {index + 1}</h4>
+        <h4 style={{ margin: 0 }}>{t.lblEpisodeN}{index + 1}</h4>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <button 
             type="button"
@@ -139,13 +139,13 @@ export const EpisodeEditor = memo(function EpisodeEditor({ episode, seasonId, in
             <div style={{ marginTop: '0.5rem' }}>
               <img src={episode.thumbnailUrl} alt={episode.altText || "Thumbnail Vorschau"} style={{ width: '100%', height: '80px', objectFit: 'cover', borderRadius: '6px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }} />
               <div style={{ marginTop: '0.5rem' }}>
-                <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.3rem', fontWeight: 500 }}>Alternativtext (Barrierefreiheit)</label>
+                <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.3rem', fontWeight: 500 }}>{t.lblAltText}</label>
                 <input 
                   type="text" 
                   value={episode.altText || ''}
                   onChange={(e) => onUpdate(seasonId, episode.id, { altText: e.target.value })}
                   maxLength={fieldLimits.altText}
-                  placeholder="Beschreibe das Bild in max. 125 Zeichen..."
+                  placeholder={t.lblDescImage}
                   required
                   style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid var(--border-color)' }}
                 />

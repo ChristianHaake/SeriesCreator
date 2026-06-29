@@ -514,6 +514,66 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
   text-decoration: none;
 }
 
+/* Markdown Content Styles */
+.markdown-content {
+  color: var(--color-text);
+  line-height: 1.6;
+  font-size: 1.1rem;
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4 {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  color: var(--color-text);
+}
+
+.markdown-content h1 { font-size: 2.5rem; }
+.markdown-content h2 { 
+  font-size: 2rem; 
+  border-bottom: 1px solid var(--border-color); 
+  padding-bottom: 0.5rem; 
+}
+.markdown-content h3 { font-size: 1.5rem; }
+.markdown-content h4 { font-size: 1.25rem; }
+
+.markdown-content p {
+  margin-bottom: 1.25rem;
+}
+
+.markdown-content ul,
+.markdown-content ol {
+  margin-bottom: 1.25rem;
+  padding-left: 2rem;
+}
+
+.markdown-content li {
+  margin-bottom: 0.5rem;
+}
+
+.markdown-content a {
+  color: var(--brand-primary);
+  text-decoration: underline;
+}
+
+.markdown-content a:hover {
+  text-decoration: none;
+}
+
+.markdown-content strong {
+  font-weight: 700;
+}
+
+.markdown-content blockquote {
+  border-left: 4px solid var(--border-color);
+  padding-left: 1rem;
+  margin-left: 0;
+  margin-bottom: 1.25rem;
+  color: var(--color-text-muted);
+}
+
 .streaming-meta {
   display: flex;
   align-items: center;

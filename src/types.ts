@@ -37,6 +37,8 @@ export interface ProjectData {
   reflection?: string;
   learningObjectives?: string;
   sources?: string;
+  customConceptTitle?: string;
+  customConceptText?: string;
 }
 
 export const initialProjectData: ProjectData = {

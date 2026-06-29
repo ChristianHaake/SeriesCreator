@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { initialProjectData } from '../types';
 import { loadStoredProject, saveStoredProject, useProjectStore } from './useProjectStore';
+import { LocaleProvider } from '../i18n';
 
 class MemoryStorage implements Storage {
   private values = new Map<string, string>();
@@ -60,7 +61,9 @@ describe('project storage', () => {
 
 describe('useProjectStore hook mutations', () => {
   it('adds and removes episodes', () => {
-    const { result } = renderHook(() => useProjectStore());
+    const { result } = renderHook(() => useProjectStore(), {
+      wrapper: LocaleProvider
+    });
     
     act(() => {
       result.current.resetData();

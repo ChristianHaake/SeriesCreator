@@ -1,16 +1,19 @@
 
 import type { Episode } from '../types';
 import { Image as ImageIcon } from 'lucide-react';
+import { useTranslation } from '../i18n';
 
 interface Props {
   episodes: Episode[];
 }
 
 export function EpisodeGrid({ episodes }: Props) {
+  const { t } = useTranslation();
+
   if (episodes.length === 0) {
     return (
       <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-dark-secondary)' }}>
-        Noch keine Episoden vorhanden.
+        {t.lblNoEpisodes}
       </div>
     );
   }
@@ -25,7 +28,7 @@ export function EpisodeGrid({ episodes }: Props) {
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: '#9ca3af' }}>
                 <ImageIcon size={32} />
-                <span style={{ fontSize: '0.9rem', marginTop: '0.5rem', fontWeight: 500 }}>Kein Bild</span>
+                <span style={{ fontSize: '0.9rem', marginTop: '0.5rem', fontWeight: 500 }}>{t.noImage}</span>
               </div>
             )}
             <div style={{ position: 'absolute', bottom: '0.5rem', left: '0.5rem', backgroundColor: 'rgba(0,0,0,0.85)', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.9rem', fontWeight: 'bold', border: '1px solid rgba(255,255,255,0.1)' }}>
@@ -33,9 +36,9 @@ export function EpisodeGrid({ episodes }: Props) {
             </div>
           </div>
           <div style={{ padding: '1.2rem' }}>
-            <h3 style={{ marginBottom: '0.6rem', fontSize: '1.15rem' }}>{index + 1}. {ep.title || "Ohne Titel"}</h3>
+            <h3 style={{ marginBottom: '0.6rem', fontSize: '1.15rem' }}>{index + 1}. {ep.title || t.lblUntitled}</h3>
             <p style={{ color: 'var(--color-text-dark-secondary)', fontSize: '0.95rem', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: 1.5 }}>
-              {ep.summary || "Keine Beschreibung verfügbar."}
+              {ep.summary || t.lblNoDescription}
             </p>
           </div>
         </div>
