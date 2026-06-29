@@ -591,7 +591,7 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
   --color-text: var(--color-text-primary);
   --color-text-muted: var(--color-text-secondary);
   align-items: center;
-  background: rgb(255 255 255 / 94%);
+  background: color-mix(in srgb, var(--color-surface) 94%, transparent);
   border-bottom: 1px solid var(--color-border);
   backdrop-filter: blur(14px);
   display: flex;
@@ -606,54 +606,15 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
 
 .brand {
   align-items: center;
-  background: #005a9f;
-  border-radius: 8px;
-  box-shadow: 0 10px 24px rgb(15 23 42 / 14%);
-  color: var(--color-text);
   display: inline-flex;
   min-height: 64px;
-  padding: 0.38rem;
   text-decoration: none;
 }
 
-.brand__mark {
-  align-items: center;
-  background: #eaf3fb;
-  border-radius: 6px;
-  color: #005a9f;
-  display: inline-flex;
-  justify-content: center;
-  min-height: 48px;
-  width: 48px;
-}
-
-.brand__panel {
-  align-items: center;
-  background: white;
-  border-radius: 5px;
-  display: inline-flex;
-  min-height: 48px;
-  padding: 0.55rem 1.15rem 0.55rem 0.85rem;
-}
-
-.brand__text {
-  display: flex;
-  flex-direction: column;
-  white-space: nowrap;
-}
-
-.brand__text strong {
-  color: #0f3762;
-  font-size: 0.95rem;
-  line-height: 1.05;
-}
-
-.brand__text small {
-  color: #12856d;
-  font-size: 0.74rem;
-  font-weight: 750;
-  line-height: 1.1;
-  margin-top: 0.15rem;
+.brand__logo {
+  height: 72px;
+  width: auto;
+  object-fit: contain;
 }
 
 .header-meta {
@@ -767,8 +728,8 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
     width: 100%;
   }
 
-  .brand__panel {
-    flex: 1;
+  .brand__logo {
+    height: 56px;
   }
 
   .local-badge {
@@ -786,12 +747,14 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 1.5rem;
-  background-color: var(--color-surface);
+  background: color-mix(in srgb, var(--color-surface) 94%, transparent);
+  backdrop-filter: blur(14px);
   border-top: 1px solid var(--border-color);
   height: 50px;
   flex-shrink: 0;
   font-size: 0.85rem;
   z-index: 20;
+  color: var(--color-text);
 }
 
 .app-footer nav {
@@ -802,16 +765,18 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
 
 .app-footer a {
   text-decoration: none;
-  color: var(--color-text-muted);
+  color: var(--color-text);
+  font-weight: 500;
   transition: color 0.2s;
 }
 
 .app-footer a:hover {
-  color: var(--color-text);
+  color: var(--brand-primary);
 }
 
 .app-footer__privacy {
-  color: var(--color-text-muted);
+  color: var(--color-text);
+  font-weight: 500;
 }
 
 .github-link {

@@ -23,6 +23,7 @@ export interface ProjectData {
   description: string;
   coverUrl?: string;
   previewBrand: string;
+  previewCategory: string;
   
   // Legacy meta field retained for older project backups.
   matchPercentage: number;
@@ -46,6 +47,7 @@ export const initialProjectData: ProjectData = {
   author: "",
   description: "Eine fesselnde Reise durch das Thema...",
   previewBrand: "SeriesCreator",
+  previewCategory: "Klassenprojekte",
   matchPercentage: 99,
   ageRating: "Klasse 8+",
   genre: "Dokumentation",
