@@ -18,6 +18,7 @@ export const de = {
   lblDesc: "Beschreibung",
   lblAge: "FSK / Klassenstufe",
   lblPreviewBrand: "Anbieter",
+  lblPreviewCategory: "Kategorie (z.B. Klassenprojekte)",
   lblCoverArt: "Cover-Art",
   btnChooseCover: "Cover auswählen",
   btnRemoveCover: "Cover entfernen",

@@ -107,15 +107,27 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
 
       {editorStep === 1 && (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
-        <div>
-          <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblPreviewBrand}</label>
-          <input 
-            type="text" 
-            value={data.previewBrand} 
-            onChange={(e) => updateData({ previewBrand: e.target.value })}
-            maxLength={fieldLimits.previewBrand}
-            style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)' }}
-          />
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <div style={{ flex: 1 }}>
+            <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblPreviewBrand}</label>
+            <input 
+              type="text" 
+              value={data.previewBrand || ''} 
+              onChange={(e) => updateData({ previewBrand: e.target.value })}
+              maxLength={fieldLimits.previewBrand}
+              style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)' }}
+            />
+          </div>
+          <div style={{ flex: 1 }}>
+            <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblPreviewCategory}</label>
+            <input 
+              type="text" 
+              value={data.previewCategory || ''} 
+              onChange={(e) => updateData({ previewCategory: e.target.value })}
+              maxLength={40}
+              style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)' }}
+            />
+          </div>
         </div>
 
         <div>
@@ -222,15 +234,27 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
         <div style={{ display: 'flex', gap: '1rem' }}>
           <div style={{ flex: 1 }}>
             <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblGenre}</label>
-            <select 
-              value={data.genre} 
+            <input 
+              list="genre-options"
+              type="text"
+              value={data.genre || ''} 
               onChange={(e) => updateData({ genre: e.target.value })}
-              style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)', backgroundColor: 'var(--color-bg-surface)', color: 'var(--color-text-primary)' }}
-            >
-              <option value="Placeholder 1">Placeholder 1</option>
-              <option value="Placeholder 2">Placeholder 2</option>
-              <option value="Placeholder 3">Placeholder 3</option>
-            </select>
+              maxLength={40}
+              style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)' }}
+            />
+            <datalist id="genre-options">
+              <option value="Dokumentation" />
+              <option value="Erklärvideo" />
+              <option value="Kurzfilm" />
+              <option value="Reportage" />
+              <option value="Nachrichten" />
+              <option value="Interview" />
+              <option value="Hörspiel" />
+              <option value="Podcast" />
+              <option value="Animationsfilm" />
+              <option value="Stop-Motion" />
+              <option value="Tutorial" />
+            </datalist>
           </div>
           <div style={{ flex: 1 }}>
             <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblCast}</label>

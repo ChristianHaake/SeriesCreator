@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle2, Clapperboard, Download, GraduationCap, Trash2, Upload } from "lucide-react";
+import { CheckCircle2, Download, GraduationCap, Trash2, Upload } from "lucide-react";
 import type { ProjectData } from "../types";
 import { useTranslation } from "../i18n";
 import { parseProjectJson, PROJECT_FILE_EXTENSION } from '../domain/projectCodec';
@@ -43,17 +43,9 @@ export function AppHeader({ onExport, onImport, onReset }: Props) {
 
   return (
     <header className="app-header">
-      <div className="brand">
-        <span className="brand__mark" aria-hidden="true">
-          <Clapperboard size={30} />
-        </span>
-        <span className="brand__panel">
-          <span className="brand__text">
-            <strong>{t.appTitle}</strong>
-            <small>{t.appSubtitle}</small>
-          </span>
-        </span>
-      </div>
+      <a href="/" className="brand" aria-label={t.appTitle} title={t.appSubtitle}>
+        <img src="/logo-wide.png" alt={t.appTitle} className="brand__logo" />
+      </a>
 
       <div className="header-meta">
         <div className="header-meta__top">

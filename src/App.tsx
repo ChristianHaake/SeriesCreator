@@ -136,7 +136,7 @@ function App() {
           <nav className="preview-header__nav">
             <span>Startseite</span>
             <strong>Serien</strong>
-            <span>Klassenprojekte</span>
+            <span>{data.previewCategory || 'Klassenprojekte'}</span>
           </nav>
           <button type="button" className="preview-header__print" onClick={handleExport}>
             <Download size={16} />
