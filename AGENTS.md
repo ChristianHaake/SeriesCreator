@@ -28,7 +28,7 @@ https://github.com/ChristianHaake/haak3-webapp-standard
 ## App-specific rules
 
 - App name: `SeriesCreator`
-- Live URL: not finalized for release
+- Live URL: `https://seriescreator.haak3.de`
 - Repository: `https://github.com/ChristianHaake/SeriesCreator`
 
 ## Verification

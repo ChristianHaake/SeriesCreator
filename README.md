@@ -17,7 +17,7 @@ in einer Streaming-ähnlichen Oberfläche.
 
 ## Status
 
-- Live URL: noch nicht als finale Produktionsadresse dokumentiert
+- Live URL: https://seriescreator.haak3.de
 - Repository: https://github.com/ChristianHaake/SeriesCreator
 - Deployment: Cloudflare Workers Assets
 - License: GPL-3.0-only

@@ -3,7 +3,7 @@
 ## Product
 
 - App: `SeriesCreator`
-- Live URL: not finalized for release
+- Live URL: https://seriescreator.haak3.de
 - Repository: `https://github.com/ChristianHaake/SeriesCreator`
 - Intended users: educators and learners creating fictional educational series
   concepts without account setup
