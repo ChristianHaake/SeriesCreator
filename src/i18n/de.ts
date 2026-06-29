@@ -58,6 +58,7 @@ export const de = {
   noReflection: "Noch keine Lernziele oder Reflexionen eingetragen.",
   noSources: "Noch keine Quellen eingetragen.",
   btnPdf: "Drucken / als PDF",
+  btnHtml: "Als HTML exportieren",
   footerPrivacy: "Daten bleiben auf deinem Gerät",
   footerHelp: "Hilfe",
   footerAbout: "Über",

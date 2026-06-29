@@ -60,6 +60,7 @@ export const en: Record<TranslationKey, string> = {
   noReflection: "No learning objectives or reflections entered yet.",
   noSources: "No sources entered yet.",
   btnPdf: "Print / Save as PDF",
+  btnHtml: "Download as HTML",
   footerPrivacy: "Data stays on your device",
   footerHelp: "Help",
   footerAbout: "About",

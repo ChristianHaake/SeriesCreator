@@ -22,10 +22,12 @@ werden vollständig validiert. Bei Fehlern bleibt das aktuelle Projekt erhalten.
 Akzeptiert werden PNG, JPG/JPEG und WebP. Große Bilder werden automatisch
 verkleinert (Cover bis 1920 Pixel, Episodenbilder bis 800 Pixel Breite) und lokal als JPEG-Daten gespeichert.
 
-## Präsentieren und PDF
+## Präsentieren und Exportieren
 
 **Präsentieren** öffnet eine Vollbildansicht mit Tastatursteuerung. Nutze
 Pfeiltasten oder Leertaste zum Weitergehen und `Escape` zum Schließen.
+
+**Als HTML exportieren** lädt die Präsentation als eigenständige HTML-Datei herunter. Diese kann ohne Internetverbindung auf jedem Gerät im Browser geöffnet werden.
 
 **Drucken / als PDF** verwendet die Druckfunktion des Browsers. Prüfe das
 Ergebnis vor der Weitergabe im Zielbrowser.

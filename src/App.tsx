@@ -17,6 +17,7 @@ import {
   PROJECT_FILE_MIME_TYPE,
   serializeProject,
 } from './domain/projectCodec';
+import { exportProjectToHtml } from './domain/exportHtml';
 import { displayCompletion } from './domain/completion';
 import './index.css';
 
@@ -57,6 +58,17 @@ function App() {
 
   const handleExport = () => {
     window.print();
+  };
+
+  const handleHtmlExport = () => {
+    const htmlContent = exportProjectToHtml(data);
+    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${data.title ? data.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() : 'presentation'}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   if (showPresentation) {
@@ -150,6 +162,9 @@ function App() {
             <div className="streaming-actions">
               <button type="button" className="btn-play" onClick={() => setShowPresentation(true)}>
                 <Presentation size={24} /> {t.btnPlay}
+              </button>
+              <button type="button" className="ui-button" onClick={handleHtmlExport} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.8rem 1.5rem', backgroundColor: 'transparent', color: 'white', border: '1px solid rgba(255,255,255,0.3)', borderRadius: '4px', cursor: 'pointer', fontSize: '1.1rem', fontWeight: 600 }}>
+                <Download size={20} /> {t.btnHtml}
               </button>
             </div>
 
