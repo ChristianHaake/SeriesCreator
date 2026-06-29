@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useProjectStore } from './store/useProjectStore';
-import { Download, Presentation } from 'lucide-react';
+import { Presentation } from 'lucide-react';
 import { EditorSidebar } from './components/EditorSidebar';
 import { EpisodeGrid } from './components/EpisodeGrid';
 import { PresentationMode } from './components/PresentationMode';
@@ -100,6 +100,8 @@ function App() {
           URL.revokeObjectURL(url);
           alert(locale === 'de' ? 'Das Projekt wurde erfolgreich heruntergeladen.' : 'The project was successfully downloaded.');
         }}
+        onHtmlExport={handleHtmlExport}
+        onPrint={handleExport}
         onImport={(importedData) => {
           replaceData(importedData);
           setActiveSeasonId(importedData.seasons[0]?.id || '');
@@ -138,10 +140,6 @@ function App() {
             <strong>Serien</strong>
             <span>{data.previewCategory || 'Klassenprojekte'}</span>
           </nav>
-          <button type="button" className="preview-header__print" onClick={handleExport}>
-            <Download size={16} />
-            {t.btnPdf}
-          </button>
         </header>
 
         <section className="streaming-hero" style={{ backgroundImage: data.coverUrl ? `url(${data.coverUrl})` : 'none', backgroundColor: data.coverUrl ? 'transparent' : '#222' }}>
@@ -162,9 +160,6 @@ function App() {
             <div className="streaming-actions">
               <button type="button" className="btn-play" onClick={() => setShowPresentation(true)}>
                 <Presentation size={24} /> {t.btnPlay}
-              </button>
-              <button type="button" className="ui-button" onClick={handleHtmlExport} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.8rem 1.5rem', backgroundColor: 'transparent', color: 'white', border: '1px solid rgba(255,255,255,0.3)', borderRadius: '4px', cursor: 'pointer', fontSize: '1.1rem', fontWeight: 600 }}>
-                <Download size={20} /> {t.btnHtml}
               </button>
             </div>
 
@@ -222,8 +217,15 @@ function App() {
 
           {activeTab === 'DETAILS' && (
             <div className="preview-text-panel">
-              <h3>Lernziele & Reflexion</h3>
+              <h3>{t.lblReflection}</h3>
               <p>{data.reflection || t.noReflection}</p>
+              
+              {(data.customConceptTitle || data.customConceptText) && (
+                <div style={{ marginTop: '2.5rem' }}>
+                  <h3>{data.customConceptTitle || (locale === 'de' ? 'Eigene Rubrik' : 'Custom Section')}</h3>
+                  <p>{data.customConceptText}</p>
+                </div>
+              )}
             </div>
           )}
 

@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import type { ProjectData } from '../types';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useTranslation } from '../i18n';
 
 interface Props {
   data: ProjectData;
@@ -8,6 +9,7 @@ interface Props {
 }
 
 export function PresentationMode({ data, onClose }: Props) {
+  const { t, locale } = useTranslation();
   // Collect all episodes across seasons
   const allEpisodes = useMemo(() => data.seasons.flatMap(s => s.episodes), [data.seasons]);
   const [currentIndex, setCurrentIndex] = useState(-1); // -1 is the title screen
@@ -87,11 +89,19 @@ export function PresentationMode({ data, onClose }: Props) {
           </div>
         ) : currentIndex === allEpisodes.length ? (
           // Details / Reflexion
-          <div style={{ textAlign: 'center', maxWidth: '800px' }}>
-            <h1 style={{ fontSize: '3rem', marginBottom: '2rem', color: '#fb923c' }}>Hintergrund & Lernziele</h1>
+          <div style={{ textAlign: 'center', maxWidth: '800px', maxHeight: '100vh', overflowY: 'auto', padding: '2rem 0' }}>
+            <h1 style={{ fontSize: '3rem', marginBottom: '2rem', color: '#fb923c' }}>{t.lblReflection}</h1>
             <p style={{ fontSize: '1.5rem', lineHeight: 1.6, whiteSpace: 'pre-wrap', textAlign: 'left' }}>
               {data.reflection || "Keine Reflexion hinterlegt."}
             </p>
+            {(data.customConceptTitle || data.customConceptText) && (
+              <div style={{ marginTop: '3rem' }}>
+                <h1 style={{ fontSize: '3rem', marginBottom: '2rem', color: '#fb923c' }}>{data.customConceptTitle || (locale === 'de' ? 'Eigene Rubrik' : 'Custom Section')}</h1>
+                <p style={{ fontSize: '1.5rem', lineHeight: 1.6, whiteSpace: 'pre-wrap', textAlign: 'left' }}>
+                  {data.customConceptText}
+                </p>
+              </div>
+            )}
           </div>
         ) : currentIndex === allEpisodes.length + 1 ? (
           // Sources

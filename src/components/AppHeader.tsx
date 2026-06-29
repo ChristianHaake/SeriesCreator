@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle2, Download, GraduationCap, Trash2, Upload } from "lucide-react";
+import { CheckCircle2, Download, GraduationCap, Trash2, Upload, Printer } from "lucide-react";
 import type { ProjectData } from "../types";
 import { useTranslation } from "../i18n";
 import { parseProjectJson, PROJECT_FILE_EXTENSION } from '../domain/projectCodec';
@@ -7,11 +7,13 @@ import { resourceLimits } from '../domain/constraints';
 
 interface Props {
   onExport?: () => void;
+  onHtmlExport?: () => void;
   onImport?: (data: ProjectData) => void;
   onReset?: () => void;
+  onPrint?: () => void;
 }
 
-export function AppHeader({ onExport, onImport, onReset }: Props) {
+export function AppHeader({ onExport, onHtmlExport, onImport, onReset, onPrint }: Props) {
   const { t, locale, setLocale } = useTranslation();
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -76,12 +78,6 @@ export function AppHeader({ onExport, onImport, onReset }: Props) {
               <span>{t.btnReset}</span>
             </button>
           )}
-          {onExport && (
-            <button type="button" className="btn-header ui-button" onClick={onExport} aria-label={t.btnSave} title={t.btnSave}>
-              <Download size={18} />
-              <span>{t.btnSave}</span>
-            </button>
-          )}
           {onImport && (
             <label className="btn-header ui-button" style={{ cursor: 'pointer', margin: 0 }} title={t.btnLoad}>
               <Upload size={18} />
@@ -93,6 +89,24 @@ export function AppHeader({ onExport, onImport, onReset }: Props) {
                 onChange={handleFileUpload}
               />
             </label>
+          )}
+          {onExport && (
+            <button type="button" className="btn-header ui-button" onClick={onExport} aria-label={t.btnSave} title={t.btnSave}>
+              <Download size={18} />
+              <span>{t.btnSave}</span>
+            </button>
+          )}
+          {onHtmlExport && (
+            <button type="button" className="btn-header ui-button" onClick={onHtmlExport} aria-label={t.btnHtml} title={t.btnHtml}>
+              <Download size={18} />
+              <span>{t.btnHtml}</span>
+            </button>
+          )}
+          {onPrint && (
+            <button type="button" className="btn-header ui-button" onClick={onPrint} aria-label={t.btnPdf} title={t.btnPdf}>
+              <Printer size={18} />
+              <span>{t.btnPdf}</span>
+            </button>
           )}
           <a href="/lehrkraefte" className="btn-header ui-button" aria-label={t.btnTeachers} title={t.btnTeachers}>
             <GraduationCap size={18} />

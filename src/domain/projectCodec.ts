@@ -123,6 +123,8 @@ export function normalizeProject(value: unknown): ProjectParseResult {
     learningObjectives:
       limitText(value.learningObjectives, fieldLimits.reflection) || undefined,
     sources: limitText(value.sources, fieldLimits.sources) || undefined,
+    customConceptTitle: limitText(value.customConceptTitle, fieldLimits.title) || undefined,
+    customConceptText: limitText(value.customConceptText, fieldLimits.reflection) || undefined,
   };
 
   return { ok: true, data };

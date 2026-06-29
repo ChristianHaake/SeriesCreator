@@ -86,8 +86,13 @@ export function exportProjectToHtml(data: ProjectData): string {
       html += '<h1 style="font-size: 3.5rem; margin-bottom: 2rem; line-height: 1.1">' + escapeHtml(ep.title) + '</h1>';
       html += '<p>' + escapeHtml(ep.summary) + '</p></div></div>';
     } else if (currentIndex === allEpisodes.length) {
-      html = '<div class="center-container"><h1 style="font-size: 3rem; margin-bottom: 2rem; color: #fb923c">Hintergrund & Lernziele</h1>';
-      html += '<p style="white-space: pre-wrap; text-align: left;">' + escapeHtml(data.reflection || "Keine Reflexion hinterlegt.") + '</p></div>';
+      html = '<div class="center-container"><h1 style="font-size: 3rem; margin-bottom: 2rem; color: #fb923c">Projektverlauf & Reflexion</h1>';
+      html += '<p style="white-space: pre-wrap; text-align: left;">' + escapeHtml(data.reflection || "Keine Reflexion hinterlegt.") + '</p>';
+      if (data.customConceptTitle || data.customConceptText) {
+        html += '<div style="margin-top: 3rem;"><h1 style="font-size: 3rem; margin-bottom: 2rem; color: #fb923c">' + escapeHtml(data.customConceptTitle || "Eigene Rubrik") + '</h1>';
+        html += '<p style="white-space: pre-wrap; text-align: left;">' + escapeHtml(data.customConceptText || "") + '</p></div>';
+      }
+      html += '</div>';
     } else if (currentIndex === allEpisodes.length + 1) {
       html = '<div class="center-container"><h1 style="font-size: 3rem; margin-bottom: 2rem; color: #fb923c">Quellenverzeichnis</h1>';
       html += '<p style="white-space: pre-wrap; text-align: left;">' + escapeHtml(data.sources || "Keine Quellen hinterlegt.") + '</p></div>';

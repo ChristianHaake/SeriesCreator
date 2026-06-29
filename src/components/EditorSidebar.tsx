@@ -107,7 +107,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
 
       {editorStep === 1 && (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', gap: '1rem' }}>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end' }}>
           <div style={{ flex: 1 }}>
             <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblPreviewBrand}</label>
             <input 
@@ -115,6 +115,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
               value={data.previewBrand || ''} 
               onChange={(e) => updateData({ previewBrand: e.target.value })}
               maxLength={fieldLimits.previewBrand}
+              placeholder="SeriesCreator"
               style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)' }}
             />
           </div>
@@ -125,6 +126,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
               value={data.previewCategory || ''} 
               onChange={(e) => updateData({ previewCategory: e.target.value })}
               maxLength={40}
+              placeholder="z.B. Klassenprojekte"
               style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)' }}
             />
           </div>
@@ -234,27 +236,58 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
         <div style={{ display: 'flex', gap: '1rem' }}>
           <div style={{ flex: 1 }}>
             <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblGenre}</label>
-            <input 
-              list="genre-options"
-              type="text"
-              value={data.genre || ''} 
-              onChange={(e) => updateData({ genre: e.target.value })}
-              maxLength={40}
-              style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)' }}
-            />
-            <datalist id="genre-options">
-              <option value="Dokumentation" />
-              <option value="Erklärvideo" />
-              <option value="Kurzfilm" />
-              <option value="Reportage" />
-              <option value="Nachrichten" />
-              <option value="Interview" />
-              <option value="Hörspiel" />
-              <option value="Podcast" />
-              <option value="Animationsfilm" />
-              <option value="Stop-Motion" />
-              <option value="Tutorial" />
-            </datalist>
+            {(() => {
+              const predefinedGenres = [
+                "Dokumentation", "Erklärvideo", "Kurzfilm", "Reportage", 
+                "Nachrichten", "Interview", "Hörspiel", "Podcast", 
+                "Animationsfilm", "Stop-Motion", "Tutorial",
+                "Drama", "Komödie", "Bühnenstück", "Gedichtverfilmung"
+              ];
+              const isStandard = predefinedGenres.includes(data.genre);
+              const showSelect = isStandard || data.genre === '';
+              
+              if (showSelect) {
+                return (
+                  <select 
+                    value={data.genre || predefinedGenres[0]} 
+                    onChange={(e) => {
+                      if (e.target.value === '__custom__') {
+                        updateData({ genre: ' ' }); // Trigger custom input mode
+                      } else {
+                        updateData({ genre: e.target.value });
+                      }
+                    }}
+                    style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)', backgroundColor: 'var(--color-bg-surface)', color: 'var(--color-text-primary)' }}
+                  >
+                    {predefinedGenres.map(g => <option key={g} value={g}>{g}</option>)}
+                    <option value="__custom__">Eigene Eingabe...</option>
+                  </select>
+                );
+              }
+              
+              return (
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <input 
+                    type="text" 
+                    value={data.genre.trim()} 
+                    onChange={(e) => updateData({ genre: e.target.value })}
+                    maxLength={40}
+                    placeholder="Eigenes Genre..."
+                    style={{ flex: 1, padding: '0.6rem', border: '1px solid var(--border-color)', width: '100%' }}
+                    autoFocus
+                  />
+                  <button 
+                    type="button" 
+                    className="ui-icon-button"
+                    onClick={() => updateData({ genre: predefinedGenres[0] })}
+                    title="Zurück zur Auswahl"
+                    style={{ flexShrink: 0 }}
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              );
+            })()}
           </div>
           <div style={{ flex: 1 }}>
             <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblCast}</label>
@@ -284,7 +317,28 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
             style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)', resize: 'vertical' }}
           />
         </div>
-
+        <div>
+          <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem', marginTop: '1rem' }}>{t.lblCustomConceptTitle}</label>
+          <input 
+            type="text"
+            value={data.customConceptTitle || ''} 
+            onChange={(e) => updateData({ customConceptTitle: e.target.value })}
+            maxLength={60}
+            placeholder={locale === 'de' ? 'z.B. Didaktischer Kommentar' : 'e.g. Didactic Commentary'}
+            style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)', marginBottom: '1rem' }}
+          />
+        </div>
+        
+        <div>
+          <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblCustomConceptText}</label>
+          <textarea 
+            value={data.customConceptText || ''} 
+            onChange={(e) => updateData({ customConceptText: e.target.value })}
+            rows={5}
+            maxLength={fieldLimits.reflection}
+            style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)', resize: 'vertical' }}
+          />
+        </div>
         <div>
           <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem', marginTop: '1rem' }}>{t.lblSources}</label>
           <textarea 

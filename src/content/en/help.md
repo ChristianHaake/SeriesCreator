@@ -27,7 +27,7 @@ as JPEG data.
 **Present** opens a fullscreen view with keyboard navigation. Use arrow keys or
 space to continue and `Escape` to close.
 
-**Download as HTML** downloads the presentation as a standalone HTML file. This can be opened in any browser without an internet connection.
+**Download as HTML** saves an interactive, playable offline version of the presentation as an `.html` file. You can share this file with students or teachers, who can play it in any browser without an internet connection or the SeriesCreator app.
 
 **Print / Save as PDF** uses the browser print workflow. Check the result in the
 target browser before sharing.

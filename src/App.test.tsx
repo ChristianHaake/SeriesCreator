@@ -31,7 +31,7 @@ describe('App', () => {
     await user.click(backgroundTab);
 
     expect(backgroundTab).toHaveAttribute('aria-selected', 'true');
-    expect(screen.getByText('No learning objectives or reflections entered yet.')).toBeInTheDocument();
+    expect(screen.getByText('No project journey or reflections entered yet.')).toBeInTheDocument();
   });
 
   it('uses path routing for the educator link', () => {
