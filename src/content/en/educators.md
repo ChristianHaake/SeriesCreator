@@ -1,104 +1,54 @@
-SeriesCreator is an educational simulation environment. This page supports
-legally and pedagogically informed use but does not constitute legal advice.
+SeriesCreator is a digital implementation of the "Netflix Method". This page provides pedagogical and legal information for classroom use but does not constitute legal advice.
 
-## Suitable classroom uses
+## The Netflix Method
 
-The tool supports source criticism, media analysis, role play, conflict
-prevention, and investigation of platform mechanics. Use only fictional names,
-profiles, images, and situations.
+In the Netflix Method, learners summarize a topic (e.g., a historical era, a novel's plot, or a biological process) by designing it as a fictional streaming series. The method promotes creativity, analytical thinking, and media literacy.
 
-## Risks and limitations
+- **Creative Learning Products:** Instead of a traditional poster or presentation, learners create an engaging, modern media product.
+- **Low Preparation (Substitute Lessons):** The method can be used spontaneously. After a brief introduction, learners can start directly in the web app.
+- **Structuring Information:** Dividing content into seasons and episodes forces learners to structure complex topics into meaningful, chronological, or thematic segments.
 
-- Exports can be misunderstood outside their classroom context.
-- Real names, images, or private messages may violate personality rights.
-- Third-party images and text require appropriate permission.
-- Visible labeling reduces confusion but cannot technically prevent misuse.
-- Educators remain responsible for the task, supervision, and publication.
+## Scenario 1: Summarizing Literature (Language Arts)
 
-## Privacy and personality rights
+**Learning objective:** Structure and visually present the plot, characters, and conflicts of a literary work.
 
-User content is processed locally in the browser. Even so, do not use real
-personal data, private conversations, or images of real people. Before sharing,
-check copyright, image rights, consent, and applicable school rules.
+**Process:** Learners translate the chapters of a book into episodes of a series. They write engaging episode descriptions and select appropriate (royalty-free) images as thumbnails.
 
-## Scenario 1: Checking sources
+**Reflection:** Which scenes work well as cliffhangers at the end of an episode? How is the protagonist's development reflected in the episode descriptions?
 
-**Learning objective:** Distinguish claims, sources, and evidence.
+## Scenario 2: Historical Events (History/Social Studies)
 
-**Process:** One group creates a fictional microblog post containing a disputed
-claim. Other groups add questions, check two independent sources, and revise
-the post.
+**Learning objective:** Present historical processes and cause-and-effect relationships chronologically.
 
-**Reflection:** Which source was reliable? What was missing? How did context
-and date change the assessment?
+**Process:** A historical event (e.g., the French Revolution) is designed as a docudrama series. Major turning points become season finales.
 
-## Scenario 2: Recognizing cyberbullying
+**Reflection:** How can a complex historical event be divided into 45-minute "episodes"? Which perspectives are focused on?
 
-**Learning objective:** Recognize escalation patterns and develop responses.
+## Scenario 3: Scientific Processes (STEM)
 
-**Process:** A fully fictional comment thread contains demeaning reactions.
-Learners identify boundary violations and draft de-escalating replies and
-reporting routes.
+**Learning objective:** Creatively illustrate scientific processes (e.g., photosynthesis, the water cycle).
 
-**Reflection:** When does criticism become abuse? Who is responsible? Which
-response protects affected people?
+**Process:** Learners design a science documentary series. Each episode highlights a specific step or component.
 
-## Scenario 3: Privacy
+**Reflection:** How can abstract processes be packaged excitingly as a series for a broad audience?
 
-**Learning objective:** Assess which details allow conclusions about people.
+## Privacy and Copyright
 
-**Process:** A fictional photo feed deliberately contains excessive location,
-time, and daily-life details. Learners identify risks and create a
-data-minimizing version.
+User content is processed locally in the browser. Nevertheless:
 
-**Reflection:** Which details seem harmless alone? What emerges when they are
-combined? Who could use them differently?
-
-## Scenario 4: Conflict in chat
-
-**Learning objective:** Investigate misunderstandings in written communication.
-
-**Process:** A fictional messenger chat stops at a point of conflict. Groups
-develop different continuations and compare wording, timestamps, and seen
-status.
-
-**Reflection:** Which signals were inferred? Which wording de-escalates? When
-would another communication channel be better?
-
-## Scenario 5: Platform mechanics
-
-**Learning objective:** Reflect on the effects of metrics and presentation.
-
-**Process:** The same fictional content is presented as a photo post,
-microblog, and chat. Likes, views, and comment counts are then varied.
-
-**Reflection:** What appears credible or important? How do metrics affect
-perception? Which designs encourage impulsive reactions?
+- **Copyright:** Third-party images may only be used if the license (e.g., CC0, Public Domain) permits. There are exceptions for classroom use, but publishing the export requires strict copyright compliance.
+- **Personality Rights:** When depicting real people, personality rights must always be respected.
 
 ## FAQ
 
 ### Are entries uploaded?
 
-No. Text, images, and configurations are processed locally. Cloudflare
-processes technical connection data when serving the website.
+No. Text, images, and configurations are processed locally in your browser. Cloudflare processes technical connection data when serving the website.
 
 ### May I use images from the internet?
 
-Only when the license or consent permits the intended use. Prefer original,
-public-domain, or explicitly licensed fictional material.
-
-### May real people be depicted?
-
-School simulations should use fictional people. Depicting real people requires
-a valid legal basis and potentially consent, with particular caution for
-minors.
+Only when the license (e.g. CC0/Pixabay) permits the intended use. Prefer original or public-domain material.
 
 ### Can results be published?
 
-Only after review and in compliance with personality rights, copyright, and
-school rules. The export label is not permission to publish.
-
-### Which age groups is the tool suitable for?
-
-Suitability depends on the task, guidance, and prior knowledge. Conflict and
-bullying scenarios require age-appropriate preparation and debriefing.
+Only after review and in compliance with personality rights, copyright, and school rules. The app does not provide legal clearance for publishing third-party material.

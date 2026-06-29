@@ -1,116 +1,54 @@
-SeriesCreator ist eine schulische Simulationsumgebung. Die Inhalte dieser
-Seite unterstützen einen rechtlich und didaktisch informierten Einsatz,
-ersetzen aber keine Rechtsberatung.
+SeriesCreator ist eine digitale Umsetzung der sogenannten "Netflix-Methode". Diese Seite bietet didaktische und rechtliche Hinweise für den Unterrichtseinsatz, ersetzt aber keine Rechtsberatung.
 
-## Geeignete Einsatzfelder
+## Die Netflix-Methode
 
-Das Werkzeug eignet sich für Quellenkritik, Medienanalyse, Rollenarbeit,
-Konfliktprävention und die Untersuchung von Plattformmechaniken. Verwendet
-werden sollen ausschließlich fiktive Namen, Profile, Bilder und Situationen.
+Bei der Netflix-Methode fassen Lernende ein Thema (z.B. eine historische Epoche, die Handlung eines Romans oder einen biologischen Prozess) zusammen, indem sie es als fiktive Streaming-Serie konzipieren. Die Methode fördert Kreativität, analytisches Denken und Medienkompetenz.
 
-## Risiken und Grenzen
+- **Kreative Lernprodukte:** Statt eines klassischen Plakats oder einer Präsentation gestalten die Lernenden ein ansprechendes, zeitgemäßes Medienprodukt.
+- **Wenig Vorbereitung (Vertretungsstunden):** Die Methode lässt sich spontan einsetzen. Nach einer kurzen Hinführung können die Lernenden direkt in der Web-App starten.
+- **Strukturierung:** Die Einteilung in Staffeln und Episoden zwingt die Lernenden, komplexe Themen in sinnvolle, chronologische oder thematische Abschnitte zu gliedern.
 
-- Exporte können außerhalb ihres Unterrichtskontexts missverstanden werden.
-- Reale Namen, Bilder oder private Nachrichten können Persönlichkeitsrechte
-  verletzen.
-- Fremde Bilder und Texte dürfen nur mit passender Erlaubnis verwendet werden.
-- Die sichtbare Kennzeichnung reduziert Verwechslungsrisiken, verhindert
-  Missbrauch aber nicht technisch.
-- Lehrkräfte bleiben für Aufgabenstellung, Aufsicht und Veröffentlichung
-  verantwortlich.
+## Unterrichtsszenario 1: Zusammenfassung einer Lektüre (Deutsch/Fremdsprachen)
 
-## Datenschutz und Persönlichkeitsrechte
+**Lernziel:** Die Handlung, Figuren und Konflikte eines literarischen Werks strukturieren und prägnant aufbereiten.
 
-Nutzinhalte werden lokal im Browser verarbeitet. Trotzdem sollen keine echten
-personenbezogenen Daten, privaten Chatverläufe oder Bilder realer Personen
-verwendet werden. Vor einer Weitergabe müssen Urheberrechte, Recht am eigenen
-Bild, Einwilligungen und schulische Vorgaben geprüft werden.
+**Ablauf:** Die Lernenden übersetzen die Kapitel eines Buchs in Episoden einer Serie. Sie formulieren reißerische Episodenbeschreibungen und wählen passende (lizenzfreie) Bilder als Thumbnails.
 
-## Unterrichtsszenario 1: Quellenprüfung
+**Reflexionsfragen:** Welche Szenen eignen sich als Cliffhanger am Ende einer Episode? Wie wird die Entwicklung der Hauptfigur in den Episodenbeschreibungen deutlich?
 
-**Lernziel:** Lernende unterscheiden Behauptung, Quelle und Beleg.
+## Unterrichtsszenario 2: Historische Ereignisse (Geschichte/Politik)
 
-**Ablauf:** Eine Gruppe erstellt einen fiktiven Mikroblog-Beitrag mit einer
-strittigen Aussage. Andere Gruppen ergänzen Rückfragen, prüfen zwei voneinander
-unabhängige Quellen und überarbeiten den Beitrag.
+**Lernziel:** Historische Prozesse und Ursache-Wirkungs-Zusammenhänge chronologisch darstellen.
 
-**Reflexionsfragen:** Welche Quelle war belastbar? Welche Information fehlte?
-Wie veränderten Kontext und Datum die Bewertung?
+**Ablauf:** Ein historisches Ereignis (z.B. die Französische Revolution) wird als Doku-Drama-Serie konzipiert. Wichtige Wendepunkte werden zu Staffelfinalen.
 
-## Unterrichtsszenario 2: Cybermobbing erkennen
+**Reflexionsfragen:** Wie kann ein komplexes historisches Ereignis in 45-minütige "Episoden" unterteilt werden? Welche Perspektiven werden in den Fokus gerückt?
 
-**Lernziel:** Lernende erkennen Eskalationsmuster und entwickeln
-Handlungsoptionen.
+## Unterrichtsszenario 3: Wissenschaftliche Prozesse (MINT)
 
-**Ablauf:** Ein vollständig fiktiver Kommentarverlauf zeigt abwertende
-Reaktionen. Die Klasse markiert Grenzüberschreitungen und formuliert
-deeskalierende Antworten sowie Meldewege.
+**Lernziel:** Naturwissenschaftliche Abläufe (z.B. Photosynthese, Wasserkreislauf) kreativ veranschaulichen.
 
-**Reflexionsfragen:** Wann wird Kritik zur Herabwürdigung? Wer trägt
-Verantwortung? Welche Reaktion schützt Betroffene?
+**Ablauf:** Die Lernenden gestalten eine Wissenschaftsdoku. Jede Episode beleuchtet einen bestimmten Teilschritt.
 
-## Unterrichtsszenario 3: Privatsphäre
+**Reflexionsfragen:** Wie können abstrakte Prozesse für ein breites Publikum spannend als Serie verpackt werden?
 
-**Lernziel:** Lernende bewerten, welche Angaben Rückschlüsse auf Personen
-ermöglichen.
+## Datenschutz und Urheberrecht
 
-**Ablauf:** Ein fiktiver Foto-Feed enthält bewusst zu viele Orts-, Zeit- und
-Alltagsangaben. Lernende identifizieren Risiken und erstellen eine
-datensparsame Fassung.
+Nutzinhalte werden lokal im Browser verarbeitet. Dennoch gilt:
 
-**Reflexionsfragen:** Welche Angaben wirken einzeln harmlos? Was entsteht durch
-ihre Kombination? Wer könnte sie anders nutzen?
-
-## Unterrichtsszenario 4: Konflikte im Chat
-
-**Lernziel:** Lernende untersuchen Missverständnisse in schriftlicher
-Kommunikation.
-
-**Ablauf:** Ein fiktiver Messenger-Chat wird an einer Konfliktstelle
-unterbrochen. Gruppen entwickeln unterschiedliche Fortsetzungen und vergleichen
-Wortwahl, Zeitstempel und Gesehen-Status.
-
-**Reflexionsfragen:** Welche Signale wurden hineininterpretiert? Welche
-Formulierung entschärft den Konflikt? Wann ist ein anderes Gesprächsmedium
-sinnvoll?
-
-## Unterrichtsszenario 5: Plattformmechaniken
-
-**Lernziel:** Lernende reflektieren die Wirkung von Kennzahlen und
-Darstellungsformen.
-
-**Ablauf:** Derselbe fiktive Inhalt wird als Foto-Post, Mikroblog und Chat
-gestaltet. Anschließend werden Likes, Aufrufe und Kommentarzahlen variiert.
-
-**Reflexionsfragen:** Was wirkt glaubwürdig oder wichtig? Wie beeinflussen
-Kennzahlen die Wahrnehmung? Welche Gestaltung fördert vorschnelle Reaktionen?
+- **Urheberrecht:** Fremde Bilder dürfen nur verwendet werden, wenn die Lizenz (z.B. CC0, Public Domain) dies erlaubt. Für schulische Zwecke gibt es im Klassenraum Ausnahmen, eine Veröffentlichung des Exports erfordert jedoch die strikte Einhaltung des Urheberrechts.
+- **Persönlichkeitsrechte:** Bei der Darstellung realer Personen ist stets auf den Schutz der Persönlichkeitsrechte zu achten.
 
 ## FAQ
 
 ### Werden Eingaben hochgeladen?
 
-Nein. Texte, Bilder und Konfigurationen werden lokal verarbeitet. Beim Abruf
-der Website verarbeitet Cloudflare technische Verbindungsdaten.
+Nein. Texte, Bilder und Konfigurationen werden lokal in Ihrem Browser verarbeitet. Beim Abruf der Website verarbeitet Cloudflare technische Verbindungsdaten.
 
 ### Darf ich Bilder aus dem Internet verwenden?
 
-Nur wenn Lizenz oder Einwilligung die geplante Nutzung erlauben. Für Übungen
-sind eigene, gemeinfreie oder ausdrücklich freigegebene fiktive Materialien
-vorzuziehen.
-
-### Dürfen reale Personen dargestellt werden?
-
-Für schulische Simulationen sollen fiktive Personen verwendet werden. Reale
-Personen erfordern eine belastbare Rechtsgrundlage und gegebenenfalls
-Einwilligungen; bei Minderjährigen ist besondere Zurückhaltung nötig.
+Nur wenn die Lizenz (z. B. CC0/Pixabay) oder das Zitatrecht die Nutzung erlauben. Für eigene Projekte sollten gemeinfreie oder selbst erstellte Bilder verwendet werden.
 
 ### Können Ergebnisse veröffentlicht werden?
 
-Nur nach inhaltlicher Prüfung und unter Beachtung von Persönlichkeits-,
-Urheber- und Schulrecht. Die Exportkennzeichnung ist kein Freibrief zur
-Veröffentlichung.
-
-### Für welche Altersgruppen eignet sich das Werkzeug?
-
-Die Eignung hängt von Aufgabe, Begleitung und Vorwissen ab. Konflikt- oder
-Mobbingszenarien müssen altersangemessen vorbereitet und nachbesprochen werden.
+Nur nach inhaltlicher Prüfung und unter Beachtung von Persönlichkeits-, Urheber- und Schulrecht. Die App bietet keine rechtliche Absicherung für die Veröffentlichung von Fremdmaterial.

@@ -260,7 +260,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
                     style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)', backgroundColor: 'var(--color-bg-surface)', color: 'var(--color-text-primary)' }}
                   >
                     {predefinedGenres.map(g => <option key={g} value={g}>{g}</option>)}
-                    <option value="__custom__">Eigene Eingabe...</option>
+                    <option value="__custom__">{t.customGenre}</option>
                   </select>
                 );
               }
@@ -272,7 +272,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
                     value={data.genre.trim()} 
                     onChange={(e) => updateData({ genre: e.target.value })}
                     maxLength={40}
-                    placeholder="Eigenes Genre..."
+                    placeholder={t.customGenre}
                     style={{ flex: 1, padding: '0.6rem', border: '1px solid var(--border-color)', width: '100%' }}
                     autoFocus
                   />
@@ -280,7 +280,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
                     type="button" 
                     className="ui-icon-button"
                     onClick={() => updateData({ genre: predefinedGenres[0] })}
-                    title="Zurück zur Auswahl"
+                    title={t.lblBackToSelection}
                     style={{ flexShrink: 0 }}
                   >
                     <X size={16} />
@@ -373,7 +373,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
                 updateData({
                   seasons: [
                     ...data.seasons,
-                    { id: newSeasonId, title: `Staffel ${data.seasons.length + 1}`, episodes: [] }
+                    { id: newSeasonId, title: `${t.lblSeasonN}${data.seasons.length + 1}`, episodes: [] }
                   ]
                 });
                 setActiveSeasonId(newSeasonId);

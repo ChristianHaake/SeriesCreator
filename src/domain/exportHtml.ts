@@ -10,14 +10,19 @@ function escapeHtml(unsafe: string | undefined): string {
     .replace(/'/g, "&#039;");
 }
 
-export function exportProjectToHtml(data: ProjectData): string {
-  const jsonData = JSON.stringify(data);
+export function exportProjectToHtml(
+  data: ProjectData,
+  t: Record<string, string>,
+  locale: string
+): string {
+  // Replace </ to prevent XSS via </script> injection
+  const jsonData = JSON.stringify(data).replace(/<\//g, '<\\/');
   return `<!DOCTYPE html>
-<html lang="de">
+<html lang="${locale}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${escapeHtml(data.title)} - Präsentation</title>
+<title>${escapeHtml(data.title)} - ${t.exportPresentation}</title>
 <style>
   body { margin: 0; background: #111; color: white; font-family: system-ui, sans-serif; overflow: hidden; display: flex; flex-direction: column; height: 100vh; }
   #close { position: absolute; top: 2rem; right: 2rem; background: rgba(0,0,0,0.5); border: none; color: white; padding: 0.5rem 1rem; border-radius: 50%; cursor: pointer; z-index: 110; font-size: 1.5rem; text-decoration: none; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; }
@@ -43,11 +48,11 @@ export function exportProjectToHtml(data: ProjectData): string {
 </style>
 </head>
 <body>
-  <button id="close" aria-label="Schließen" onclick="window.close()" title="Schließen">✕</button>
+  <button id="close" aria-label="${t.lblClose}" onclick="window.close()" title="${t.lblClose}">✕</button>
   <div id="content"></div>
   <div class="nav-buttons">
-    <button id="prevBtn" class="nav-btn" aria-label="Vorherige Folie">❮</button>
-    <button id="nextBtn" class="nav-btn" aria-label="Nächste Folie">❯</button>
+    <button id="prevBtn" class="nav-btn" aria-label="${t.ariaPrevSlide}">❮</button>
+    <button id="nextBtn" class="nav-btn" aria-label="${t.ariaNextSlide}">❯</button>
   </div>
 <script>
   const data = ${jsonData};
@@ -71,35 +76,35 @@ export function exportProjectToHtml(data: ProjectData): string {
 
     if (currentIndex === -1) {
       html = '<div class="center-container">';
-      if (data.coverUrl) html += '<img class="cover" src="' + data.coverUrl + '" alt="Cover">';
+      if (data.coverUrl) html += '<img class="cover" src="' + escapeHtml(data.coverUrl) + '" alt="Cover">';
       html += '<h1>' + escapeHtml(data.title) + '</h1>';
       html += '<p>' + escapeHtml(data.description) + '</p></div>';
     } else if (currentIndex < allEpisodes.length) {
       const ep = allEpisodes[currentIndex];
       html = '<div class="episode-container">';
       if (ep.thumbnailUrl) {
-        html += '<img class="episode-image" src="' + ep.thumbnailUrl + '" alt="Thumbnail">';
+        html += '<img class="episode-image" src="' + escapeHtml(ep.thumbnailUrl) + '" alt="Thumbnail">';
       } else {
-        html += '<div class="episode-no-image">Kein Bild</div>';
+        html += '<div class="episode-no-image">${t.noImage}</div>';
       }
-      html += '<div class="episode-text"><h2>Episode ' + (currentIndex + 1) + '</h2>';
+      html += '<div class="episode-text"><h2>${t.lblEpisodeN}' + (currentIndex + 1) + '</h2>';
       html += '<h1 style="font-size: 3.5rem; margin-bottom: 2rem; line-height: 1.1">' + escapeHtml(ep.title) + '</h1>';
       html += '<p>' + escapeHtml(ep.summary) + '</p></div></div>';
     } else if (currentIndex === allEpisodes.length) {
-      html = '<div class="center-container"><h1 style="font-size: 3rem; margin-bottom: 2rem; color: #fb923c">Projektverlauf & Reflexion</h1>';
-      html += '<p style="white-space: pre-wrap; text-align: left;">' + escapeHtml(data.reflection || "Keine Reflexion hinterlegt.") + '</p>';
+      html = '<div class="center-container"><h1 style="font-size: 3rem; margin-bottom: 2rem; color: #fb923c">${t.lblReflection}</h1>';
+      html += '<p style="white-space: pre-wrap; text-align: left;">' + escapeHtml(data.reflection || "${t.noReflection}") + '</p>';
       if (data.customConceptTitle || data.customConceptText) {
-        html += '<div style="margin-top: 3rem;"><h1 style="font-size: 3rem; margin-bottom: 2rem; color: #fb923c">' + escapeHtml(data.customConceptTitle || "Eigene Rubrik") + '</h1>';
+        html += '<div style="margin-top: 3rem;"><h1 style="font-size: 3rem; margin-bottom: 2rem; color: #fb923c">' + escapeHtml(data.customConceptTitle || "${t.lblCustomSection}") + '</h1>';
         html += '<p style="white-space: pre-wrap; text-align: left;">' + escapeHtml(data.customConceptText || "") + '</p></div>';
       }
       html += '</div>';
     } else if (currentIndex === allEpisodes.length + 1) {
-      html = '<div class="center-container"><h1 style="font-size: 3rem; margin-bottom: 2rem; color: #fb923c">Quellenverzeichnis</h1>';
-      html += '<p style="white-space: pre-wrap; text-align: left;">' + escapeHtml(data.sources || "Keine Quellen hinterlegt.") + '</p></div>';
+      html = '<div class="center-container"><h1 style="font-size: 3rem; margin-bottom: 2rem; color: #fb923c">${t.lblSources}</h1>';
+      html += '<p style="white-space: pre-wrap; text-align: left;">' + escapeHtml(data.sources || "${t.noSources}") + '</p></div>';
     } else {
       html = '<div class="credits"><h1>' + escapeHtml(data.title) + '</h1>';
-      html += '<h2>Eine Produktion von</h2><p style="font-size: 2.5rem; margin-bottom: 3rem; font-weight: bold;">' + escapeHtml(data.cast || "Der Klasse") + '</p>';
-      html += '<h2>Genre</h2><p style="font-size: 2.5rem; margin-bottom: 3rem; font-weight: bold;">' + escapeHtml(data.genre) + '</p>';
+      html += '<h2>${t.presentationBy}</h2><p style="font-size: 2.5rem; margin-bottom: 3rem; font-weight: bold;">' + escapeHtml(data.cast || "${t.presentationClassFallback}") + '</p>';
+      html += '<h2>${t.lblGenre}</h2><p style="font-size: 2.5rem; margin-bottom: 3rem; font-weight: bold;">' + escapeHtml(data.genre) + '</p>';
       html += '<div style="margin-top: 5rem; color: #fb923c; font-weight: bold; font-size: 2rem;">' + escapeHtml(data.previewBrand || "SeriesCreator") + '</div></div>';
     }
     contentDiv.innerHTML = html;

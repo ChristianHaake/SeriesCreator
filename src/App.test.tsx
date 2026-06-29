@@ -53,6 +53,6 @@ describe('App', () => {
     renderApp('/lehrkraefte');
 
     expect(screen.getByRole('heading', { name: 'Suitable classroom uses' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /zurück zur app/i })).toHaveAttribute('href', '/');
+    expect(screen.getByRole('link', { name: /back to app/i })).toHaveAttribute('href', '/');
   });
 });

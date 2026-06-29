@@ -22,12 +22,12 @@ import { displayCompletion } from './domain/completion';
 import './index.css';
 
 function ContentPage({ pathname }: { pathname: ContentPath }) {
-  const { locale } = useTranslation();
+  const { locale, t } = useTranslation();
   const page = contentPages[locale][pathname];
   
   return (
     <main className="content-page">
-      <a href="/" className="content-page__back">← Zurück zur App</a>
+      <a href="/" className="content-page__back">{t.backToApp}</a>
       <div className="markdown-content">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{page.content}</ReactMarkdown>
       </div>
@@ -61,7 +61,7 @@ function App() {
   };
 
   const handleHtmlExport = () => {
-    const htmlContent = exportProjectToHtml(data);
+    const htmlContent = exportProjectToHtml(data, t, locale);
     const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -98,7 +98,7 @@ function App() {
           a.download = makeProjectFilename(data.title);
           a.click();
           URL.revokeObjectURL(url);
-          alert(locale === 'de' ? 'Das Projekt wurde erfolgreich heruntergeladen.' : 'The project was successfully downloaded.');
+          alert(t.msgExportSuccess);
         }}
         onHtmlExport={handleHtmlExport}
         onPrint={handleExport}
@@ -136,15 +136,15 @@ function App() {
         <header className="preview-header">
           <div className="preview-header__brand">{data.previewBrand || 'SeriesCreator'}</div>
           <nav className="preview-header__nav">
-            <span>Startseite</span>
-            <strong>Serien</strong>
-            <span>{data.previewCategory || 'Klassenprojekte'}</span>
+            <span>{t.home}</span>
+            <strong>{t.series}</strong>
+            <span>{data.previewCategory || t.categoryFallback}</span>
           </nav>
         </header>
 
         <section className="streaming-hero" style={{ backgroundImage: data.coverUrl ? `url(${data.coverUrl})` : 'none', backgroundColor: data.coverUrl ? 'transparent' : '#222' }}>
           <div className="streaming-hero-content">
-            <h1 className="streaming-title">{data.title || "Titel der Serie"}</h1>
+            <h1 className="streaming-title">{data.title || t.titlePlaceholder}</h1>
             
             <div className="streaming-meta">
               <span className="completion-score">{t.completionMeta} {completion}%</span>
@@ -154,7 +154,7 @@ function App() {
             </div>
 
             <p className="streaming-desc">
-              {data.description || "Füge eine spannende Beschreibung hinzu..."}
+              {data.description || t.descPlaceholder}
             </p>
 
             <div className="streaming-actions">
@@ -171,7 +171,7 @@ function App() {
         </section>
 
         <section className="preview-section">
-          <div className="preview-tabs" role="tablist" aria-label="Serienbereich">
+          <div className="preview-tabs" role="tablist" aria-label={t.ariaSeriesArea}>
             <button
               type="button"
               role="tab"
@@ -222,7 +222,7 @@ function App() {
               
               {(data.customConceptTitle || data.customConceptText) && (
                 <div style={{ marginTop: '2.5rem' }}>
-                  <h3>{data.customConceptTitle || (locale === 'de' ? 'Eigene Rubrik' : 'Custom Section')}</h3>
+                  <h3>{data.customConceptTitle || t.lblCustomSection}</h3>
                   <p>{data.customConceptText}</p>
                 </div>
               )}
@@ -231,7 +231,7 @@ function App() {
 
           {activeTab === 'QUELLEN' && (
             <div className="preview-text-panel">
-              <h3>Quellenverzeichnis</h3>
+              <h3>{t.lblSources}</h3>
               <p>{data.sources || t.noSources}</p>
             </div>
           )}

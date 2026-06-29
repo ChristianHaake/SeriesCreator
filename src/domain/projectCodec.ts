@@ -54,10 +54,11 @@ function normalizeEpisode(value: unknown, index: number): Episode | null {
 function normalizeSeason(value: unknown, index: number): Season | null {
   if (!isRecord(value) || !Array.isArray(value.episodes)) return null;
   if (typeof value.title !== 'string') return null;
+  if (!Array.isArray(value.episodes)) return null;
   if (value.episodes.length > resourceLimits.maxEpisodesPerSeason) return null;
 
-  const episodes = value.episodes.map(normalizeEpisode);
-  if (episodes.some((episode) => episode === null)) return null;
+  const episodes = value.episodes.map(normalizeEpisode).filter((e): e is Episode => e !== null);
+  if (episodes.length !== value.episodes.length) return null; // Abort if any episode was invalid
 
   return {
     id: limitText(value.id, 80) || `s_${index + 1}`,
@@ -112,6 +113,11 @@ export function normalizeProject(value: unknown): ProjectParseResult {
       value.previewBrand,
       fieldLimits.previewBrand,
       initialProjectData.previewBrand,
+    ),
+    previewCategory: limitText(
+      value.previewCategory,
+      60,
+      initialProjectData.previewCategory,
     ),
     matchPercentage: asOptionalPercentage(value.matchPercentage) ?? initialProjectData.matchPercentage,
     completionOverride: asOptionalPercentage(value.completionOverride),
