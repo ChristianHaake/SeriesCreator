@@ -22,10 +22,12 @@ PNG, JPG/JPEG, and WebP files are accepted. Large images are automatically
 scaled down (up to 1920 pixels wide for covers, 800 pixels for episodes) and stored locally
 as JPEG data.
 
-## Present and PDF
+## Present and Export
 
 **Present** opens a fullscreen view with keyboard navigation. Use arrow keys or
 space to continue and `Escape` to close.
+
+**Download as HTML** downloads the presentation as a standalone HTML file. This can be opened in any browser without an internet connection.
 
 **Print / Save as PDF** uses the browser print workflow. Check the result in the
 target browser before sharing.
