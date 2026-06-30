@@ -36,6 +36,9 @@ function ContentPage({ pathname }: { pathname: ContentPath }) {
 }
 
 type PreviewTab = 'EPISODEN' | 'DETAILS' | 'QUELLEN';
+type MobilePanel = 'editor' | 'preview';
+type StatusTone = 'success' | 'error' | 'info';
+type AppStatus = { message: string; tone: StatusTone } | null;
 
 function App() {
   const store = useProjectStore();
@@ -44,6 +47,8 @@ function App() {
   const [activeTab, setActiveTab] = useState<PreviewTab>('EPISODEN');
   const [showPresentation, setShowPresentation] = useState(false);
   const [currentPath, setCurrentPath] = useState(window.location.pathname.replace(/\/+$/, "") || "/");
+  const [mobilePanel, setMobilePanel] = useState<MobilePanel>('editor');
+  const [status, setStatus] = useState<AppStatus>(null);
   const { t, locale } = useTranslation();
 
   useEffect(() => {
@@ -56,19 +61,41 @@ function App() {
   const activeSeason = data.seasons.find(s => s.id === activeSeasonId) || data.seasons[0];
   const completion = displayCompletion(data);
 
+  const showStatus = (message: string, tone: StatusTone = 'success') => {
+    setStatus({ message, tone });
+  };
+
+  const downloadBlob = (blob: Blob, filename: string) => {
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    anchor.style.display = 'none';
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
+  };
+
   const handleExport = () => {
-    window.print();
+    try {
+      window.print();
+      showStatus(t.msgPrintStarted, 'info');
+    } catch {
+      showStatus(t.msgExportFailed, 'error');
+    }
   };
 
   const handleHtmlExport = () => {
-    const htmlContent = exportProjectToHtml(data, t, locale);
-    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${data.title ? data.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() : 'presentation'}.html`;
-    a.click();
-    URL.revokeObjectURL(url);
+    try {
+      const htmlContent = exportProjectToHtml(data, t, locale);
+      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+      const filename = `${data.title ? data.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() : 'presentation'}.html`;
+      downloadBlob(blob, filename);
+      showStatus(t.msgHtmlExportSuccess, 'success');
+    } catch {
+      showStatus(t.msgExportFailed, 'error');
+    }
   };
 
   if (showPresentation) {
@@ -86,25 +113,25 @@ function App() {
   }
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell app-shell--mobile-${mobilePanel}`}>
       <AppHeader 
         onExport={() => {
-          const blob = new Blob([serializeProject(data)], {
-            type: PROJECT_FILE_MIME_TYPE,
-          });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = makeProjectFilename(data.title);
-          a.click();
-          URL.revokeObjectURL(url);
-          alert(t.msgExportSuccess);
+          try {
+            const blob = new Blob([serializeProject(data)], {
+              type: PROJECT_FILE_MIME_TYPE,
+            });
+            downloadBlob(blob, makeProjectFilename(data.title));
+            showStatus(t.msgExportSuccess, 'success');
+          } catch {
+            showStatus(t.msgExportFailed, 'error');
+          }
         }}
         onHtmlExport={handleHtmlExport}
         onPrint={handleExport}
         onImport={(importedData) => {
           replaceData(importedData);
           setActiveSeasonId(importedData.seasons[0]?.id || '');
+          showStatus(t.msgImportSuccess, 'success');
         }}
         onReset={() => {
           if (window.confirm(t.confirmReset)) {
@@ -112,6 +139,31 @@ function App() {
           }
         }}
       />
+      <div
+        className={`app-status${status ? ` app-status--${status.tone}` : ''}`}
+        role="status"
+        aria-live="polite"
+      >
+        {status?.message}
+      </div>
+      <div className="mobile-panel-switch" role="group" aria-label={t.mobilePanelSwitchLabel}>
+        <button
+          type="button"
+          className={mobilePanel === 'editor' ? 'is-active' : ''}
+          aria-pressed={mobilePanel === 'editor'}
+          onClick={() => setMobilePanel('editor')}
+        >
+          {t.mobilePanelEditor}
+        </button>
+        <button
+          type="button"
+          className={mobilePanel === 'preview' ? 'is-active' : ''}
+          aria-pressed={mobilePanel === 'preview'}
+          onClick={() => setMobilePanel('preview')}
+        >
+          {t.mobilePanelPreview}
+        </button>
+      </div>
       <div className="app-main-content">
         {/* Hidden layout purely used for the high-res PDF snapshot */}
         <PrintLayout
@@ -150,7 +202,7 @@ function App() {
               <span className="completion-score">{t.completionMeta} {completion}%</span>
               <span>{new Date().getFullYear()}</span>
               <span className="age-rating">{data.ageRating || "Klasse"}</span>
-              <span>{data.seasons.length} {t.season}{data.seasons.length === 1 ? '' : 'n'}</span>
+              <span>{data.seasons.length} {data.seasons.length === 1 ? t.season : t.seasonPlural}</span>
             </div>
 
             <p className="streaming-desc">

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { CheckCircle2, Download, GraduationCap, Trash2, Upload, Printer } from "lucide-react";
 import type { ProjectData } from "../types";
 import { useTranslation } from "../i18n";
@@ -15,6 +15,7 @@ interface Props {
 
 export function AppHeader({ onExport, onHtmlExport, onImport, onReset, onPrint }: Props) {
   const { t, locale, setLocale } = useTranslation();
+  const importInputRef = useRef<HTMLInputElement | null>(null);
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -79,16 +80,26 @@ export function AppHeader({ onExport, onHtmlExport, onImport, onReset, onPrint }
             </button>
           )}
           {onImport && (
-            <label className="btn-header ui-button" style={{ cursor: 'pointer', margin: 0 }} title={t.btnLoad}>
+            <>
+            <button
+              type="button"
+              className="btn-header ui-button"
+              onClick={() => importInputRef.current?.click()}
+              aria-label={t.btnLoad}
+              title={t.btnLoad}
+            >
               <Upload size={18} />
               <span>{t.btnLoad}</span>
+            </button>
               <input
+                ref={importInputRef}
                 type="file"
                 accept={`.${PROJECT_FILE_EXTENSION},.json,application/json`}
-                style={{ display: 'none' }}
+                className="visually-hidden"
+                tabIndex={-1}
                 onChange={handleFileUpload}
               />
-            </label>
+            </>
           )}
           {onExport && (
             <button type="button" className="btn-header ui-button" onClick={onExport} aria-label={t.btnSave} title={t.btnSave}>

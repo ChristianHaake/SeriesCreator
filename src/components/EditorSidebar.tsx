@@ -1,4 +1,4 @@
-import { useState, useMemo, type ChangeEvent } from 'react';
+import { useRef, useState, useMemo, type ChangeEvent } from 'react';
 import { Plus, Edit2, Image as ImageIcon, Trash2, X } from 'lucide-react';
 import { EpisodeEditor } from './EpisodeEditor';
 import { useProjectStore } from '../store/useProjectStore';
@@ -15,6 +15,8 @@ interface Props {
 export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Props) {
   const { data, updateData, addEpisode, updateEpisode, removeEpisode, moveEpisode, updateSeason, removeSeason } = store;
   const [editorStep, setEditorStep] = useState<1 | 2 | 3>(1);
+  const [coverError, setCoverError] = useState('');
+  const coverInputRef = useRef<HTMLInputElement | null>(null);
   const { t, locale } = useTranslation();
 
   const activeSeason = data.seasons.find(s => s.id === activeSeasonId) || data.seasons[0];
@@ -29,13 +31,14 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
   const handleCoverUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+    setCoverError('');
 
     const resetInput = () => {
       event.target.value = '';
     };
 
     if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
-      alert(alertText.unsupportedImage);
+      setCoverError(alertText.unsupportedImage);
       resetInput();
       return;
     }
@@ -43,7 +46,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
     const reader = new FileReader();
     reader.onloadend = () => {
       if (typeof reader.result !== 'string') {
-        alert(alertText.imageReadFailed);
+        setCoverError(alertText.imageReadFailed);
         resetInput();
         return;
       }
@@ -64,26 +67,31 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
         canvas.height = height;
         const context = canvas.getContext('2d');
         if (!context) {
-          alert(alertText.imageProcessFailed);
+          setCoverError(alertText.imageProcessFailed);
           resetInput();
           return;
         }
 
         context.drawImage(image, 0, 0, width, height);
         updateData({ coverUrl: canvas.toDataURL('image/jpeg', 0.78) });
+        setCoverError('');
         resetInput();
       };
       image.onerror = () => {
-        alert(alertText.imageProcessFailed);
+        setCoverError(alertText.imageProcessFailed);
         resetInput();
       };
       image.src = reader.result;
     };
     reader.onerror = () => {
-      alert(alertText.imageReadFailed);
+      setCoverError(alertText.imageReadFailed);
       resetInput();
     };
     reader.readAsDataURL(file);
+  };
+
+  const openCoverDialog = () => {
+    coverInputRef.current?.click();
   };
 
   return (
@@ -147,23 +155,45 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
           <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblCoverArt}</label>
           <div className="cover-art-field">
             <div className="cover-art-field__actions">
-              <label className="ui-button cover-art-field__upload">
+              <button
+                type="button"
+                className="ui-button cover-art-field__upload"
+                onClick={openCoverDialog}
+                aria-describedby={coverError ? 'cover-upload-error' : undefined}
+              >
                 <ImageIcon size={16} />
                 <span>{t.btnChooseCover}</span>
-                <input type="file" accept="image/png,image/jpeg,image/webp" onChange={handleCoverUpload} />
-              </label>
+              </button>
+              <input
+                ref={coverInputRef}
+                id="cover-upload-input"
+                className="visually-hidden"
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                tabIndex={-1}
+                onChange={handleCoverUpload}
+              />
               {data.coverUrl && (
                 <button
                   type="button"
                   className="ui-button ui-button--danger"
-                  onClick={() => updateData({ coverUrl: undefined })}
+                  onClick={() => {
+                    setCoverError('');
+                    updateData({ coverUrl: undefined });
+                  }}
                 >
                   <X size={16} />
                   <span>{t.btnRemoveCover}</span>
                 </button>
               )}
             </div>
-            <div className="cover-art-field__preview">
+            <button
+              type="button"
+              className="cover-art-field__preview"
+              onClick={openCoverDialog}
+              aria-label={data.coverUrl ? t.btnReplaceCoverFromPreview : t.btnChooseCoverFromPreview}
+              aria-describedby={coverError ? 'cover-upload-error' : undefined}
+            >
               {data.coverUrl ? (
                 <img src={data.coverUrl} alt={t.lblCoverArt} />
               ) : (
@@ -172,7 +202,12 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
                   <span>{t.noCover}</span>
                 </div>
               )}
-            </div>
+            </button>
+            {coverError && (
+              <p id="cover-upload-error" className="field-error" role="alert">
+                {coverError}
+              </p>
+            )}
           </div>
         </div>
 
@@ -354,9 +389,9 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
 
       {editorStep === 2 && (
       <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
           <h3 style={{ margin: 0 }}>{t.episodesTitle}</h3>
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
             <select 
               value={activeSeasonId} 
               onChange={(e) => setActiveSeasonId(e.target.value)}
@@ -378,10 +413,12 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
                 });
                 setActiveSeasonId(newSeasonId);
               }}
-              className="ui-icon-button"
+              className="ui-button season-action-button"
+              aria-label={t.addSeason}
               title={t.addSeason}
             >
               <Plus size={16} />
+              <span>{t.addSeason}</span>
             </button>
             <button
               type="button"

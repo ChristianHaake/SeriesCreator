@@ -9,7 +9,7 @@ in einer Streaming-ähnlichen Oberfläche.
 
 - **No Accounts, Full Privacy**: All data is processed and stored locally in your browser.
 - **Interactive Editor**: Plan your series with titles, cast, genres, and reflection notes.
-- **Seasons & Episodes**: Structure your content easily with drag-and-drop support (up to 20 seasons and 100 episodes per season).
+- **Seasons & Episodes**: Structure your content with seasons, episodes, and explicit reorder controls (up to 20 seasons and 100 episodes per season).
 - **Automatic Image Handling**: Upload large images; they are automatically optimized and scaled locally to save space.
 - **Presentation Mode**: Pitch your series using a sleek, streaming-style fullscreen interface.
 - **Standalone HTML Export**: Download a fully playable presentation as a single `.html` file that works offline anywhere.
