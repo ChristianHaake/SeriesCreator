@@ -36,6 +36,11 @@ export const EpisodeEditor = memo(function EpisodeEditor({ episode, seasonId, in
 
       const img = new Image();
       img.onload = () => {
+        if (img.width * img.height > resourceLimits.maxImageInputPixels) {
+          alert(locale === 'de' ? 'Das Bild hat zu viele Pixel. Bitte wähle ein kleineres Bild.' : 'The image has too many pixels. Please choose a smaller one.');
+          e.target.value = '';
+          return;
+        }
 
         const canvas = document.createElement('canvas');
         let width = img.width;

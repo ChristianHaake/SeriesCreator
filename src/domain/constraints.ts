@@ -15,6 +15,7 @@ export const resourceLimits = {
   projectFileBytes: 2_000_000,
   coverOutputWidth: 1920,
   episodeOutputWidth: 800,
+  maxImageInputPixels: 60_000_000,
   dataUrlLength: 1_500_000,
   minSeasons: 1,
   maxSeasons: 20,

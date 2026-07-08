@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import type { ProjectData, Episode } from '../types';
 import { initialProjectData } from '../types';
 import { normalizeProject, serializeProject } from '../domain/projectCodec';
@@ -29,15 +29,21 @@ export function saveStoredProject(storage: Storage, data: ProjectData) {
   }
 }
 
-export function useProjectStore() {
+export function useProjectStore(onSaveError?: () => void) {
   const { t } = useTranslation();
   const [data, setData] = useState<ProjectData>(() => {
     return loadStoredProject(window.localStorage);
   });
+  const onSaveErrorRef = useRef(onSaveError);
+  useEffect(() => {
+    onSaveErrorRef.current = onSaveError;
+  }, [onSaveError]);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      saveStoredProject(window.localStorage, data);
+      if (!saveStoredProject(window.localStorage, data)) {
+        onSaveErrorRef.current?.();
+      }
     }, 500);
     return () => clearTimeout(timeoutId);
   }, [data]);

@@ -26,6 +26,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
     unsupportedImage: locale === 'de' ? 'Bitte wähle ein PNG-, JPG- oder WebP-Bild.' : 'Choose a PNG, JPG, or WebP image.',
     imageReadFailed: locale === 'de' ? 'Das Bild konnte nicht gelesen werden.' : 'The image could not be read.',
     imageProcessFailed: locale === 'de' ? 'Das Bild konnte nicht verarbeitet werden.' : 'The image could not be processed.',
+    imageTooLarge: locale === 'de' ? 'Das Bild hat zu viele Pixel. Bitte wähle ein kleineres Bild.' : 'The image has too many pixels. Please choose a smaller one.',
   };
 
   const handleCoverUpload = (event: ChangeEvent<HTMLInputElement>) => {
@@ -53,6 +54,11 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
 
       const image = new Image();
       image.onload = () => {
+        if (image.width * image.height > resourceLimits.maxImageInputPixels) {
+          setCoverError(alertText.imageTooLarge);
+          resetInput();
+          return;
+        }
 
         const canvas = document.createElement('canvas');
         let width = image.width;

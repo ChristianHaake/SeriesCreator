@@ -100,6 +100,7 @@ export const de = {
   msgPrintStarted: "Druckdialog wurde geöffnet. Speichere dort bei Bedarf als PDF.",
   msgExportFailed: "Export konnte nicht gestartet werden. Bitte versuche es erneut.",
   msgImportSuccess: "Projektdatei wurde geladen.",
+  msgSaveFailed: "Speichern fehlgeschlagen – Projekt zu groß für den lokalen Speicher. Exportiere es als Datei, um nichts zu verlieren.",
   mobilePanelSwitchLabel: "Editor oder Vorschau anzeigen",
   mobilePanelEditor: "Editor",
   mobilePanelPreview: "Vorschau",

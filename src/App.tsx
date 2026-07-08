@@ -41,15 +41,17 @@ type StatusTone = 'success' | 'error' | 'info';
 type AppStatus = { message: string; tone: StatusTone } | null;
 
 function App() {
-  const store = useProjectStore();
+  const { t, locale } = useTranslation();
+  const [status, setStatus] = useState<AppStatus>(null);
+  const store = useProjectStore(() =>
+    setStatus({ message: t.msgSaveFailed, tone: 'error' }),
+  );
   const { data, replaceData, resetData } = store;
   const [activeSeasonId, setActiveSeasonId] = useState(data.seasons[0]?.id || '');
   const [activeTab, setActiveTab] = useState<PreviewTab>('EPISODEN');
   const [showPresentation, setShowPresentation] = useState(false);
   const [currentPath, setCurrentPath] = useState(window.location.pathname.replace(/\/+$/, "") || "/");
   const [mobilePanel, setMobilePanel] = useState<MobilePanel>('editor');
-  const [status, setStatus] = useState<AppStatus>(null);
-  const { t, locale } = useTranslation();
 
   useEffect(() => {
     const handlePopState = () => setCurrentPath(window.location.pathname.replace(/\/+$/, "") || "/");

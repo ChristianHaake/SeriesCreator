@@ -102,6 +102,7 @@ export const en: Record<TranslationKey, string> = {
   msgPrintStarted: "Print dialog opened. Use it to save as PDF if needed.",
   msgExportFailed: "Export could not be started. Please try again.",
   msgImportSuccess: "Project file loaded.",
+  msgSaveFailed: "Save failed – project too large for local storage. Export it as a file to avoid losing work.",
   mobilePanelSwitchLabel: "Show editor or preview",
   mobilePanelEditor: "Editor",
   mobilePanelPreview: "Preview",
