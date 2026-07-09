@@ -25,7 +25,11 @@ function limitText(value: unknown, limit: number, fallback = '') {
 function asOptionalImageUrl(value: unknown) {
   if (typeof value !== 'string' || value.length === 0) return undefined;
   if (value.length > resourceLimits.dataUrlLength) return undefined;
-  if (!/^data:image\/(png|jpeg|jpg|webp);base64,/i.test(value)) return undefined;
+  // Validate the full payload: prefix AND a clean base64 body. Checking only the
+  // prefix would let stray characters (e.g. `")`) survive into inline style url(...).
+  if (!/^data:image\/(png|jpeg|jpg|webp);base64,[A-Za-z0-9+/]+={0,2}$/i.test(value)) {
+    return undefined;
+  }
   return value;
 }
 

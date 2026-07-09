@@ -41,24 +41,62 @@ export interface ProjectData {
   customConceptText?: string;
 }
 
-export const initialProjectData: ProjectData = {
-  schemaVersion: 1,
-  title: "Meine Neue Serie",
-  subject: "",
-  topic: "",
-  author: "",
-  description: "Eine fesselnde Reise durch das Thema...",
-  previewBrand: "SeriesCreator",
-  previewCategory: "Klassenprojekte",
-  matchPercentage: 99,
-  ageRating: "Klasse 8+",
-  genre: "Dokumentation",
-  cast: "Die Klasse",
-  seasons: [
-    {
-      id: "s1",
-      title: "Staffel 1",
-      episodes: []
-    }
-  ],
+type InitialLocale = 'de' | 'en';
+
+// Locale-specific text for a fresh project. Non-text fields (genre, ageRating)
+// stay German because their editor controls are currently German-only.
+const initialProjectText: Record<InitialLocale, {
+  title: string;
+  description: string;
+  previewCategory: string;
+  cast: string;
+  seasonTitle: string;
+  genre: string;
+  ageRating: string;
+}> = {
+  de: {
+    title: "Meine Neue Serie",
+    description: "Eine fesselnde Reise durch das Thema...",
+    previewCategory: "Klassenprojekte",
+    cast: "Die Klasse",
+    seasonTitle: "Staffel 1",
+    genre: "Dokumentation",
+    ageRating: "ab 12",
+  },
+  en: {
+    title: "My New Series",
+    description: "A captivating journey through the topic...",
+    previewCategory: "Class projects",
+    cast: "The class",
+    seasonTitle: "Season 1",
+    genre: "Documentary",
+    ageRating: "12+",
+  },
 };
+
+export function createInitialProjectData(locale: InitialLocale = 'de'): ProjectData {
+  const text = initialProjectText[locale];
+  return {
+    schemaVersion: 1,
+    title: text.title,
+    subject: "",
+    topic: "",
+    author: "",
+    description: text.description,
+    previewBrand: "SeriesCreator",
+    previewCategory: text.previewCategory,
+    matchPercentage: 99,
+    ageRating: text.ageRating,
+    genre: text.genre,
+    cast: text.cast,
+    seasons: [
+      {
+        id: "s1",
+        title: text.seasonTitle,
+        episodes: [],
+      },
+    ],
+  };
+}
+
+export const initialProjectData: ProjectData = createInitialProjectData('de');

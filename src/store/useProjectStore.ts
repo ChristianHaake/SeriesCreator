@@ -1,15 +1,18 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import type { ProjectData, Episode } from '../types';
-import { initialProjectData } from '../types';
+import { initialProjectData, createInitialProjectData } from '../types';
 import { normalizeProject, serializeProject } from '../domain/projectCodec';
 import { useTranslation } from '../i18n';
 
 const STORAGE_KEY = 'series_creator_data';
 
-export function loadStoredProject(storage: Storage): ProjectData {
+export function loadStoredProject(
+  storage: Storage,
+  fallback: ProjectData = initialProjectData,
+): ProjectData {
   try {
     const saved = storage.getItem(STORAGE_KEY);
-    if (!saved) return initialProjectData;
+    if (!saved) return fallback;
 
     const parsed = normalizeProject(JSON.parse(saved));
     if (parsed.ok) return parsed.data;
@@ -17,7 +20,7 @@ export function loadStoredProject(storage: Storage): ProjectData {
     // Blocked storage or corrupt JSON falls back to a fresh local project.
   }
 
-  return initialProjectData;
+  return fallback;
 }
 
 export function saveStoredProject(storage: Storage, data: ProjectData) {
@@ -30,9 +33,9 @@ export function saveStoredProject(storage: Storage, data: ProjectData) {
 }
 
 export function useProjectStore(onSaveError?: () => void) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [data, setData] = useState<ProjectData>(() => {
-    return loadStoredProject(window.localStorage);
+    return loadStoredProject(window.localStorage, createInitialProjectData(locale));
   });
   const onSaveErrorRef = useRef(onSaveError);
   useEffect(() => {
@@ -140,8 +143,8 @@ export function useProjectStore(onSaveError?: () => void) {
   }, [t.lblSeasonN]);
 
   const resetData = useCallback(() => {
-    setData(initialProjectData);
-  }, []);
+    setData(createInitialProjectData(locale));
+  }, [locale]);
 
   const replaceData = useCallback((nextData: ProjectData) => {
     setData(nextData);

@@ -4,6 +4,7 @@ import type { ProjectData } from "../types";
 import { useTranslation } from "../i18n";
 import { parseProjectJson, PROJECT_FILE_EXTENSION } from '../domain/projectCodec';
 import { resourceLimits } from '../domain/constraints';
+import { BrandLogo } from './BrandLogo';
 
 interface Props {
   onExport?: () => void;
@@ -47,7 +48,7 @@ export function AppHeader({ onExport, onHtmlExport, onImport, onReset, onPrint }
   return (
     <header className="app-header">
       <a href="/" className="brand" aria-label={t.appTitle} title={t.appSubtitle}>
-        <img src="/logo-wide.png" alt={t.appTitle} className="brand__logo" />
+        <BrandLogo title={t.appTitle} className="brand__logo" />
       </a>
 
       <div className="header-meta">

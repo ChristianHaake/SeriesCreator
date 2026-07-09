@@ -1,6 +1,6 @@
 # Privacy
 
-Last updated: June 26, 2026
+Last updated: July 9, 2026
 
 ## 1. Controller
 
@@ -42,17 +42,44 @@ Cloudflare, Inc.
 San Francisco, CA 94107  
 USA
 
-## 5. Cookies and external content
+Where applicable, processing is based on the legitimate interest in secure,
+stable, and efficient delivery under Art. 6(1)(f) GDPR.
+
+## 5. Cloudflare Web Analytics
+
+This website uses Cloudflare Web Analytics for statistical usage analysis.
+Page views, referrers, device type, browser information, approximate origin,
+and access times may be processed.
+
+Cloudflare states that Web Analytics does not use cookies, `localStorage`,
+cross-device profiles, or individual fingerprinting for analytics. Where
+applicable, processing is based on the legitimate interest in analyzing and
+improving the website under Art. 6(1)(f) GDPR.
+
+Further information:
+
+- [Cloudflare Web Analytics](https://www.cloudflare.com/web-analytics/)
+- [Cloudflare Privacy Policy](https://www.cloudflare.com/privacypolicy/)
+
+## 6. Cookies and external content
 
 The application sets no advertising or tracking cookies and loads no external
 fonts. External links are loaded only when users actively open them. Cloudflare
 may use technically necessary cookies for security measures.
 
-## 6. Analytics
+## 7. International transfers
 
-The application currently embeds no application-level analytics script.
+Processing by Cloudflare in the United States cannot be excluded. Cloudflare
+describes appropriate safeguards for international transfers, including EU
+Standard Contractual Clauses where required.
 
-## 7. Data-subject rights
+## 8. Retention
+
+User content is not stored on a server. Cloudflare or the controller determines
+retention and deletion periods for technical connection, security, and
+analytics data.
+
+## 9. Data-subject rights
 
 Subject to statutory requirements, data subjects have rights including access,
 rectification, erasure, restriction, portability, and objection. They may also

@@ -1,6 +1,6 @@
 # Datenschutz
 
-Stand: 26. Juni 2026
+Stand: 9. Juli 2026
 
 ## 1. Verantwortlicher
 
@@ -46,18 +46,48 @@ Cloudflare, Inc.
 San Francisco, CA 94107  
 USA
 
-## 5. Cookies und externe Inhalte
+Die Verarbeitung dient der sicheren, stabilen und effizienten Bereitstellung
+des Angebots. Rechtsgrundlage ist, soweit anwendbar, Art. 6 Abs. 1 lit. f
+DSGVO.
+
+## 5. Cloudflare Web Analytics
+
+Diese Website verwendet Cloudflare Web Analytics zur statistischen Analyse der
+Nutzung. Dabei können Seitenaufrufe, Referrer, Gerätetyp, Browserinformationen,
+ungefähre Herkunft und Zugriffszeitpunkte verarbeitet werden.
+
+Nach Angaben von Cloudflare verwendet Web Analytics für Analysezwecke keine
+Cookies, kein `localStorage`, keine geräteübergreifenden Profile und kein
+Fingerprinting einzelner Personen. Die Verarbeitung erfolgt auf Grundlage des
+berechtigten Interesses an Analyse und Verbesserung des Webangebots gemäß Art.
+6 Abs. 1 lit. f DSGVO.
+
+Weitere Informationen:
+
+- [Cloudflare Web Analytics](https://www.cloudflare.com/web-analytics/)
+- [Datenschutzerklärung von Cloudflare](https://www.cloudflare.com/privacypolicy/)
+
+## 6. Cookies und externe Inhalte
 
 Die Anwendung setzt keine Werbe- oder Tracking-Cookies und lädt keine externen
 Schriftarten. Externe Links werden erst aufgerufen, wenn Nutzer sie aktiv
 anklicken. Cloudflare kann im Rahmen technisch notwendiger Sicherheitsmaßnahmen
 Cookies einsetzen.
 
-## 6. Analyse
+## 7. Datenübermittlung in Drittländer
 
-Die Anwendung bindet derzeit kein anwendungsseitiges Analytics-Skript ein.
+Eine Verarbeitung durch Cloudflare in den USA kann nicht ausgeschlossen
+werden. Cloudflare beschreibt für internationale Übermittlungen geeignete
+Garantien, insbesondere Standardvertragsklauseln der Europäischen Kommission,
+soweit erforderlich.
 
-## 7. Rechte betroffener Personen
+## 8. Speicherdauer
+
+Nutzinhalte werden nicht serverseitig gespeichert. Für technische Verbindungs-,
+Sicherheits- und Analysedaten gelten die Speicher- und Löschfristen von
+Cloudflare beziehungsweise des Verantwortlichen.
+
+## 9. Rechte betroffener Personen
 
 Betroffene Personen haben im Rahmen der gesetzlichen Voraussetzungen
 insbesondere Rechte auf Auskunft, Berichtigung, Löschung, Einschränkung der

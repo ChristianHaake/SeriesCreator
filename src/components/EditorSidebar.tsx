@@ -12,6 +12,29 @@ interface Props {
   store: ReturnType<typeof useProjectStore>;
 }
 
+// Localized preset genres. A genre stored in the other language falls through to
+// the free-text input, so switching locale never silently mismatches the select.
+const GENRE_OPTIONS: Record<'de' | 'en', string[]> = {
+  de: [
+    'Dokumentation', 'Erklärvideo', 'Kurzfilm', 'Reportage',
+    'Nachrichten', 'Interview', 'Hörspiel', 'Podcast',
+    'Animationsfilm', 'Stop-Motion', 'Tutorial',
+    'Drama', 'Komödie', 'Bühnenstück', 'Gedichtverfilmung',
+  ],
+  en: [
+    'Documentary', 'Explainer', 'Short film', 'Report',
+    'News', 'Interview', 'Radio play', 'Podcast',
+    'Animation', 'Stop motion', 'Tutorial',
+    'Drama', 'Comedy', 'Stage play', 'Poem adaptation',
+  ],
+};
+
+// FSK-style age ratings per locale.
+const AGE_OPTIONS: Record<'de' | 'en', string[]> = {
+  de: ['ab 0', 'ab 6', 'ab 12', 'ab 16', 'ab 18'],
+  en: ['0+', '6+', '12+', '16+', '18+'],
+};
+
 export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Props) {
   const { data, updateData, addEpisode, updateEpisode, removeEpisode, moveEpisode, updateSeason, removeSeason } = store;
   const [editorStep, setEditorStep] = useState<1 | 2 | 3>(1);
@@ -230,16 +253,17 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
 
         <div style={{ maxWidth: '18rem' }}>
             <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblAge}</label>
-            <select 
-              value={data.ageRating} 
+            <select
+              value={data.ageRating}
               onChange={(e) => updateData({ ageRating: e.target.value })}
               style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)', backgroundColor: 'var(--color-bg-surface)', color: 'var(--color-text-primary)' }}
             >
-              <option value="ab 0">ab 0</option>
-              <option value="ab 6">ab 6</option>
-              <option value="ab 12">ab 12</option>
-              <option value="ab 16">ab 16</option>
-              <option value="ab 18">ab 18</option>
+              {(AGE_OPTIONS[locale].includes(data.ageRating)
+                ? AGE_OPTIONS[locale]
+                : [data.ageRating, ...AGE_OPTIONS[locale]]
+              ).map((age) => (
+                <option key={age} value={age}>{age}</option>
+              ))}
             </select>
         </div>
 
@@ -278,12 +302,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
           <div style={{ flex: 1 }}>
             <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblGenre}</label>
             {(() => {
-              const predefinedGenres = [
-                "Dokumentation", "Erklärvideo", "Kurzfilm", "Reportage", 
-                "Nachrichten", "Interview", "Hörspiel", "Podcast", 
-                "Animationsfilm", "Stop-Motion", "Tutorial",
-                "Drama", "Komödie", "Bühnenstück", "Gedichtverfilmung"
-              ];
+              const predefinedGenres = GENRE_OPTIONS[locale];
               const isStandard = predefinedGenres.includes(data.genre);
               const showSelect = isStandard || data.genre === '';
               
