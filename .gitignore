@@ -15,6 +15,9 @@ dist-ssr
 # Local preview server config (not needed in the repo)
 .claude/launch.json
 
+# Playwright MCP page dumps (local automation artifacts)
+.playwright-mcp/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
