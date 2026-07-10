@@ -7,13 +7,14 @@ in einer Streaming-ähnlichen Oberfläche.
 
 ## Features
 
-- **No Accounts, Full Privacy**: All data is processed and stored locally in your browser.
+- **No Accounts, Local-First**: Your series content is processed and stored only in your browser — no login, no server-side storage. Reach is measured with anonymous, cookieless Cloudflare Web Analytics.
 - **Interactive Editor**: Plan your series with titles, cast, genres, and reflection notes.
 - **Seasons & Episodes**: Structure your content with seasons, episodes, and explicit reorder controls (up to 20 seasons and 100 episodes per season).
 - **Automatic Image Handling**: Upload large images; they are automatically optimized and scaled locally to save space.
 - **Presentation Mode**: Pitch your series using a sleek, streaming-style fullscreen interface.
 - **Standalone HTML Export**: Download a fully playable presentation as a single `.html` file that works offline anywhere.
 - **PDF & Project Exports**: Generate print-ready PDFs or save your editable state as a `.seriescreator` file.
+- **Bilingual (DE / EN)**: Full German and English UI, including locale-specific starter content.
 
 ## Status
 
@@ -29,6 +30,10 @@ speichert den aktuellen Entwurf und die Spracheinstellung in `localStorage`.
 Projektbackups werden als versionierte `.seriescreator`-Dateien lokal
 heruntergeladen und beim Import vollständig validiert, bevor sie den aktuellen
 Entwurf ersetzen.
+
+Zur anonymen Reichweitenmessung wird Cloudflare Web Analytics ohne Cookies und
+ohne Fingerprinting eingesetzt. Nutzinhalte verlassen das Gerät dabei nicht.
+Details: [Datenschutz](https://seriescreator.haak3.de/datenschutz).
 
 ## Entwicklung
 
