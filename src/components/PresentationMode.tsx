@@ -34,7 +34,7 @@ export function PresentationMode({ data, onClose }: Props) {
   // Request fullscreen on mount
   useEffect(() => {
     document.documentElement.requestFullscreen().catch(() => {
-      console.log('Fullscreen failed');
+      // Fullscreen unsupported or denied (e.g. iOS Safari); presentation still works.
     });
     return () => {
       if (document.fullscreenElement) {

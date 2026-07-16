@@ -38,6 +38,7 @@ const AGE_OPTIONS: Record<'de' | 'en', string[]> = {
 export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Props) {
   const { data, updateData, addEpisode, updateEpisode, removeEpisode, moveEpisode, updateSeason, removeSeason } = store;
   const [editorStep, setEditorStep] = useState<1 | 2 | 3>(1);
+  const [customGenreSelected, setCustomGenreSelected] = useState(false);
   const [coverError, setCoverError] = useState('');
   const coverInputRef = useRef<HTMLInputElement | null>(null);
   const { t, locale } = useTranslation();
@@ -146,10 +147,11 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end' }}>
           <div style={{ flex: 1 }}>
-            <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblPreviewBrand}</label>
-            <input 
-              type="text" 
-              value={data.previewBrand || ''} 
+            <label htmlFor="field-brand" style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblPreviewBrand}</label>
+            <input
+              id="field-brand"
+              type="text"
+              value={data.previewBrand || ''}
               onChange={(e) => updateData({ previewBrand: e.target.value })}
               maxLength={fieldLimits.previewBrand}
               placeholder="SeriesCreator"
@@ -157,10 +159,11 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
             />
           </div>
           <div style={{ flex: 1 }}>
-            <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblPreviewCategory}</label>
-            <input 
-              type="text" 
-              value={data.previewCategory || ''} 
+            <label htmlFor="field-category" style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblPreviewCategory}</label>
+            <input
+              id="field-category"
+              type="text"
+              value={data.previewCategory || ''}
               onChange={(e) => updateData({ previewCategory: e.target.value })}
               maxLength={40}
               placeholder="z.B. Klassenprojekte"
@@ -170,10 +173,11 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
         </div>
 
         <div>
-          <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblTitle}</label>
-          <input 
-            type="text" 
-            value={data.title} 
+          <label htmlFor="field-title" style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblTitle}</label>
+          <input
+            id="field-title"
+            type="text"
+            value={data.title}
             onChange={(e) => updateData({ title: e.target.value })}
             maxLength={fieldLimits.title}
             style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)' }}
@@ -241,9 +245,10 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
         </div>
 
         <div>
-          <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblDesc}</label>
-          <textarea 
-            value={data.description} 
+          <label htmlFor="field-desc" style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblDesc}</label>
+          <textarea
+            id="field-desc"
+            value={data.description}
             onChange={(e) => updateData({ description: e.target.value })}
             rows={4}
             maxLength={fieldLimits.description}
@@ -252,8 +257,9 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
         </div>
 
         <div style={{ maxWidth: '18rem' }}>
-            <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblAge}</label>
+            <label htmlFor="field-age" style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblAge}</label>
             <select
+              id="field-age"
               value={data.ageRating}
               onChange={(e) => updateData({ ageRating: e.target.value })}
               style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)', backgroundColor: 'var(--color-bg-surface)', color: 'var(--color-text-primary)' }}
@@ -300,19 +306,23 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
         
         <div style={{ display: 'flex', gap: '1rem' }}>
           <div style={{ flex: 1 }}>
-            <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblGenre}</label>
+            <label htmlFor="field-genre" style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblGenre}</label>
             {(() => {
               const predefinedGenres = GENRE_OPTIONS[locale];
               const isStandard = predefinedGenres.includes(data.genre);
-              const showSelect = isStandard || data.genre === '';
-              
-              if (showSelect) {
+              // Custom input shows when the user explicitly picked it, or when the
+              // stored genre is free text (e.g. saved under the other locale).
+              const showCustom = customGenreSelected || (!isStandard && data.genre.trim() !== '');
+
+              if (!showCustom) {
                 return (
-                  <select 
-                    value={data.genre || predefinedGenres[0]} 
+                  <select
+                    id="field-genre"
+                    value={isStandard ? data.genre : predefinedGenres[0]}
                     onChange={(e) => {
                       if (e.target.value === '__custom__') {
-                        updateData({ genre: ' ' }); // Trigger custom input mode
+                        setCustomGenreSelected(true);
+                        updateData({ genre: '' });
                       } else {
                         updateData({ genre: e.target.value });
                       }
@@ -324,22 +334,26 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
                   </select>
                 );
               }
-              
+
               return (
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <input 
-                    type="text" 
-                    value={data.genre.trim()} 
+                  <input
+                    id="field-genre"
+                    type="text"
+                    value={data.genre}
                     onChange={(e) => updateData({ genre: e.target.value })}
                     maxLength={40}
                     placeholder={t.customGenre}
                     style={{ flex: 1, padding: '0.6rem', border: '1px solid var(--border-color)', width: '100%' }}
                     autoFocus
                   />
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className="ui-icon-button"
-                    onClick={() => updateData({ genre: predefinedGenres[0] })}
+                    onClick={() => {
+                      setCustomGenreSelected(false);
+                      updateData({ genre: predefinedGenres[0] });
+                    }}
                     title={t.lblBackToSelection}
                     style={{ flexShrink: 0 }}
                   >
@@ -350,10 +364,11 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
             })()}
           </div>
           <div style={{ flex: 1 }}>
-            <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblCast}</label>
-            <input 
-              type="text" 
-              value={data.cast} 
+            <label htmlFor="field-cast" style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblCast}</label>
+            <input
+              id="field-cast"
+              type="text"
+              value={data.cast}
               onChange={(e) => updateData({ cast: e.target.value })}
               required
               maxLength={fieldLimits.cast}
@@ -368,9 +383,10 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
       {editorStep === 3 && (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
         <div>
-          <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblReflection}</label>
-          <textarea 
-            value={data.reflection || ''} 
+          <label htmlFor="field-reflection" style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblReflection}</label>
+          <textarea
+            id="field-reflection"
+            value={data.reflection || ''}
             onChange={(e) => updateData({ reflection: e.target.value })}
             rows={5}
             maxLength={fieldLimits.reflection}
@@ -378,10 +394,11 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
           />
         </div>
         <div>
-          <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem', marginTop: '1rem' }}>{t.lblCustomConceptTitle}</label>
-          <input 
+          <label htmlFor="field-concept-title" style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem', marginTop: '1rem' }}>{t.lblCustomConceptTitle}</label>
+          <input
+            id="field-concept-title"
             type="text"
-            value={data.customConceptTitle || ''} 
+            value={data.customConceptTitle || ''}
             onChange={(e) => updateData({ customConceptTitle: e.target.value })}
             maxLength={60}
             placeholder={locale === 'de' ? 'z.B. Didaktischer Kommentar' : 'e.g. Didactic Commentary'}
@@ -390,9 +407,10 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
         </div>
         
         <div>
-          <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblCustomConceptText}</label>
-          <textarea 
-            value={data.customConceptText || ''} 
+          <label htmlFor="field-concept-text" style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblCustomConceptText}</label>
+          <textarea
+            id="field-concept-text"
+            value={data.customConceptText || ''}
             onChange={(e) => updateData({ customConceptText: e.target.value })}
             rows={5}
             maxLength={fieldLimits.reflection}
@@ -400,9 +418,10 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
           />
         </div>
         <div>
-          <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem', marginTop: '1rem' }}>{t.lblSources}</label>
-          <textarea 
-            value={data.sources || ''} 
+          <label htmlFor="field-sources" style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem', marginTop: '1rem' }}>{t.lblSources}</label>
+          <textarea
+            id="field-sources"
+            value={data.sources || ''}
             onChange={(e) => updateData({ sources: e.target.value })}
             rows={5}
             maxLength={fieldLimits.sources}
@@ -417,9 +436,10 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
           <h3 style={{ margin: 0 }}>{t.episodesTitle}</h3>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-            <select 
-              value={activeSeasonId} 
+            <select
+              value={activeSeasonId}
               onChange={(e) => setActiveSeasonId(e.target.value)}
+              aria-label={t.selSeasonLabel}
               style={{ padding: '0.4rem', border: '1px solid var(--border-color)' }}
             >
               {data.seasons.map(s => (

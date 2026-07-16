@@ -16,7 +16,7 @@ export function calculateProjectCompletion(data: ProjectData) {
     data.seasons.some((season) =>
       season.episodes.some((episode) => hasText(episode.title) && hasText(episode.summary)),
     ),
-    hasText(data.reflection) || hasText(data.learningObjectives),
+    hasText(data.reflection),
     hasText(data.sources),
   ];
 
