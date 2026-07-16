@@ -114,9 +114,10 @@ export const EpisodeEditor = memo(function EpisodeEditor({ episode, seasonId, in
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <div>
-          <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.3rem', fontWeight: 500 }}>{t.episodeTitleLabel}</label>
-          <input 
-            type="text" 
+          <label htmlFor={`ep-title-${episode.id}`} style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.3rem', fontWeight: 500 }}>{t.episodeTitleLabel}</label>
+          <input
+            id={`ep-title-${episode.id}`}
+            type="text"
             value={episode.title}
             onChange={(e) => onUpdate(seasonId, episode.id, { title: e.target.value })}
             maxLength={fieldLimits.episodeTitle}
@@ -125,8 +126,9 @@ export const EpisodeEditor = memo(function EpisodeEditor({ episode, seasonId, in
         </div>
         
         <div>
-          <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.3rem', fontWeight: 500 }}>{t.episodeDescriptionLabel}</label>
-          <textarea 
+          <label htmlFor={`ep-summary-${episode.id}`} style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.3rem', fontWeight: 500 }}>{t.episodeDescriptionLabel}</label>
+          <textarea
+            id={`ep-summary-${episode.id}`}
             value={episode.summary}
             onChange={(e) => onUpdate(seasonId, episode.id, { summary: e.target.value })}
             rows={2}
@@ -144,9 +146,10 @@ export const EpisodeEditor = memo(function EpisodeEditor({ episode, seasonId, in
             <div style={{ marginTop: '0.5rem' }}>
               <img src={episode.thumbnailUrl} alt={episode.altText || "Thumbnail Vorschau"} style={{ width: '100%', height: '80px', objectFit: 'cover', borderRadius: '6px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }} />
               <div style={{ marginTop: '0.5rem' }}>
-                <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.3rem', fontWeight: 500 }}>{t.lblAltText}</label>
-                <input 
-                  type="text" 
+                <label htmlFor={`ep-alt-${episode.id}`} style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.3rem', fontWeight: 500 }}>{t.lblAltText}</label>
+                <input
+                  id={`ep-alt-${episode.id}`}
+                  type="text"
                   value={episode.altText || ''}
                   onChange={(e) => onUpdate(seasonId, episode.id, { altText: e.target.value })}
                   maxLength={fieldLimits.altText}

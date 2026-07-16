@@ -5,18 +5,24 @@ https://github.com/ChristianHaake/haak3-webapp-standard
 
 Standard version: `1.0.0-draft`
 
-Last reviewed: `2026-06-26`
+Last reviewed: `2026-07-16`
 
 ## Exceptions
 
+None.
+
+### Resolved
+
 ```text
 Rule: Production CSP should avoid inline styles.
-Reason: The current React UI still uses inline style props across editor,
-preview, print, and presentation components. Removing them safely requires a
-dedicated UI refactor.
-Scope: public/_headers style-src includes 'unsafe-inline'.
-Temporary or permanent: Temporary.
-Review date: 2026-07-31
+Resolution: style-src no longer includes 'unsafe-inline'. React applies its
+inline style props through the CSSOM (element.style.*), which CSP style-src
+does not govern, so the exception was unnecessary. Verified with a tightened
+style-src 'self' policy across editor, preview, presentation, and content
+routes: zero CSP violations. No raw-HTML rendering path exists (react-markdown
+runs without rehype-raw, no dangerouslySetInnerHTML), so markdown cannot inject
+style attributes.
+Resolved: 2026-07-16
 ```
 
 ## App-specific decisions

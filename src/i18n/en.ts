@@ -107,5 +107,6 @@ export const en: Record<TranslationKey, string> = {
   mobilePanelEditor: "Editor",
   mobilePanelPreview: "Preview",
   newEpisode: "New Episode",
-  customGenre: "Custom Genre..."
+  customGenre: "Custom Genre...",
+  selSeasonLabel: "Select season"
 };

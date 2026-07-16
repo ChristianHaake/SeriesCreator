@@ -60,6 +60,3 @@ und Build aus.
 
 - PDF-Ausgabe nutzt die Druckfunktion des Browsers und muss vor einem Release
   manuell in Zielbrowsern geprüft werden.
-- Die Content-Security-Policy erlaubt aktuell inline Styles, weil die
-  bestehende React-Oberfläche noch umfangreich mit `style`-Props arbeitet.
-  Diese Ausnahme ist in `docs/standard-conformance.md` dokumentiert.

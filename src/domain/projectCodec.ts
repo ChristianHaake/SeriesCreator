@@ -48,8 +48,6 @@ function normalizeEpisode(value: unknown, index: number): Episode | null {
     id: limitText(value.id, 80) || `ep_${index + 1}`,
     title: limitText(value.title, fieldLimits.episodeTitle) || 'Neue Episode',
     summary: limitText(value.summary, fieldLimits.episodeSummary),
-    notes: limitText(value.notes, fieldLimits.episodeSummary) || undefined,
-    duration: limitText(value.duration, 40) || undefined,
     thumbnailUrl: asOptionalImageUrl(value.thumbnailUrl),
     altText: limitText(value.altText, fieldLimits.altText) || undefined,
   };
@@ -104,8 +102,6 @@ export function normalizeProject(value: unknown): ProjectParseResult {
     ...initialProjectData,
     schemaVersion: PROJECT_SCHEMA_VERSION,
     title: limitText(value.title, fieldLimits.title, initialProjectData.title),
-    subject: limitText(value.subject, 120),
-    topic: limitText(value.topic, 120),
     author: limitText(value.author, 120),
     description: limitText(
       value.description,
@@ -130,8 +126,6 @@ export function normalizeProject(value: unknown): ProjectParseResult {
     cast: limitText(value.cast, fieldLimits.cast, initialProjectData.cast),
     seasons: seasons as Season[],
     reflection: limitText(value.reflection, fieldLimits.reflection) || undefined,
-    learningObjectives:
-      limitText(value.learningObjectives, fieldLimits.reflection) || undefined,
     sources: limitText(value.sources, fieldLimits.sources) || undefined,
     customConceptTitle: limitText(value.customConceptTitle, fieldLimits.title) || undefined,
     customConceptText: limitText(value.customConceptText, fieldLimits.reflection) || undefined,
@@ -163,12 +157,18 @@ export function serializeProject(data: ProjectData) {
   );
 }
 
-export function makeProjectFilename(title: string) {
-  const base = title
-    .trim()
-    .replace(/[^a-z0-9äöüß _-]/gi, '')
-    .replace(/\s+/g, '-')
-    .slice(0, 60);
+// Shared filename base so project (.seriescreator) and HTML exports sanitize
+// titles identically (umlauts kept, whitespace collapsed, capped at 60 chars).
+export function makeExportBaseName(title: string, fallback: string) {
+  return (
+    title
+      .trim()
+      .replace(/[^a-z0-9äöüß _-]/gi, '')
+      .replace(/\s+/g, '-')
+      .slice(0, 60) || fallback
+  );
+}
 
-  return `${base || 'SeriesCreator-Projekt'}.${PROJECT_FILE_EXTENSION}`;
+export function makeProjectFilename(title: string) {
+  return `${makeExportBaseName(title, 'SeriesCreator-Projekt')}.${PROJECT_FILE_EXTENSION}`;
 }

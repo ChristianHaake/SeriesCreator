@@ -105,7 +105,8 @@ export const de = {
   mobilePanelEditor: "Editor",
   mobilePanelPreview: "Vorschau",
   newEpisode: "Neue Episode",
-  customGenre: "Eigenes Genre..."
+  customGenre: "Eigenes Genre...",
+  selSeasonLabel: "Staffel auswählen"
 } as const;
 
 export type TranslationKey = keyof typeof de;

@@ -13,6 +13,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { contentPages, type ContentPath, isContentPath } from './content';
 import {
+  makeExportBaseName,
   makeProjectFilename,
   PROJECT_FILE_MIME_TYPE,
   serializeProject,
@@ -92,7 +93,7 @@ function App() {
     try {
       const htmlContent = exportProjectToHtml(data, t, locale);
       const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
-      const filename = `${data.title ? data.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() : 'presentation'}.html`;
+      const filename = `${makeExportBaseName(data.title, 'SeriesCreator-Praesentation')}.html`;
       downloadBlob(blob, filename);
       showStatus(t.msgHtmlExportSuccess, 'success');
     } catch {
@@ -229,6 +230,8 @@ function App() {
             <button
               type="button"
               role="tab"
+              id="tab-episoden"
+              aria-controls="panel-episoden"
               aria-selected={activeTab === 'EPISODEN'}
               onClick={() => setActiveTab('EPISODEN')}
             >
@@ -237,6 +240,8 @@ function App() {
             <button
               type="button"
               role="tab"
+              id="tab-details"
+              aria-controls="panel-details"
               aria-selected={activeTab === 'DETAILS'}
               onClick={() => setActiveTab('DETAILS')}
             >
@@ -245,6 +250,8 @@ function App() {
             <button
               type="button"
               role="tab"
+              id="tab-quellen"
+              aria-controls="panel-quellen"
               aria-selected={activeTab === 'QUELLEN'}
               onClick={() => setActiveTab('QUELLEN')}
             >
@@ -253,11 +260,12 @@ function App() {
           </div>
 
           {activeTab === 'EPISODEN' && (
-            <>
+            <div role="tabpanel" id="panel-episoden" aria-labelledby="tab-episoden" tabIndex={0}>
               <div className="season-selector">
-                <select 
+                <select
                   value={activeSeasonId}
                   onChange={(e) => setActiveSeasonId(e.target.value)}
+                  aria-label={t.selSeasonLabel}
                 >
                   {data.seasons.map(s => (
                     <option key={s.id} value={s.id}>{s.title}</option>
@@ -266,11 +274,11 @@ function App() {
               </div>
 
               {activeSeason && <EpisodeGrid episodes={activeSeason.episodes} />}
-            </>
+            </div>
           )}
 
           {activeTab === 'DETAILS' && (
-            <div className="preview-text-panel">
+            <div className="preview-text-panel" role="tabpanel" id="panel-details" aria-labelledby="tab-details" tabIndex={0}>
               <h3>{t.lblReflection}</h3>
               <p>{data.reflection || t.noReflection}</p>
               
@@ -284,7 +292,7 @@ function App() {
           )}
 
           {activeTab === 'QUELLEN' && (
-            <div className="preview-text-panel">
+            <div className="preview-text-panel" role="tabpanel" id="panel-quellen" aria-labelledby="tab-quellen" tabIndex={0}>
               <h3>{t.lblSources}</h3>
               <p>{data.sources || t.noSources}</p>
             </div>
