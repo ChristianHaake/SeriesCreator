@@ -76,6 +76,7 @@ export const de = {
   home: "Startseite",
   series: "Serien",
   categoryFallback: "Klassenprojekte",
+  categoryPlaceholder: "z.B. Klassenprojekte",
   titlePlaceholder: "Titel der Serie",
   descPlaceholder: "Füge eine spannende Beschreibung hinzu...",
   ariaSeriesArea: "Serienbereich",
