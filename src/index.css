@@ -488,6 +488,7 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
 .preview-header__nav {
   display: flex;
   flex: 1;
+  flex-wrap: wrap;
   font-weight: 500;
   gap: 1.5rem;
   text-shadow: 1px 1px 2px rgb(0 0 0 / 80%);
@@ -953,19 +954,27 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
   padding: 0.75rem 1.5rem;
   background: color-mix(in srgb, var(--color-surface) 94%, transparent);
   backdrop-filter: blur(14px);
   border-top: 1px solid var(--border-color);
-  height: 50px;
+  min-height: 50px;
   flex-shrink: 0;
   font-size: 0.85rem;
   z-index: 20;
   color: var(--color-text);
 }
 
+.app-footer__right {
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
+}
+
 .app-footer nav {
   display: flex;
+  flex-wrap: wrap;
   gap: 1.5rem;
   align-items: center;
 }

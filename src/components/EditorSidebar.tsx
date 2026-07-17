@@ -166,7 +166,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
               value={data.previewCategory || ''}
               onChange={(e) => updateData({ previewCategory: e.target.value })}
               maxLength={40}
-              placeholder="z.B. Klassenprojekte"
+              placeholder={t.categoryPlaceholder}
               style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)' }}
             />
           </div>

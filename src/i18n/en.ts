@@ -78,6 +78,7 @@ export const en: Record<TranslationKey, string> = {
   home: "Home",
   series: "Series",
   categoryFallback: "Class Projects",
+  categoryPlaceholder: "e.g. Class projects",
   titlePlaceholder: "Series Title",
   descPlaceholder: "Add an exciting description...",
   ariaSeriesArea: "Series Area",
