@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2026-07-17
+
+### Changed
+- **Accessibility**: Every editor field label is now associated with its control (`htmlFor`/`id`); season `<select>`s have `aria-label`; preview tabs are wired to their panels (`role=tabpanel`, `aria-controls`, `aria-labelledby`).
+- **Export filenames**: `.seriescreator` and HTML export share one filename sanitizer — umlauts are kept (previously mangled to underscores in the HTML export), whitespace collapsed, 60-char cap.
+- **Responsive layout**: Footer and navigation wrap on narrow viewports instead of clipping.
+
+### Removed
+- Dropped unused schema fields with no UI or read path (`Episode.notes`, `Episode.duration`, `ProjectData.subject`/`topic`/`learningObjectives`). Legacy imports carrying these keys now discard them instead of round-tripping them; in-app completion scoring is unchanged.
+
+### Security
+- **Content-Security-Policy**: Removed `'unsafe-inline'` from `style-src`. React's inline `style` props go through the CSSOM, not CSP-governed attributes, so the exception was unnecessary; verified empirically across editor, preview, presentation mode, and content routes.
+
 ## [1.1.0] - 2026-07-09
 
 ### Added
