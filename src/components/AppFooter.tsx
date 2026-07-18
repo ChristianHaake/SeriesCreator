@@ -27,7 +27,7 @@ export function AppFooter() {
         </nav>
         <a
           className="app-footer__coffee"
-          href="https://buymeacoffee.com/christianhaake"
+          href="https://buymeacoffee.com/haake"
           target="_blank"
           rel="noopener noreferrer"
           style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', textDecoration: 'none', color: '#FFDD00', fontWeight: 'bold' }}
