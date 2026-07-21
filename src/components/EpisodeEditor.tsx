@@ -140,7 +140,7 @@ export const EpisodeEditor = memo(function EpisodeEditor({ episode, seasonId, in
         <div>
           <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.95rem', fontWeight: 500, padding: '0.6rem', border: '1px dashed var(--color-border)', borderRadius: '6px', justifyContent: 'center', backgroundColor: 'var(--color-bg-surface)', transition: 'background-color 0.2s', color: 'var(--color-text-primary)' }}>
             <ImageIcon size={18} /> {t.btnChooseThumbnail}
-            <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageUpload} />
+            <input type="file" accept="image/*" aria-label={t.btnChooseThumbnail} style={{ display: 'none' }} onChange={handleImageUpload} />
           </label>
           {episode.thumbnailUrl && (
             <div style={{ marginTop: '0.5rem' }}>
