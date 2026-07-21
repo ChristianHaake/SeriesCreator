@@ -5,8 +5,8 @@ https://github.com/ChristianHaake/haak3-webapp-standard/blob/main/docs/review-ch
 
 ## Release
 
-- Version: `0.0.0`
-- Review date: `2026-06-26`
+- Version: `1.3.0`
+- Review date: `2026-07-21`
 - Reviewer: `Codex`
 
 ## Results
@@ -19,12 +19,16 @@ https://github.com/ChristianHaake/haak3-webapp-standard/blob/main/docs/review-ch
 - [x] Help, privacy, imprint, and educator routes exist and support direct navigation.
 - [x] Build, lint, typecheck, and unit/browser-like tests are exposed through `npm run verify`.
 - [x] README, package metadata, and license file name GPL-3.0-only consistently.
-- [x] Known CSP exception is documented.
-- [ ] Manual PDF/print output review completed on target browsers.
+- [x] CSP has no documented app-side exception.
+- [x] Bundled school example loads into the normal project state.
+- [x] Examples and social media kit are viewable at `/beispiele`.
+- [x] Chromium PDF/print smoke creates an A4 PDF containing title and episodes.
+- [x] DOM accessibility smoke finds no relevant form controls without accessible names.
+- [ ] Manual PDF/print output review completed on all target browsers.
 - [ ] Manual screen-reader review completed.
-- [ ] Final production URL documented.
+- [x] Final production URL documented: https://seriescreator.haak3.de
 
 ## Notes
 
-The app is closer to release validation, but the CSP inline-style exception and
-manual accessibility/export checks should be resolved before a 1.0 release.
+Automated release gates are green locally. Manual target-browser PDF review and
+manual screen-reader review remain explicit release checks.

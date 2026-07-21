@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] - 2026-07-21
+
+### Added
+- **School example project**: Added "The School Climate Code" / "Der Klima-Code der Schule" as a complete in-app example with two seasons, six episodes, reflection notes, sources, and image-generation prompts.
+- **Example loading flow**: Added a guarded "Load Example" action that replaces the current draft only after confirmation and uses the same project state as normal user work.
+- **Examples page**: Added `/beispiele` with viewable classroom examples, social media copy, hashtags, alt text, and image prompts for reuse.
+
+### Fixed
+- **Print/PDF layout**: Print output no longer inherits the clipped app shell layout. Generated PDFs start at the page top and include episode cards instead of cropping after the hero area.
+- **File input accessibility**: Hidden import, cover, and thumbnail file inputs now have explicit accessible names.
+- **Release copy drift**: About/help/release documentation now describes SeriesCreator's streaming-series workflow instead of stale social-media creator wording.
+
+### Verification
+- `npm run verify` passes with lint, typecheck, tests, and production build.
+- Browser PDF smoke confirms an A4 PDF with title and episode text.
+- Browser DOM accessibility smoke confirms all relevant form controls have accessible names.
+
 ## [1.2.0] - 2026-07-17
 
 ### Changed

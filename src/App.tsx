@@ -19,6 +19,7 @@ import {
   serializeProject,
 } from './domain/projectCodec';
 import { exportProjectToHtml } from './domain/exportHtml';
+import { createSchoolEnergyExampleProject } from './domain/exampleProjects';
 import { displayCompletion } from './domain/completion';
 import './index.css';
 
@@ -135,6 +136,16 @@ function App() {
           replaceData(importedData);
           setActiveSeasonId(importedData.seasons[0]?.id || '');
           showStatus(t.msgImportSuccess, 'success');
+        }}
+        onLoadExample={() => {
+          if (window.confirm(t.confirmLoadExample)) {
+            const exampleProject = createSchoolEnergyExampleProject(locale);
+            replaceData(exampleProject);
+            setActiveSeasonId(exampleProject.seasons[0]?.id || '');
+            setActiveTab('EPISODEN');
+            setMobilePanel('preview');
+            showStatus(t.msgExampleLoaded, 'success');
+          }
         }}
         onReset={() => {
           if (window.confirm(t.confirmReset)) {

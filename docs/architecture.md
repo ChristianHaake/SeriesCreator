@@ -18,7 +18,7 @@ fallback configured in `wrangler.jsonc`.
 
 - `src/components`: application shell, editor, preview, print, and presentation
   components.
-- `src/domain`: validation, project codec, and shared limits.
+- `src/domain`: validation, project codec, bundled examples, and shared limits.
 - `src/i18n`: locale context, provider, hook, and dictionaries.
 - `src/content`: bundled Markdown pages for help, privacy, legal, educator, and
   responsible-use content.
@@ -47,6 +47,13 @@ Editable backups use:
 
 Imports are treated as untrusted input. A project replaces state only after full
 runtime validation and normalization.
+
+## Bundled example
+
+The app ships with a school-themed climate-and-energy example. Loading it is a
+state replacement guarded by confirmation, just like reset/import risk paths.
+The example intentionally exercises seasons, episode ordering, reflection,
+sources, presentation, HTML export, PDF/print, and project-file export.
 
 ## Network and privacy
 
