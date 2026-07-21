@@ -107,6 +107,7 @@ export const en: Record<TranslationKey, string> = {
   msgExportFailed: "Export could not be started. Please try again.",
   msgImportSuccess: "Project file loaded.",
   msgExampleLoaded: "Example project loaded.",
+  msgExampleLoadFailed: "Example images could not be loaded. Please try again.",
   msgSaveFailed: "Save failed – project too large for local storage. Export it as a file to avoid losing work.",
   exampleGalleryTitle: "Examples in the app",
   exampleGalleryIntro: "Load a complete school project to test editor, preview, concept, sources, presentation, PDF, and export directly.",

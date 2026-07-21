@@ -21,6 +21,7 @@ import {
 } from './domain/projectCodec';
 import { exportProjectToHtml } from './domain/exportHtml';
 import { getExampleProjects, type ExampleProjectId } from './domain/exampleProjects';
+import { attachExampleImages } from './domain/exampleImageAssets';
 import { displayCompletion } from './domain/completion';
 import './index.css';
 
@@ -105,17 +106,22 @@ function App() {
     }
   };
 
-  const handleExampleChoose = (id: ExampleProjectId) => {
+  const handleExampleChoose = async (id: ExampleProjectId) => {
     const example = examples.find((item) => item.id === id);
     if (!example) return;
 
     if (window.confirm(t.confirmLoadExample)) {
-      replaceData(example.project);
-      setActiveSeasonId(example.project.seasons[0]?.id || '');
-      setActiveTab('EPISODEN');
-      setMobilePanel('preview');
-      setShowExamples(false);
-      showStatus(t.msgExampleLoaded, 'success');
+      try {
+        const exampleProject = await attachExampleImages(example.project, example.id);
+        replaceData(exampleProject);
+        setActiveSeasonId(exampleProject.seasons[0]?.id || '');
+        setActiveTab('EPISODEN');
+        setMobilePanel('preview');
+        setShowExamples(false);
+        showStatus(t.msgExampleLoaded, 'success');
+      } catch {
+        showStatus(t.msgExampleLoadFailed, 'error');
+      }
     }
   };
 

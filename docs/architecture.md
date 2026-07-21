@@ -57,8 +57,9 @@ sources, presentation, HTML export, PDF/print, project-file export, social copy,
 and image-generation prompts.
 
 The same examples are generated as importable `.seriescreator` files in
-`examples/` via `npm run build:examples`. These artifacts must parse through the
-normal project import codec.
+`examples/` via `npm run build:examples`. These artifacts embed generated cover
+and episode JPEGs as data URLs and must parse through the normal project import
+codec.
 
 ## Network and privacy
 

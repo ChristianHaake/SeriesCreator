@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 - **In-app example gallery**: Added complete climate and Weimar classroom projects that load directly into the editor, preview, presentation, PDF, HTML, and project-file workflows.
 - **Example material kit**: Each in-app example includes social media copy, hashtags, alt text, and image-generation prompts in the reusable project data.
 - **Importable example files**: Added generated `.seriescreator` files in `examples/` for direct loading through the app's normal import flow.
+- **Example visuals**: Added AI-generated cover and episode images to the example project files as embedded JPEG data URLs.
 - **Example loading flow**: Added a guarded "Use example" action that replaces the current draft only after confirmation and uses the same project state as normal user work.
 
 ### Fixed
