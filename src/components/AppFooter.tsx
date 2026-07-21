@@ -9,6 +9,7 @@ export function AppFooter() {
         <nav className="app-footer__nav" aria-label="Footer Navigation">
           <a href="/hilfe">{t.footerHelp}</a>
           <a href="/ueber">{t.footerAbout}</a>
+          <a href="/beispiele">{t.footerExamples}</a>
           <a href="/lehrkraefte">{t.footerTeachers}</a>
           <a href="/datenschutz">{t.footerPrivacyPolicy}</a>
           <a href="/impressum">{t.footerImprint}</a>

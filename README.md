@@ -10,6 +10,8 @@ in einer Streaming-ähnlichen Oberfläche.
 - **No Accounts, Local-First**: Your series content is processed and stored only in your browser — no login, no server-side storage. Reach is measured with anonymous, cookieless Cloudflare Web Analytics.
 - **Interactive Editor**: Plan your series with titles, cast, genres, and reflection notes.
 - **Seasons & Episodes**: Structure your content with seasons, episodes, and explicit reorder controls (up to 20 seasons and 100 episodes per season).
+- **School Example Project**: Load a complete climate-and-energy classroom project with seasons, episodes, reflection notes, sources, and image-generation prompts.
+- **Examples & Social Kit**: View reusable classroom examples, social media copy, hashtags, alt text, and image prompts at `/beispiele`.
 - **Automatic Image Handling**: Upload large images; they are automatically optimized and scaled locally to save space.
 - **Presentation Mode**: Pitch your series using a sleek, streaming-style fullscreen interface.
 - **Standalone HTML Export**: Download a fully playable presentation as a single `.html` file that works offline anywhere.
@@ -56,7 +58,18 @@ npm audit --audit-level=low
 `npm run verify` ist das lokale Release-Gate und führt Lint, Typecheck, Tests
 und Build aus.
 
+## Release-Status
+
+- Version: `1.3.0`
+- Stand: 2026-07-21
+- Lokales Release-Gate: `npm run verify`
+- Zusätzliche Release-Checks: `npm audit --audit-level=low`, Chromium-PDF-Smoke,
+  DOM-Check für Accessible Names
+
 ## Bekannte Grenzen
 
-- PDF-Ausgabe nutzt die Druckfunktion des Browsers und muss vor einem Release
-  manuell in Zielbrowsern geprüft werden.
+- Ein echter Screenreader-Review mit VoiceOver/NVDA bleibt ein manueller
+  Zielsystem-Check.
+- PDF-Ausgabe nutzt die Druckfunktion des Browsers. Der Chromium-Smoke ist
+  geprüft; finale Zielbrowser sollten vor Veröffentlichung manuell geprüft
+  werden.

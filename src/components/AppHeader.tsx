@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { CheckCircle2, Download, GraduationCap, Trash2, Upload, Printer } from "lucide-react";
+import { CheckCircle2, Download, FileText, GraduationCap, Trash2, Upload, Printer } from "lucide-react";
 import type { ProjectData } from "../types";
 import { useTranslation } from "../i18n";
 import { parseProjectJson, PROJECT_FILE_EXTENSION } from '../domain/projectCodec';
@@ -10,11 +10,12 @@ interface Props {
   onExport?: () => void;
   onHtmlExport?: () => void;
   onImport?: (data: ProjectData) => void;
+  onLoadExample?: () => void;
   onReset?: () => void;
   onPrint?: () => void;
 }
 
-export function AppHeader({ onExport, onHtmlExport, onImport, onReset, onPrint }: Props) {
+export function AppHeader({ onExport, onHtmlExport, onImport, onLoadExample, onReset, onPrint }: Props) {
   const { t, locale, setLocale } = useTranslation();
   const importInputRef = useRef<HTMLInputElement | null>(null);
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -102,6 +103,12 @@ export function AppHeader({ onExport, onHtmlExport, onImport, onReset, onPrint }
                 onChange={handleFileUpload}
               />
             </>
+          )}
+          {onLoadExample && (
+            <button type="button" className="btn-header ui-button" onClick={onLoadExample} aria-label={t.btnLoadExample} title={t.btnLoadExample}>
+              <FileText size={18} />
+              <span>{t.btnLoadExample}</span>
+            </button>
           )}
           {onExport && (
             <button type="button" className="btn-header ui-button" onClick={onExport} aria-label={t.btnSave} title={t.btnSave}>

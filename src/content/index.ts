@@ -5,6 +5,7 @@ import ueber from "./ueber.md?raw";
 import lehrkraefte from "./lehrkraefte.md?raw";
 import verantwortungsvoll from "./verantwortungsvoll.md?raw";
 import nutzungsbedingungen from "./nutzungsbedingungen.md?raw";
+import beispiele from "./beispiele.md?raw";
 import privacyEn from "./en/privacy.md?raw";
 import helpEn from "./en/help.md?raw";
 import legalEn from "./en/legal.md?raw";
@@ -12,6 +13,7 @@ import aboutEn from "./en/about.md?raw";
 import educatorsEn from "./en/educators.md?raw";
 import responsibleEn from "./en/responsible-use.md?raw";
 import termsEn from "./en/terms.md?raw";
+import examplesEn from "./en/examples.md?raw";
 
 export const contentPages = {
   de: {
@@ -20,6 +22,10 @@ export const contentPages = {
     "/lehrkraefte": {
       title: "Hinweise für Lehrkräfte",
       content: lehrkraefte,
+    },
+    "/beispiele": {
+      title: "Beispiele und Social-Media-Kit",
+      content: beispiele,
     },
     "/verantwortungsvoll": {
       title: "Verantwortungsvoller Einsatz",
@@ -38,6 +44,10 @@ export const contentPages = {
     "/lehrkraefte": {
       title: "Information for educators",
       content: educatorsEn,
+    },
+    "/beispiele": {
+      title: "Examples and social media kit",
+      content: examplesEn,
     },
     "/verantwortungsvoll": {
       title: "Responsible use",

@@ -1,17 +1,17 @@
 ## Zweck
 
 SeriesCreator ist eine browserbasierte Simulationsumgebung für fiktive
-digitale Kommunikation. Lernende gestalten Beiträge, Chats und Diskussionen,
-ohne ein Konto bei einem sozialen Netzwerk zu benötigen oder Nutzinhalte auf
-eine Plattform hochzuladen.
+Streaming-Serienprojekte. Lernende strukturieren Unterrichtsinhalte als
+Serienkonzept mit Staffeln, Episoden, Quellen und Reflexion, ohne ein Konto zu
+benötigen oder Nutzinhalte auf eine Plattform hochzuladen.
 
 ## Pädagogische Ziele
 
-- digitale Kommunikationsformen analysieren
-- Quellen, Kontext und Glaubwürdigkeit reflektieren
-- Auswirkungen von Kennzahlen und Plattformgestaltung untersuchen
-- Konflikte, Privatsphäre und Persönlichkeitsrechte thematisieren
-- verantwortungsvolle Veröffentlichung und Mediengestaltung einüben
+- komplexe Unterrichtsinhalte in eine klare Episodenstruktur übersetzen
+- Quellen, Messdaten, Kontext und Glaubwürdigkeit reflektieren
+- kreative Präsentationsformen mit fachlicher Argumentation verbinden
+- Arbeitsprozesse und Entscheidungen nachvollziehbar dokumentieren
+- verantwortungsvolle Mediengestaltung und Quellenarbeit einüben
 
 ## Zielgruppen
 
@@ -26,14 +26,15 @@ Bildungskontexten.
   Nutzinhalten.
 - Cloudflare verarbeitet technische Verbindungs- und statistische
   Web-Analytics-Daten.
-- Die Oberfläche verwendet neutrale Bezeichnungen und generische Icons.
-- Bestehende Plattformen werden nicht pixelgenau kopiert.
-- Exporte werden sichtbar als Simulation gekennzeichnet.
+- Die Oberfläche verwendet generische Streaming-Muster statt eine echte
+  Plattform pixelgenau zu kopieren.
+- Exporte bleiben lokale Dateien und können offline weitergegeben werden.
 
 ## Entwicklungsstand
 
-Foto-Post, Messenger-Chat und Mikroblog unterstützen Live-Vorschau, lokale
-Bilder, Konfigurationsdateien sowie PNG-, JPG- und PDF-Export.
+Serienmetadaten, Staffeln, Episoden, lokale Bilder, Präsentationsmodus,
+Offline-HTML, PDF-Druck und versionierte `.seriescreator`-Projektdateien sind
+funktionsfähig. Ein schulisches Beispielprojekt zeigt den vollständigen Ablauf.
 
 ## Quellcode
 

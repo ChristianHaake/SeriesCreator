@@ -8,6 +8,10 @@
 4. Prüfe die Vorschau und den Präsentationsmodus.
 5. Speichere ein editierbares Projektbackup oder drucke die Vorschau als PDF.
 
+Mit **Beispiel laden** kannst du ein vollständiges Schulprojekt zum Thema
+Energie und Klima laden. Das ersetzt den aktuellen Entwurf erst nach
+Bestätigung.
+
 ## Projekt speichern und laden
 
 **Speichern** lädt eine versionierte `.seriescreator`-Datei herunter. Sie enthält
@@ -16,6 +20,9 @@ Thumbnail-Bilder.
 
 **Laden** akzeptiert `.seriescreator` und ältere JSON-Dateien. Importierte Daten
 werden vollständig validiert. Bei Fehlern bleibt das aktuelle Projekt erhalten.
+
+**Beispiel laden** lädt ein lokales Beispielprojekt in denselben Editor- und
+Exportpfad wie eigene Projekte.
 
 ## Unterstützte Bilder
 
