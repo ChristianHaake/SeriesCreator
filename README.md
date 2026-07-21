@@ -11,7 +11,7 @@ in einer Streaming-ähnlichen Oberfläche.
 - **Interactive Editor**: Plan your series with titles, cast, genres, and reflection notes.
 - **Seasons & Episodes**: Structure your content with seasons, episodes, and explicit reorder controls (up to 20 seasons and 100 episodes per season).
 - **In-App Example Gallery**: Load complete school projects for climate education and history with seasons, episodes, reflection notes, sources, social copy, and image-generation prompts.
-- **Importable Example Files**: Ready-made `.seriescreator` files are generated in `examples/` and can be opened through the app's **Load** action.
+- **Importable Example Files**: Ready-made `.seriescreator` files are generated in `examples/` with embedded cover and episode images and can be opened through the app's **Load** action.
 - **Automatic Image Handling**: Upload large images; they are automatically optimized and scaled locally to save space.
 - **Presentation Mode**: Pitch your series using a sleek, streaming-style fullscreen interface.
 - **Standalone HTML Export**: Download a fully playable presentation as a single `.html` file that works offline anywhere.

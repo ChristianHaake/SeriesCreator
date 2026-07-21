@@ -105,6 +105,7 @@ export const de = {
   msgExportFailed: "Export konnte nicht gestartet werden. Bitte versuche es erneut.",
   msgImportSuccess: "Projektdatei wurde geladen.",
   msgExampleLoaded: "Beispielprojekt wurde geladen.",
+  msgExampleLoadFailed: "Beispielbilder konnten nicht geladen werden. Bitte versuche es erneut.",
   msgSaveFailed: "Speichern fehlgeschlagen – Projekt zu groß für den lokalen Speicher. Exportiere es als Datei, um nichts zu verlieren.",
   exampleGalleryTitle: "Beispiele in der App",
   exampleGalleryIntro: "Lade ein vollständiges Schulprojekt, um Editor, Vorschau, Konzept, Quellen, Präsentation, PDF und Export direkt zu testen.",

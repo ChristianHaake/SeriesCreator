@@ -1,6 +1,6 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
 import { getExampleProjects } from './domain/exampleProjects';
 import { parseProjectJson, serializeProject } from './domain/projectCodec';
@@ -31,6 +31,17 @@ describe('App', () => {
       configurable: true,
       value: vi.fn(),
     });
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => new Response(new Uint8Array([255, 216, 255, 217]), {
+        headers: { 'Content-Type': 'image/jpeg' },
+        status: 200,
+      })),
+    );
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it('renders keyboard-operable preview tabs', async () => {
@@ -166,10 +177,11 @@ describe('App', () => {
     expect(window.confirm).toHaveBeenCalledWith(
       'Load this example project? This will replace your current draft.',
     );
-    expect(screen.getByText('Example project loaded.')).toBeInTheDocument();
+    expect(await screen.findByText('Example project loaded.')).toBeInTheDocument();
     expect(screen.getAllByRole('heading', { name: 'The School Climate Code' }).length).toBeGreaterThan(0);
     expect(screen.getAllByRole('heading', { name: /1\. The Electricity Detective/ }).length).toBeGreaterThan(0);
     expect(screen.getAllByRole('heading', { name: /2\. Heat on the Run/ }).length).toBeGreaterThan(0);
+    expect(document.querySelectorAll('.episode-card img[src^="data:image/jpeg;base64,"]').length).toBe(3);
 
     await user.click(screen.getByRole('tab', { name: 'Concept' }));
     expect(screen.getByText('Image prompts and social media kit')).toBeInTheDocument();
@@ -189,10 +201,11 @@ describe('App', () => {
     expect(weimarCard).not.toBeNull();
     await user.click(within(weimarCard!).getByRole('button', { name: 'Use example' }));
 
-    expect(screen.getByText('Example project loaded.')).toBeInTheDocument();
+    expect(await screen.findByText('Example project loaded.')).toBeInTheDocument();
     expect(screen.getAllByRole('heading', { name: 'The Weimar File' }).length).toBeGreaterThan(0);
     expect(screen.getAllByRole('heading', { name: /1\. A New Start/ }).length).toBeGreaterThan(0);
     expect(screen.getAllByRole('heading', { name: /2\. Inflation in the Street/ }).length).toBeGreaterThan(0);
+    expect(document.querySelectorAll('.episode-card img[src^="data:image/jpeg;base64,"]').length).toBe(3);
 
     await user.click(screen.getByRole('tab', { name: 'Concept' }));
     expect(screen.getByText('Image prompts and social media kit')).toBeInTheDocument();

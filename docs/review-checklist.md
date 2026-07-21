@@ -23,6 +23,7 @@ https://github.com/ChristianHaake/haak3-webapp-standard/blob/main/docs/review-ch
 - [x] Bundled school examples load into the normal project state.
 - [x] Example gallery is visible inside the app and includes social copy, hashtags, and image prompts.
 - [x] Generated `.seriescreator` example files exist in `examples/` and parse through the import codec.
+- [x] Example project files include embedded cover and episode thumbnail images.
 - [x] Chromium PDF/print smoke creates an A4 PDF containing title and episodes.
 - [x] DOM accessibility smoke finds no relevant form controls without accessible names.
 - [ ] Manual PDF/print output review completed on all target browsers.
