@@ -8,8 +8,8 @@
 4. Review the preview and presentation mode.
 5. Save an editable project backup or print the preview as PDF.
 
-Use **Load Example** to load a complete school project about energy and climate.
-It replaces the current draft only after confirmation.
+Use **Examples** to load complete school projects. An example replaces the
+current draft only after confirmation.
 
 ## Save and load projects
 
@@ -19,8 +19,8 @@ seasons, episodes, and embedded optimized thumbnail images.
 **Load** accepts `.seriescreator` and older JSON files. Imported data is fully
 validated. If validation fails, the current project remains unchanged.
 
-**Load Example** loads a local example project into the same editor and export
-workflow as user-created projects.
+**Examples** opens a local example gallery. Each example loads into the same
+editor and export workflow as user-created projects.
 
 ## Supported images
 

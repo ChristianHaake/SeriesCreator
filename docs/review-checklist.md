@@ -20,8 +20,9 @@ https://github.com/ChristianHaake/haak3-webapp-standard/blob/main/docs/review-ch
 - [x] Build, lint, typecheck, and unit/browser-like tests are exposed through `npm run verify`.
 - [x] README, package metadata, and license file name GPL-3.0-only consistently.
 - [x] CSP has no documented app-side exception.
-- [x] Bundled school example loads into the normal project state.
-- [x] Examples and social media kit are viewable at `/beispiele`.
+- [x] Bundled school examples load into the normal project state.
+- [x] Example gallery is visible inside the app and includes social copy, hashtags, and image prompts.
+- [x] Generated `.seriescreator` example files exist in `examples/` and parse through the import codec.
 - [x] Chromium PDF/print smoke creates an A4 PDF containing title and episodes.
 - [x] DOM accessibility smoke finds no relevant form controls without accessible names.
 - [ ] Manual PDF/print output review completed on all target browsers.

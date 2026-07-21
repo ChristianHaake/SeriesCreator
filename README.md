@@ -10,8 +10,8 @@ in einer Streaming-ähnlichen Oberfläche.
 - **No Accounts, Local-First**: Your series content is processed and stored only in your browser — no login, no server-side storage. Reach is measured with anonymous, cookieless Cloudflare Web Analytics.
 - **Interactive Editor**: Plan your series with titles, cast, genres, and reflection notes.
 - **Seasons & Episodes**: Structure your content with seasons, episodes, and explicit reorder controls (up to 20 seasons and 100 episodes per season).
-- **School Example Project**: Load a complete climate-and-energy classroom project with seasons, episodes, reflection notes, sources, and image-generation prompts.
-- **Examples & Social Kit**: View reusable classroom examples, social media copy, hashtags, alt text, and image prompts at `/beispiele`.
+- **In-App Example Gallery**: Load complete school projects for climate education and history with seasons, episodes, reflection notes, sources, social copy, and image-generation prompts.
+- **Importable Example Files**: Ready-made `.seriescreator` files are generated in `examples/` and can be opened through the app's **Load** action.
 - **Automatic Image Handling**: Upload large images; they are automatically optimized and scaled locally to save space.
 - **Presentation Mode**: Pitch your series using a sleek, streaming-style fullscreen interface.
 - **Standalone HTML Export**: Download a fully playable presentation as a single `.html` file that works offline anywhere.
@@ -49,14 +49,15 @@ npm run dev
 ```bash
 npm run lint
 npm run typecheck
+npm run build:examples
 npm run test
 npm run build
 npm run verify
 npm audit --audit-level=low
 ```
 
-`npm run verify` ist das lokale Release-Gate und führt Lint, Typecheck, Tests
-und Build aus.
+`npm run verify` ist das lokale Release-Gate und führt Lint, Typecheck,
+Beispieldatei-Generierung, Tests und Build aus.
 
 ## Release-Status
 

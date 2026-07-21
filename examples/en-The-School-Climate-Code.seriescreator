@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "title": "The School Climate Code",
+  "author": "Class 8b",
+  "description": "A class investigates where energy is lost in everyday school life and turns measurements, interviews, and observations into a concrete climate action plan.",
+  "previewBrand": "SchoolStream",
+  "previewCategory": "Class projects",
+  "matchPercentage": 99,
+  "completionOverride": 92,
+  "ageRating": "12+",
+  "genre": "Documentary",
+  "cast": "Class 8b, Energy Club, facility manager, student council",
+  "seasons": [
+    {
+      "id": "climate-season-research",
+      "title": "Season 1: Investigation",
+      "episodes": [
+        {
+          "id": "climate-ep-electricity",
+          "title": "The Electricity Detective",
+          "summary": "The class measures standby consumption, lighting, and device usage, then identifies hidden energy drains in the classroom.",
+          "altText": "Students measuring energy consumption in a classroom."
+        },
+        {
+          "id": "climate-ep-heat",
+          "title": "Heat on the Run",
+          "summary": "Temperature maps and room logs reveal where windows, radiators, and routines waste heating energy.",
+          "altText": "Students compare classroom temperature readings."
+        },
+        {
+          "id": "climate-ep-cafeteria",
+          "title": "The Cafeteria Balance",
+          "summary": "The team compares food waste, transport routes, and regional options to make the cafeteria part of the climate plan.",
+          "altText": "Students documenting food waste in a school cafeteria."
+        }
+      ]
+    },
+    {
+      "id": "climate-season-action",
+      "title": "Season 2: Action Plan",
+      "episodes": [
+        {
+          "id": "climate-ep-data",
+          "title": "The Data Proof",
+          "summary": "Charts, cost estimates, and short interviews turn observations into evidence the school leadership can evaluate.",
+          "altText": "Students analyzing charts on a classroom screen."
+        },
+        {
+          "id": "climate-ep-council",
+          "title": "The Climate Council",
+          "summary": "Different groups argue about comfort, cost, fairness, and feasibility before voting on realistic measures.",
+          "altText": "Students presenting climate findings in a school meeting."
+        },
+        {
+          "id": "climate-ep-monday",
+          "title": "A Plan for Monday",
+          "summary": "The finale prioritizes three immediate changes, two medium-term projects, and one question for the next class project.",
+          "altText": "Students placing action cards on a classroom board."
+        }
+      ]
+    }
+  ],
+  "reflection": "The project shows how measurement, interpretation, and communication belong together. Learners must distinguish between observations, assumptions, and evidence before proposing changes for the school.",
+  "sources": "Class measurement log; interview with facility management; German Environment Agency teaching material on energy saving; school cafeteria waste notes; student council feedback.",
+  "customConceptTitle": "Image prompts and social media kit",
+  "customConceptText": "Social media copy: Class 8b turns energy data into a streaming-style investigation. The project shows measurement, debate, and concrete school climate action in six episodes.\n\nHashtags: #SeriesCreator #SchoolProject #ClimateEducation #MediaEducation\n\nCover prompt: Wide cinematic documentary still of a modern school building at sunrise, students with clipboards and an energy meter in the courtyard, realistic, natural light, no text, 16:9.\n\nEpisode thumbnail prompts: 1. Students measuring classroom devices with a plug-in power meter, realistic documentary photo, no text, 16:9. 2. Thermal-camera-inspired view of classroom windows and radiators, students comparing notes, no text, 16:9. 3. School cafeteria with students weighing food waste and checking regional ingredients, no text, 16:9. 4. Students analyzing charts and spreadsheets on a classroom screen, no text, 16:9. 5. Student climate council presenting findings to teachers, constructive meeting atmosphere, no text, 16:9. 6. Students arranging action cards on a classroom board, practical planning mood, no text, 16:9."
+}

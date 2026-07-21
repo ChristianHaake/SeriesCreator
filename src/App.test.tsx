@@ -1,8 +1,8 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
-import { createSchoolEnergyExampleProject } from './domain/exampleProjects';
+import { getExampleProjects } from './domain/exampleProjects';
 import { parseProjectJson, serializeProject } from './domain/projectCodec';
 import { LocaleProvider } from './i18n';
 
@@ -64,22 +64,6 @@ describe('App', () => {
 
     expect(screen.getByRole('heading', { name: 'The Netflix Method' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /back to app/i })).toHaveAttribute('href', '/');
-  });
-
-  it('renders the examples and social media kit route', () => {
-    renderApp('/beispiele');
-
-    expect(screen.getByRole('heading', { name: 'Examples and social media kit' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Example 1: The School Climate Code' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Example 2: The Weimar File' })).toBeInTheDocument();
-    expect(screen.getAllByText(/Social media copy/).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/#SeriesCreator/).length).toBeGreaterThan(0);
-  });
-
-  it('links to examples from the footer', () => {
-    renderApp();
-
-    expect(screen.getByRole('link', { name: 'Examples' })).toHaveAttribute('href', '/beispiele');
   });
 
   it('adds a season, selects it, and updates the preview metadata', async () => {
@@ -152,14 +136,35 @@ describe('App', () => {
     expect(screen.getByLabelText('Sources')).toBeInTheDocument();
   });
 
+  it('shows example projects inside the app', async () => {
+    const user = userEvent.setup();
+    renderApp();
+
+    await user.click(screen.getByRole('button', { name: 'Examples' }));
+
+    const dialog = screen.getByRole('dialog', { name: 'Examples in the app' });
+    expect(within(dialog).getByRole('heading', { name: 'The School Climate Code' })).toBeInTheDocument();
+    expect(within(dialog).getByRole('heading', { name: 'The Weimar File' })).toBeInTheDocument();
+    expect(within(dialog).getAllByText('Social media copy').length).toBeGreaterThan(0);
+    expect(within(dialog).getAllByText('Image prompts').length).toBeGreaterThan(0);
+    expect(within(dialog).getAllByText(/#SeriesCreator/).length).toBeGreaterThan(0);
+
+    await user.click(within(dialog).getByRole('button', { name: 'Close examples' }));
+    expect(screen.queryByRole('dialog', { name: 'Examples in the app' })).not.toBeInTheDocument();
+  });
+
   it('loads the school climate example into the editor and preview', async () => {
     const user = userEvent.setup();
     renderApp();
 
-    await user.click(screen.getByRole('button', { name: 'Load Example' }));
+    await user.click(screen.getByRole('button', { name: 'Examples' }));
+    const dialog = screen.getByRole('dialog', { name: 'Examples in the app' });
+    const climateCard = within(dialog).getByRole('heading', { name: 'The School Climate Code' }).closest('article');
+    expect(climateCard).not.toBeNull();
+    await user.click(within(climateCard!).getByRole('button', { name: 'Use example' }));
 
     expect(window.confirm).toHaveBeenCalledWith(
-      'Load the example project? This will replace your current draft.',
+      'Load this example project? This will replace your current draft.',
     );
     expect(screen.getByText('Example project loaded.')).toBeInTheDocument();
     expect(screen.getAllByRole('heading', { name: 'The School Climate Code' }).length).toBeGreaterThan(0);
@@ -167,26 +172,50 @@ describe('App', () => {
     expect(screen.getAllByRole('heading', { name: /2\. Heat on the Run/ }).length).toBeGreaterThan(0);
 
     await user.click(screen.getByRole('tab', { name: 'Concept' }));
-    expect(screen.getByText('Image prompts for generative AI')).toBeInTheDocument();
+    expect(screen.getByText('Image prompts and social media kit')).toBeInTheDocument();
+    expect(screen.getByText(/Class 8b turns energy data/)).toBeInTheDocument();
 
     await user.click(screen.getByRole('tab', { name: 'Sources' }));
     expect(screen.getByText(/Class measurement log/)).toBeInTheDocument();
+  });
+
+  it('loads the Weimar example into the editor and preview', async () => {
+    const user = userEvent.setup();
+    renderApp();
+
+    await user.click(screen.getByRole('button', { name: 'Examples' }));
+    const dialog = screen.getByRole('dialog', { name: 'Examples in the app' });
+    const weimarCard = within(dialog).getByRole('heading', { name: 'The Weimar File' }).closest('article');
+    expect(weimarCard).not.toBeNull();
+    await user.click(within(weimarCard!).getByRole('button', { name: 'Use example' }));
+
+    expect(screen.getByText('Example project loaded.')).toBeInTheDocument();
+    expect(screen.getAllByRole('heading', { name: 'The Weimar File' }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('heading', { name: /1\. A New Start/ }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('heading', { name: /2\. Inflation in the Street/ }).length).toBeGreaterThan(0);
+
+    await user.click(screen.getByRole('tab', { name: 'Concept' }));
+    expect(screen.getByText('Image prompts and social media kit')).toBeInTheDocument();
+    expect(screen.getByText(/Weimar Republic into a source-based investigation/)).toBeInTheDocument();
   });
 });
 
 describe('example projects', () => {
   it('ship as valid project files', () => {
     for (const locale of ['de', 'en'] as const) {
-      const example = createSchoolEnergyExampleProject(locale);
-      const parsed = parseProjectJson(serializeProject(example));
+      for (const example of getExampleProjects(locale)) {
+        const parsed = parseProjectJson(serializeProject(example.project));
 
-      expect(parsed.ok).toBe(true);
-      if (parsed.ok) {
-        expect(parsed.data.seasons).toHaveLength(2);
-        expect(parsed.data.seasons.flatMap((season) => season.episodes)).toHaveLength(6);
-        expect(parsed.data.reflection).toBeTruthy();
-        expect(parsed.data.sources).toBeTruthy();
-        expect(parsed.data.customConceptText).toContain('16:9');
+        expect(parsed.ok).toBe(true);
+        if (parsed.ok) {
+          expect(parsed.data.seasons).toHaveLength(2);
+          expect(parsed.data.seasons.flatMap((season) => season.episodes)).toHaveLength(6);
+          expect(parsed.data.reflection).toBeTruthy();
+          expect(parsed.data.sources).toBeTruthy();
+          expect(parsed.data.customConceptText).toContain('16:9');
+          expect(example.socialCopy).toBeTruthy();
+          expect(example.imagePrompts.length).toBeGreaterThan(0);
+        }
       }
     }
   });

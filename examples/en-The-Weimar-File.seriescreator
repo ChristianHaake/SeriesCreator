@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "title": "The Weimar File",
+  "author": "History course 10",
+  "description": "A history course stages the Weimar Republic as an investigative series: democratic hopes, crisis pressure, media battles, and questions about responsibility.",
+  "previewBrand": "HistoryLab",
+  "previewCategory": "History projects",
+  "matchPercentage": 99,
+  "completionOverride": 88,
+  "ageRating": "14+",
+  "genre": "Historical investigation",
+  "cast": "History course 10, archive team, press group, debate panel",
+  "seasons": [
+    {
+      "id": "weimar-season-republic",
+      "title": "Season 1: Democracy Under Pressure",
+      "episodes": [
+        {
+          "id": "weimar-ep-constitution",
+          "title": "A New Start",
+          "summary": "The opening episode explains the end of empire, the new constitution, and the promises attached to parliamentary democracy.",
+          "altText": "Students examine a historical timeline about the Weimar Republic."
+        },
+        {
+          "id": "weimar-ep-crisis",
+          "title": "Inflation in the Street",
+          "summary": "Learners connect hyperinflation, everyday hardship, and political radicalization through fictional eyewitness files.",
+          "altText": "Students compare source cards about hyperinflation."
+        },
+        {
+          "id": "weimar-ep-culture",
+          "title": "Night Lights, New Voices",
+          "summary": "The class explores modern culture, gender roles, cinema, and urban life as signs of social change.",
+          "altText": "Learners build a classroom collage about Weimar culture."
+        }
+      ]
+    },
+    {
+      "id": "weimar-season-breakdown",
+      "title": "Season 2: Breakdown",
+      "episodes": [
+        {
+          "id": "weimar-ep-propaganda",
+          "title": "The Poster War",
+          "summary": "Campaign posters and newspaper excerpts show how political groups fought for attention, fear, and loyalty.",
+          "altText": "Students analyze historical election posters in class."
+        },
+        {
+          "id": "weimar-ep-election",
+          "title": "Votes and Violence",
+          "summary": "The episode links election results, street violence, presidential cabinets, and the shrinking room for compromise.",
+          "altText": "Students discuss a chart of election results."
+        },
+        {
+          "id": "weimar-ep-question",
+          "title": "Could It Have Been Different?",
+          "summary": "The finale turns the investigation into a moderated classroom debate about causes, responsibility, and democratic resilience.",
+          "altText": "Students hold a moderated debate in a history classroom."
+        }
+      ]
+    }
+  ],
+  "reflection": "This example makes chronology, source criticism, perspective taking, and historical judgement visible. Students do not just retell events; they turn evidence into a structured argument.",
+  "sources": "Textbook chapter on the Weimar Republic; selected constitution excerpts; election result tables; historical posters; newspaper source excerpts; classroom debate notes.",
+  "customConceptTitle": "Image prompts and social media kit",
+  "customConceptText": "Social media copy: A history course turns the Weimar Republic into a source-based investigation. Six episodes connect democratic beginnings, crisis, media, and responsibility.\n\nHashtags: #SeriesCreator #HistoryClass #WeimarRepublic #DemocracyEducation\n\nCover prompt: Cinematic classroom archive table with Weimar-era documents, election posters, magnifying glass, and students taking notes, realistic historical investigation mood, no text, 16:9.\n\nEpisode thumbnail prompts: 1. Students studying a timeline from empire to republic, documentary classroom photo, no text, 16:9. 2. Source table about hyperinflation with banknotes, notebooks, and student annotations, no text, 16:9. 3. Classroom wall collage about 1920s culture, cinema, art, and social change, no text, 16:9. 4. Students comparing political posters and newspaper clippings, analytical mood, no text, 16:9. 5. Election chart on a classroom screen, students debating in small groups, no text, 16:9. 6. Moderated classroom debate with source cards on desks, serious but constructive mood, no text, 16:9."
+}

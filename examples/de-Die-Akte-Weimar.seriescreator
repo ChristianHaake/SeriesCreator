@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "title": "Die Akte Weimar",
+  "author": "Geschichtskurs 10",
+  "description": "Ein Geschichtskurs inszeniert die Weimarer Republik als Recherche-Serie: demokratische Hoffnungen, Krisendruck, Medienkaempfe und Fragen nach Verantwortung.",
+  "previewBrand": "HistoryLab",
+  "previewCategory": "Geschichtsprojekte",
+  "matchPercentage": 99,
+  "completionOverride": 88,
+  "ageRating": "ab 14",
+  "genre": "Historische Recherche",
+  "cast": "Geschichtskurs 10, Archivteam, Pressegruppe, Debattenrunde",
+  "seasons": [
+    {
+      "id": "weimar-staffel-republik",
+      "title": "Staffel 1: Demokratie unter Druck",
+      "episodes": [
+        {
+          "id": "weimar-ep-verfassung",
+          "title": "Ein neuer Anfang",
+          "summary": "Die Auftaktfolge erklaert das Ende des Kaiserreichs, die neue Verfassung und die Versprechen der parlamentarischen Demokratie.",
+          "altText": "Lernende untersuchen eine historische Zeitleiste zur Weimarer Republik."
+        },
+        {
+          "id": "weimar-ep-krise",
+          "title": "Inflation auf der Strasse",
+          "summary": "Die Lernenden verbinden Hyperinflation, Alltagserfahrungen und politische Radikalisierung mit fiktiven Quellenakten.",
+          "altText": "Schuelerinnen und Schueler vergleichen Quellenkarten zur Hyperinflation."
+        },
+        {
+          "id": "weimar-ep-kultur",
+          "title": "Lichter der Moderne",
+          "summary": "Die Klasse untersucht Kultur, Rollenbilder, Kino und Stadtleben als Zeichen gesellschaftlicher Veraenderung.",
+          "altText": "Lernende bauen eine Collage zur Kultur der Weimarer Republik."
+        }
+      ]
+    },
+    {
+      "id": "weimar-staffel-zerfall",
+      "title": "Staffel 2: Zerfall",
+      "episodes": [
+        {
+          "id": "weimar-ep-propaganda",
+          "title": "Der Plakatkrieg",
+          "summary": "Wahlplakate und Zeitungsausschnitte zeigen, wie politische Gruppen um Aufmerksamkeit, Angst und Loyalitaet kaempfen.",
+          "altText": "Lernende analysieren historische Wahlplakate im Unterricht."
+        },
+        {
+          "id": "weimar-ep-wahl",
+          "title": "Stimmen und Gewalt",
+          "summary": "Die Folge verknuepft Wahlergebnisse, Strassengewalt, Praesidialkabinette und den schwindenden Raum fuer Kompromisse.",
+          "altText": "Lernende diskutieren ein Diagramm mit Wahlergebnissen."
+        },
+        {
+          "id": "weimar-ep-frage",
+          "title": "Haette es anders kommen koennen?",
+          "summary": "Das Finale macht aus der Recherche eine moderierte Klassendebatte ueber Ursachen, Verantwortung und demokratische Widerstandsfaehigkeit.",
+          "altText": "Eine Klasse fuehrt eine moderierte Debatte im Geschichtsraum."
+        }
+      ]
+    }
+  ],
+  "reflection": "Dieses Beispiel macht Chronologie, Quellenkritik, Perspektivuebernahme und historische Urteilsbildung sichtbar. Die Lernenden erzaehlen Ereignisse nicht nur nach, sondern formen aus Belegen eine strukturierte Argumentation.",
+  "sources": "Schulbuchkapitel zur Weimarer Republik; ausgewaehlte Verfassungsauszüge; Wahlergebnistabellen; historische Plakate; Zeitungsauszüge; Notizen aus der Klassendebatte.",
+  "customConceptTitle": "Bildprompts und Social-Media-Kit",
+  "customConceptText": "Social-Media-Text: Ein Geschichtskurs verwandelt die Weimarer Republik in eine quellenbasierte Recherche. Sechs Episoden verbinden demokratischen Anfang, Krise, Medien und Verantwortung.\n\nHashtags: #SeriesCreator #Geschichtsunterricht #WeimarerRepublik #Demokratiebildung\n\nCover-Prompt: Cinematic classroom archive table with Weimar-era documents, election posters, magnifying glass, and students taking notes, realistic historical investigation mood, no text, 16:9.\n\nEpisoden-Prompts: 1. Students studying a timeline from empire to republic, documentary classroom photo, no text, 16:9. 2. Source table about hyperinflation with banknotes, notebooks, and student annotations, no text, 16:9. 3. Classroom wall collage about 1920s culture, cinema, art, and social change, no text, 16:9. 4. Students comparing political posters and newspaper clippings, analytical mood, no text, 16:9. 5. Election chart on a classroom screen, students debating in small groups, no text, 16:9. 6. Moderated classroom debate with source cards on desks, serious but constructive mood, no text, 16:9."
+}

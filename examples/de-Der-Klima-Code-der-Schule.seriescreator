@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "title": "Der Klima-Code der Schule",
+  "author": "Klasse 8b",
+  "description": "Eine Klasse untersucht, wo im Schulalltag Energie verloren geht, und entwickelt aus Messdaten, Interviews und Beobachtungen einen konkreten Klimaplan.",
+  "previewBrand": "SchulStream",
+  "previewCategory": "Klassenprojekte",
+  "matchPercentage": 99,
+  "completionOverride": 92,
+  "ageRating": "ab 12",
+  "genre": "Dokumentation",
+  "cast": "Klasse 8b, Energie-AG, Hausmeisterei, SV",
+  "seasons": [
+    {
+      "id": "klima-staffel-recherche",
+      "title": "Staffel 1: Recherche",
+      "episodes": [
+        {
+          "id": "klima-ep-strom",
+          "title": "Der Stromdetektiv",
+          "summary": "Die Klasse misst Standby-Verbrauch, Beleuchtung und Gerätenutzung und findet versteckte Energiefresser im Klassenraum.",
+          "altText": "Schuelerinnen und Schueler messen den Stromverbrauch im Klassenraum."
+        },
+        {
+          "id": "klima-ep-waerme",
+          "title": "Waerme auf der Flucht",
+          "summary": "Temperaturkarten und Raumprotokolle zeigen, wo Fenster, Heizkoerper und Routinen zu viel Heizenergie verlieren.",
+          "altText": "Schuelerinnen und Schueler vergleichen Temperaturmessungen."
+        },
+        {
+          "id": "klima-ep-mensa",
+          "title": "Die Mensa-Bilanz",
+          "summary": "Das Team untersucht Lebensmittelreste, Transportwege und regionale Alternativen fuer eine klimabewusstere Schulmensa.",
+          "altText": "Lernende dokumentieren Lebensmittelreste in einer Schulmensa."
+        }
+      ]
+    },
+    {
+      "id": "klima-staffel-massnahmen",
+      "title": "Staffel 2: Massnahmen",
+      "episodes": [
+        {
+          "id": "klima-ep-daten",
+          "title": "Der Datenbeweis",
+          "summary": "Diagramme, Kostenschaetzungen und Kurzinterviews machen aus Beobachtungen belastbare Argumente fuer die Schulleitung.",
+          "altText": "Lernende analysieren Diagramme auf einem Bildschirm."
+        },
+        {
+          "id": "klima-ep-klimarat",
+          "title": "Der Klimarat",
+          "summary": "Gruppen diskutieren Komfort, Kosten, Fairness und Umsetzbarkeit, bevor sie ueber realistische Massnahmen abstimmen.",
+          "altText": "Eine Klasse praesentiert Klimadaten in einer Schulbesprechung."
+        },
+        {
+          "id": "klima-ep-montag",
+          "title": "Ein Plan fuer Montag",
+          "summary": "Das Finale buendelt drei Sofortmassnahmen, zwei mittelfristige Projekte und eine Frage fuer das naechste Unterrichtsvorhaben.",
+          "altText": "Lernende ordnen Aktionskarten an einer Tafel."
+        }
+      ]
+    }
+  ],
+  "reflection": "Das Projekt macht sichtbar, dass Messen, Deuten und Kommunizieren zusammengehoeren. Die Lernenden trennen Beobachtungen, Vermutungen und Belege, bevor sie konkrete Veraenderungen fuer ihre Schule vorschlagen.",
+  "sources": "Messprotokoll der Klasse; Interview mit der Hausmeisterei; Unterrichtsmaterial des Umweltbundesamts zum Energiesparen; Notizen zur Mensa-Abfallmessung; Rueckmeldung der SV.",
+  "customConceptTitle": "Bildprompts und Social-Media-Kit",
+  "customConceptText": "Social-Media-Text: Klasse 8b verwandelt Energiedaten in eine Streaming-Recherche. Das Projekt zeigt Messen, Diskutieren und konkrete Klimamassnahmen fuer die Schule in sechs Episoden.\n\nHashtags: #SeriesCreator #Schulprojekt #Klimabildung #Medienbildung\n\nCover-Prompt: Wide cinematic documentary still of a modern German school building at sunrise, students with clipboards and an energy meter in the courtyard, realistic, natural light, no text, 16:9.\n\nEpisoden-Prompts: 1. Students measuring classroom devices with a plug-in power meter, realistic documentary photo, no text, 16:9. 2. Thermal-camera-inspired view of classroom windows and radiators, students comparing notes, no text, 16:9. 3. School cafeteria with students weighing food waste and checking regional ingredients, no text, 16:9. 4. Students analyzing charts and spreadsheets on a classroom screen, no text, 16:9. 5. Student climate council presenting findings to teachers, constructive meeting atmosphere, no text, 16:9. 6. Students arranging action cards on a classroom board, practical planning mood, no text, 16:9."
+}

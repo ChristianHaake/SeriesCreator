@@ -5,9 +5,10 @@ All notable changes to this project will be documented in this file.
 ## [1.3.0] - 2026-07-21
 
 ### Added
-- **School example project**: Added "The School Climate Code" / "Der Klima-Code der Schule" as a complete in-app example with two seasons, six episodes, reflection notes, sources, and image-generation prompts.
-- **Example loading flow**: Added a guarded "Load Example" action that replaces the current draft only after confirmation and uses the same project state as normal user work.
-- **Examples page**: Added `/beispiele` with viewable classroom examples, social media copy, hashtags, alt text, and image prompts for reuse.
+- **In-app example gallery**: Added complete climate and Weimar classroom projects that load directly into the editor, preview, presentation, PDF, HTML, and project-file workflows.
+- **Example material kit**: Each in-app example includes social media copy, hashtags, alt text, and image-generation prompts in the reusable project data.
+- **Importable example files**: Added generated `.seriescreator` files in `examples/` for direct loading through the app's normal import flow.
+- **Example loading flow**: Added a guarded "Use example" action that replaces the current draft only after confirmation and uses the same project state as normal user work.
 
 ### Fixed
 - **Print/PDF layout**: Print output no longer inherits the clipped app shell layout. Generated PDFs start at the page top and include episode cards instead of cropping after the hero area.
