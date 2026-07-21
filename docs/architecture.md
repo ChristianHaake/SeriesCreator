@@ -48,12 +48,17 @@ Editable backups use:
 Imports are treated as untrusted input. A project replaces state only after full
 runtime validation and normalization.
 
-## Bundled example
+## Bundled examples
 
-The app ships with a school-themed climate-and-energy example. Loading it is a
+The app ships with school-themed climate and history examples. Loading one is a
 state replacement guarded by confirmation, just like reset/import risk paths.
-The example intentionally exercises seasons, episode ordering, reflection,
-sources, presentation, HTML export, PDF/print, and project-file export.
+The examples intentionally exercise seasons, episode ordering, reflection,
+sources, presentation, HTML export, PDF/print, project-file export, social copy,
+and image-generation prompts.
+
+The same examples are generated as importable `.seriescreator` files in
+`examples/` via `npm run build:examples`. These artifacts must parse through the
+normal project import codec.
 
 ## Network and privacy
 

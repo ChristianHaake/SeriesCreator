@@ -10,12 +10,12 @@ interface Props {
   onExport?: () => void;
   onHtmlExport?: () => void;
   onImport?: (data: ProjectData) => void;
-  onLoadExample?: () => void;
+  onShowExamples?: () => void;
   onReset?: () => void;
   onPrint?: () => void;
 }
 
-export function AppHeader({ onExport, onHtmlExport, onImport, onLoadExample, onReset, onPrint }: Props) {
+export function AppHeader({ onExport, onHtmlExport, onImport, onShowExamples, onReset, onPrint }: Props) {
   const { t, locale, setLocale } = useTranslation();
   const importInputRef = useRef<HTMLInputElement | null>(null);
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,10 +104,10 @@ export function AppHeader({ onExport, onHtmlExport, onImport, onLoadExample, onR
               />
             </>
           )}
-          {onLoadExample && (
-            <button type="button" className="btn-header ui-button" onClick={onLoadExample} aria-label={t.btnLoadExample} title={t.btnLoadExample}>
+          {onShowExamples && (
+            <button type="button" className="btn-header ui-button" onClick={onShowExamples} aria-label={t.btnExamples} title={t.btnExamples}>
               <FileText size={18} />
-              <span>{t.btnLoadExample}</span>
+              <span>{t.btnExamples}</span>
             </button>
           )}
           {onExport && (

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useProjectStore } from './store/useProjectStore';
 import { Presentation } from 'lucide-react';
 import { EditorSidebar } from './components/EditorSidebar';
@@ -8,6 +8,7 @@ import { PrintLayout } from './components/PrintLayout';
 
 import { AppHeader } from './components/AppHeader';
 import { AppFooter } from './components/AppFooter';
+import { ExampleGallery } from './components/ExampleGallery';
 import { useTranslation } from './i18n';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -19,7 +20,7 @@ import {
   serializeProject,
 } from './domain/projectCodec';
 import { exportProjectToHtml } from './domain/exportHtml';
-import { createSchoolEnergyExampleProject } from './domain/exampleProjects';
+import { getExampleProjects, type ExampleProjectId } from './domain/exampleProjects';
 import { displayCompletion } from './domain/completion';
 import './index.css';
 
@@ -52,8 +53,10 @@ function App() {
   const [activeSeasonId, setActiveSeasonId] = useState(data.seasons[0]?.id || '');
   const [activeTab, setActiveTab] = useState<PreviewTab>('EPISODEN');
   const [showPresentation, setShowPresentation] = useState(false);
+  const [showExamples, setShowExamples] = useState(false);
   const [currentPath, setCurrentPath] = useState(window.location.pathname.replace(/\/+$/, "") || "/");
   const [mobilePanel, setMobilePanel] = useState<MobilePanel>('editor');
+  const examples = useMemo(() => getExampleProjects(locale), [locale]);
 
   useEffect(() => {
     const handlePopState = () => setCurrentPath(window.location.pathname.replace(/\/+$/, "") || "/");
@@ -102,6 +105,20 @@ function App() {
     }
   };
 
+  const handleExampleChoose = (id: ExampleProjectId) => {
+    const example = examples.find((item) => item.id === id);
+    if (!example) return;
+
+    if (window.confirm(t.confirmLoadExample)) {
+      replaceData(example.project);
+      setActiveSeasonId(example.project.seasons[0]?.id || '');
+      setActiveTab('EPISODEN');
+      setMobilePanel('preview');
+      setShowExamples(false);
+      showStatus(t.msgExampleLoaded, 'success');
+    }
+  };
+
   if (showPresentation) {
     return <PresentationMode data={data} onClose={() => setShowPresentation(false)} />;
   }
@@ -137,22 +154,20 @@ function App() {
           setActiveSeasonId(importedData.seasons[0]?.id || '');
           showStatus(t.msgImportSuccess, 'success');
         }}
-        onLoadExample={() => {
-          if (window.confirm(t.confirmLoadExample)) {
-            const exampleProject = createSchoolEnergyExampleProject(locale);
-            replaceData(exampleProject);
-            setActiveSeasonId(exampleProject.seasons[0]?.id || '');
-            setActiveTab('EPISODEN');
-            setMobilePanel('preview');
-            showStatus(t.msgExampleLoaded, 'success');
-          }
-        }}
+        onShowExamples={() => setShowExamples(true)}
         onReset={() => {
           if (window.confirm(t.confirmReset)) {
             resetData();
           }
         }}
       />
+      {showExamples && (
+        <ExampleGallery
+          examples={examples}
+          onChoose={handleExampleChoose}
+          onClose={() => setShowExamples(false)}
+        />
+      )}
       <div
         className={`app-status${status ? ` app-status--${status.tone}` : ''}`}
         role="status"
