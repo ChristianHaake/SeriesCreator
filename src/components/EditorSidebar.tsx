@@ -203,6 +203,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
                 className="visually-hidden"
                 type="file"
                 accept="image/png,image/jpeg,image/webp"
+                aria-label={t.btnChooseCover}
                 tabIndex={-1}
                 onChange={handleCoverUpload}
               />

@@ -1002,20 +1002,40 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
 }
 
 @media print {
-  body * {
-    visibility: hidden;
+  html,
+  body,
+  #root,
+  .app-shell,
+  .app-main-content {
+    block-size: auto !important;
+    min-block-size: 0 !important;
+    inline-size: auto !important;
+    overflow: visible !important;
   }
-  #print-layout-container, #print-layout-container * {
-    visibility: visible;
+
+  .app-shell,
+  .app-main-content {
+    display: block !important;
   }
+
+  .app-header,
+  .app-status,
+  .mobile-panel-switch,
+  .editor-sidebar,
+  .preview-main,
+  .app-footer {
+    display: none !important;
+  }
+
   #print-layout-container {
-    position: absolute;
-    left: 0;
-    top: 0;
+    position: static !important;
+    inset: auto !important;
     opacity: 1 !important;
-    z-index: 9999 !important;
+    z-index: auto !important;
     width: 100% !important;
+    min-height: 0 !important;
     padding: 2cm !important;
+    pointer-events: none !important;
   }
   @page {
     size: A4 portrait;

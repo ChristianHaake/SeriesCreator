@@ -97,6 +97,7 @@ export function AppHeader({ onExport, onHtmlExport, onImport, onReset, onPrint }
                 type="file"
                 accept={`.${PROJECT_FILE_EXTENSION},.json,application/json`}
                 className="visually-hidden"
+                aria-label={t.btnLoad}
                 tabIndex={-1}
                 onChange={handleFileUpload}
               />

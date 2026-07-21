@@ -103,4 +103,34 @@ describe('App', () => {
 
     expect(screen.getByRole('alert')).toHaveTextContent('Choose a PNG, JPG, or WebP image.');
   });
+
+  it('keeps editor and file controls reachable by accessible name', async () => {
+    const user = userEvent.setup();
+    renderApp();
+
+    expect(screen.getByLabelText('Load', { selector: 'input' })).toHaveAttribute('type', 'file');
+    expect(screen.getByLabelText('Choose cover', { selector: 'input' })).toHaveAttribute('type', 'file');
+    expect(screen.getByLabelText('Network / Brand')).toBeInTheDocument();
+    expect(screen.getByLabelText('Category')).toBeInTheDocument();
+    expect(screen.getByLabelText('Series Title')).toBeInTheDocument();
+    expect(screen.getByLabelText('Description')).toBeInTheDocument();
+    expect(screen.getByLabelText('Age Rating / Grade')).toBeInTheDocument();
+    expect(screen.getByLabelText('Genre')).toBeInTheDocument();
+    expect(screen.getByLabelText('Cast')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: '2. Episodes' }));
+    await user.click(screen.getByRole('button', { name: 'Add Episode' }));
+
+    expect(screen.getAllByLabelText('Select season').length).toBeGreaterThan(0);
+    expect(screen.getByLabelText('Title')).toBeInTheDocument();
+    expect(screen.getAllByLabelText('Description').length).toBeGreaterThan(0);
+    expect(screen.getByLabelText('Choose thumbnail')).toHaveAttribute('type', 'file');
+
+    await user.click(screen.getByRole('button', { name: '3. Details' }));
+
+    expect(screen.getByLabelText('Project Journey & Reflection')).toBeInTheDocument();
+    expect(screen.getByLabelText('Custom Section (Title)')).toBeInTheDocument();
+    expect(screen.getByLabelText('Custom Section (Text)')).toBeInTheDocument();
+    expect(screen.getByLabelText('Sources')).toBeInTheDocument();
+  });
 });
