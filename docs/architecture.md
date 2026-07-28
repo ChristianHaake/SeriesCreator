@@ -41,12 +41,17 @@ Editable backups use:
 - extension: `.seriescreator`
 - media type: `application/json`
 - schema version: `1`
-- import limit: 2 MB
-- image upload limit: PNG, JPG/JPEG, WebP up to 5 MB and 4096 px per edge
+- import limit: 25 MB
+- image upload limit: PNG, JPG/JPEG or WebP with at most 60 megapixels
+- image output width: cover up to 1920 px; episode images up to 800 px
 - structure limits: 1 to 20 seasons, up to 100 episodes per season
 
 Imports are treated as untrusted input. A project replaces state only after full
 runtime validation and normalization.
+
+The serialized `author` field is editable in the project information step and
+is used in preview metadata and presentation credits. See
+`docs/project-file-format.md` for the complete schema contract.
 
 ## Bundled examples
 
@@ -65,8 +70,9 @@ codec.
 
 The app core has no account system, backend API, database, or server-side user
 content storage. User-created content stays in the browser unless the user
-downloads or shares an exported file. Production network destinations are the
-Cloudflare-hosted app origin and outbound links opened by the user.
+downloads or shares an exported file. Production requests include the
+Cloudflare-hosted app origin and Cloudflare Web Analytics endpoints declared in
+`public/_headers`; users can also open outbound footer links.
 
 ## Deployment
 
@@ -75,7 +81,18 @@ Cloudflare-hosted app origin and outbound links opened by the user.
 - Output directory: `dist`
 - SPA fallback: `not_found_handling: "single-page-application"`
 - Security headers: `public/_headers`
-- Cache policy: HTML revalidates; fingerprinted assets are immutable
+- Cache policy: HTML revalidates; fingerprinted and example assets are immutable
+
+## Verification
+
+- Vitest covers codec, persistence, examples, export mapping and component
+  behavior.
+- Playwright runs the production build in Chromium and WebKit and covers the
+  primary workflow, portable downloads, presentation, direct content routes and
+  320 px responsive behavior.
+- `scripts/smoke-production.mjs` verifies the live public routes and central
+  security headers.
+- GitHub Actions runs `npm run verify` on Node.js 22.12.
 
 ## Decisions and exceptions
 

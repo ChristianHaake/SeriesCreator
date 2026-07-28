@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   PROJECT_SCHEMA_VERSION,
+  isProjectFileSizeWithinLimit,
   makeProjectFilename,
   parseProjectJson,
   serializeProject,
@@ -59,6 +60,16 @@ describe('projectCodec', () => {
     };
 
     expect(serialized.schemaVersion).toBe(PROJECT_SCHEMA_VERSION);
+  });
+
+  it('prevents exporting project files that cannot be imported again', () => {
+    expect(isProjectFileSizeWithinLimit(initialProjectData)).toBe(true);
+    expect(
+      isProjectFileSizeWithinLimit({
+        ...initialProjectData,
+        coverUrl: `data:image/jpeg;base64,${'A'.repeat(25_000_000)}`,
+      }),
+    ).toBe(false);
   });
 
   it('calculates project completion and respects custom completion override', () => {

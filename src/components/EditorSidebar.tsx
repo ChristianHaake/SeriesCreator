@@ -46,6 +46,9 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
   const activeSeason = data.seasons.find(s => s.id === activeSeasonId) || data.seasons[0];
   const calculatedCompletion = useMemo(() => calculateProjectCompletion(data), [data]);
   const hasCustomCompletion = typeof data.completionOverride === 'number';
+  const seasonLimitReached = data.seasons.length >= resourceLimits.maxSeasons;
+  const episodeLimitReached =
+    (activeSeason?.episodes.length ?? 0) >= resourceLimits.maxEpisodesPerSeason;
   const alertText = {
     unsupportedImage: locale === 'de' ? 'Bitte wähle ein PNG-, JPG- oder WebP-Bild.' : 'Choose a PNG, JPG, or WebP image.',
     imageReadFailed: locale === 'de' ? 'Das Bild konnte nicht gelesen werden.' : 'The image could not be read.',
@@ -165,7 +168,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
               type="text"
               value={data.previewCategory || ''}
               onChange={(e) => updateData({ previewCategory: e.target.value })}
-              maxLength={40}
+              maxLength={fieldLimits.previewCategory}
               placeholder={t.categoryPlaceholder}
               style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)' }}
             />
@@ -180,6 +183,18 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
             value={data.title}
             onChange={(e) => updateData({ title: e.target.value })}
             maxLength={fieldLimits.title}
+            style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)' }}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="field-author" style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>{t.lblAuthor}</label>
+          <input
+            id="field-author"
+            type="text"
+            value={data.author}
+            onChange={(e) => updateData({ author: e.target.value })}
+            maxLength={fieldLimits.author}
             style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)' }}
           />
         </div>
@@ -343,7 +358,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
                     type="text"
                     value={data.genre}
                     onChange={(e) => updateData({ genre: e.target.value })}
-                    maxLength={40}
+                    maxLength={fieldLimits.genre}
                     placeholder={t.customGenre}
                     style={{ flex: 1, padding: '0.6rem', border: '1px solid var(--border-color)', width: '100%' }}
                     autoFocus
@@ -401,7 +416,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
             type="text"
             value={data.customConceptTitle || ''}
             onChange={(e) => updateData({ customConceptTitle: e.target.value })}
-            maxLength={60}
+            maxLength={fieldLimits.customConceptTitle}
             placeholder={locale === 'de' ? 'z.B. Didaktischer Kommentar' : 'e.g. Didactic Commentary'}
             style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)', marginBottom: '1rem' }}
           />
@@ -414,7 +429,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
             value={data.customConceptText || ''}
             onChange={(e) => updateData({ customConceptText: e.target.value })}
             rows={5}
-            maxLength={fieldLimits.reflection}
+            maxLength={fieldLimits.customConceptText}
             style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)', resize: 'vertical' }}
           />
         </div>
@@ -450,6 +465,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
             <button
               type="button"
               onClick={() => {
+                if (seasonLimitReached) return;
                 const newSeasonId = crypto.randomUUID();
                 updateData({
                   seasons: [
@@ -460,12 +476,21 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
                 setActiveSeasonId(newSeasonId);
               }}
               className="ui-button season-action-button"
+              disabled={seasonLimitReached}
               aria-label={t.addSeason}
               title={t.addSeason}
             >
               <Plus size={16} />
               <span>{t.addSeason}</span>
             </button>
+            {seasonLimitReached && (
+              <span className="field-hint" role="status">
+                {t.seasonLimitReached.replace(
+                  '{count}',
+                  String(resourceLimits.maxSeasons),
+                )}
+              </span>
+            )}
             <button
               type="button"
               onClick={() => {
@@ -515,11 +540,19 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
         <button
           type="button"
           onClick={() => activeSeason && addEpisode(activeSeason.id)}
-          disabled={!activeSeason}
+          disabled={!activeSeason || episodeLimitReached}
           className="ui-button ui-button--full ui-button--dashed"
         >
           <Plus size={16} /> {t.addEpisode}
         </button>
+        {episodeLimitReached && (
+          <p className="field-hint" role="status">
+            {t.episodeLimitReached.replace(
+              '{count}',
+              String(resourceLimits.maxEpisodesPerSeason),
+            )}
+          </p>
+        )}
       </div>
       )}
     </aside>

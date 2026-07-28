@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, type KeyboardEvent } from 'react';
 import { useProjectStore } from './store/useProjectStore';
 import { Presentation } from 'lucide-react';
 import { EditorSidebar } from './components/EditorSidebar';
@@ -14,6 +14,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { contentPages, type ContentPath, isContentPath } from './content';
 import {
+  isProjectFileSizeWithinLimit,
   makeExportBaseName,
   makeProjectFilename,
   PROJECT_FILE_MIME_TYPE,
@@ -43,6 +44,7 @@ type PreviewTab = 'EPISODEN' | 'DETAILS' | 'QUELLEN';
 type MobilePanel = 'editor' | 'preview';
 type StatusTone = 'success' | 'error' | 'info';
 type AppStatus = { message: string; tone: StatusTone } | null;
+const previewTabOrder: PreviewTab[] = ['EPISODEN', 'DETAILS', 'QUELLEN'];
 
 function App() {
   const { t, locale } = useTranslation();
@@ -71,6 +73,27 @@ function App() {
 
   const showStatus = (message: string, tone: StatusTone = 'success') => {
     setStatus({ message, tone });
+  };
+
+  const handlePreviewTabKeyDown = (
+    event: KeyboardEvent<HTMLButtonElement>,
+    currentTab: PreviewTab,
+  ) => {
+    const currentIndex = previewTabOrder.indexOf(currentTab);
+    let nextIndex = currentIndex;
+
+    if (event.key === 'ArrowRight') nextIndex = (currentIndex + 1) % previewTabOrder.length;
+    if (event.key === 'ArrowLeft') {
+      nextIndex = (currentIndex - 1 + previewTabOrder.length) % previewTabOrder.length;
+    }
+    if (event.key === 'Home') nextIndex = 0;
+    if (event.key === 'End') nextIndex = previewTabOrder.length - 1;
+    if (nextIndex === currentIndex) return;
+
+    event.preventDefault();
+    const nextTab = previewTabOrder[nextIndex];
+    setActiveTab(nextTab);
+    document.getElementById(`tab-${nextTab.toLowerCase()}`)?.focus();
   };
 
   const downloadBlob = (blob: Blob, filename: string) => {
@@ -144,6 +167,10 @@ function App() {
       <AppHeader 
         onExport={() => {
           try {
+            if (!isProjectFileSizeWithinLimit(data)) {
+              showStatus(t.msgProjectTooLarge, 'error');
+              return;
+            }
             const blob = new Blob([serializeProject(data)], {
               type: PROJECT_FILE_MIME_TYPE,
             });
@@ -206,6 +233,7 @@ function App() {
           completionLabel={t.completionMeta}
           castLabel={t.castPrefix}
           genreLabel={t.genrePrefix}
+          authorLabel={t.lblAuthor}
           episodesLabel={t.tabEpisodes}
           noCoverLabel={t.noCover}
           noImageLabel={t.noImage}
@@ -251,6 +279,7 @@ function App() {
             </div>
 
             <div className="streaming-facts">
+              {data.author && <p><span>{t.lblAuthor}:</span> {data.author}</p>}
               <p><span>{t.castPrefix}</span> {data.cast}</p>
               <p><span>{t.genrePrefix}</span> {data.genre}</p>
             </div>
@@ -265,7 +294,9 @@ function App() {
               id="tab-episoden"
               aria-controls="panel-episoden"
               aria-selected={activeTab === 'EPISODEN'}
+              tabIndex={activeTab === 'EPISODEN' ? 0 : -1}
               onClick={() => setActiveTab('EPISODEN')}
+              onKeyDown={(event) => handlePreviewTabKeyDown(event, 'EPISODEN')}
             >
               {t.tabEpisodes}
             </button>
@@ -275,7 +306,9 @@ function App() {
               id="tab-details"
               aria-controls="panel-details"
               aria-selected={activeTab === 'DETAILS'}
+              tabIndex={activeTab === 'DETAILS' ? 0 : -1}
               onClick={() => setActiveTab('DETAILS')}
+              onKeyDown={(event) => handlePreviewTabKeyDown(event, 'DETAILS')}
             >
               {t.tabBackground}
             </button>
@@ -285,7 +318,9 @@ function App() {
               id="tab-quellen"
               aria-controls="panel-quellen"
               aria-selected={activeTab === 'QUELLEN'}
+              tabIndex={activeTab === 'QUELLEN' ? 0 : -1}
               onClick={() => setActiveTab('QUELLEN')}
+              onKeyDown={(event) => handlePreviewTabKeyDown(event, 'QUELLEN')}
             >
               {t.tabSources}
             </button>

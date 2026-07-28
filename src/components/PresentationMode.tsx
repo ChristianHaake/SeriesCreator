@@ -33,15 +33,26 @@ export function PresentationMode({ data, onClose }: Props) {
 
   // Request fullscreen on mount
   useEffect(() => {
+    let enteredFullscreen = false;
+    const handleFullscreenChange = () => {
+      if (document.fullscreenElement) {
+        enteredFullscreen = true;
+      } else if (enteredFullscreen) {
+        onClose();
+      }
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
     document.documentElement.requestFullscreen?.().catch(() => {
       // Fullscreen unsupported or denied (e.g. iOS Safari); presentation still works.
     });
     return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
       if (document.fullscreenElement && document.exitFullscreen) {
         document.exitFullscreen().catch(() => {});
       }
     };
-  }, []);
+  }, [onClose]);
 
   return (
     <div className="presentation-mode">
@@ -63,7 +74,7 @@ export function PresentationMode({ data, onClose }: Props) {
               <img
                 className="presentation-cover"
                 src={data.coverUrl}
-                alt="Cover"
+                alt={t.lblCoverArt}
               />
             )}
             <h1 className="presentation-title">{data.title}</h1>
@@ -77,7 +88,7 @@ export function PresentationMode({ data, onClose }: Props) {
                 <img 
                   className="presentation-episode__image"
                   src={allEpisodes[currentIndex].thumbnailUrl} 
-                  alt={allEpisodes[currentIndex].altText || "Thumbnail"} 
+                  alt={allEpisodes[currentIndex].altText || allEpisodes[currentIndex].title} 
                 />
               ) : (
                 <div className="presentation-episode__placeholder">
@@ -121,7 +132,9 @@ export function PresentationMode({ data, onClose }: Props) {
             <h1 className="presentation-title">{data.title}</h1>
             
             <h2 className="presentation-kicker">{t.presentationBy}</h2>
-            <p className="presentation-credit-value">{data.cast || t.presentationClassFallback}</p>
+            <p className="presentation-credit-value">
+              {data.author || data.cast || t.presentationClassFallback}
+            </p>
             
             <h2 className="presentation-kicker">{t.lblGenre}</h2>
             <p className="presentation-credit-value">{data.genre}</p>

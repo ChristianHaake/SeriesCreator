@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { initialProjectData } from '../types';
+import { resourceLimits } from '../domain/constraints';
 import { loadStoredProject, saveStoredProject, useProjectStore } from './useProjectStore';
 import { LocaleProvider } from '../i18n';
 
@@ -84,5 +85,34 @@ describe('useProjectStore hook mutations', () => {
     });
     
     expect(result.current.data.seasons[0].episodes.length).toBe(initialEpisodesCount);
+  });
+
+  it('does not add episodes beyond the project format limit', () => {
+    const { result } = renderHook(() => useProjectStore(), {
+      wrapper: LocaleProvider,
+    });
+    const seasonId = result.current.data.seasons[0].id;
+    const episodes = Array.from(
+      { length: resourceLimits.maxEpisodesPerSeason },
+      (_, index) => ({
+        id: `ep_${index}`,
+        title: `Episode ${index + 1}`,
+        summary: '',
+      }),
+    );
+
+    act(() => {
+      result.current.replaceData({
+        ...result.current.data,
+        seasons: [{ ...result.current.data.seasons[0], episodes }],
+      });
+    });
+    act(() => {
+      result.current.addEpisode(seasonId);
+    });
+
+    expect(result.current.data.seasons[0].episodes).toHaveLength(
+      resourceLimits.maxEpisodesPerSeason,
+    );
   });
 });

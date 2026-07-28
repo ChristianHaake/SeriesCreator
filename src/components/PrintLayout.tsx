@@ -7,6 +7,7 @@ interface Props {
   completionLabel: string;
   castLabel: string;
   genreLabel: string;
+  authorLabel: string;
   episodesLabel: string;
   noCoverLabel: string;
   noImageLabel: string;
@@ -18,6 +19,7 @@ export const PrintLayout = React.memo(function PrintLayout({
   completionLabel,
   castLabel,
   genreLabel,
+  authorLabel,
   episodesLabel,
   noCoverLabel,
   noImageLabel,
@@ -46,7 +48,7 @@ export const PrintLayout = React.memo(function PrintLayout({
       {/* Header / Hero */}
       <div style={{ display: 'flex', gap: '40px', marginBottom: '60px' }}>
         {data.coverUrl ? (
-          <img src={data.coverUrl} alt="Cover" style={{ width: '400px', height: '600px', objectFit: 'cover', borderRadius: '8px' }} />
+          <img src={data.coverUrl} alt={data.title} style={{ width: '400px', height: '600px', objectFit: 'cover', borderRadius: '8px' }} />
         ) : (
           <div style={{ width: '400px', height: '600px', backgroundColor: '#333', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <span style={{ color: '#666', fontSize: '24px' }}>{noCoverLabel}</span>
@@ -65,6 +67,7 @@ export const PrintLayout = React.memo(function PrintLayout({
           <p style={{ fontSize: '28px', lineHeight: '1.4', marginBottom: '40px' }}>{data.description}</p>
           
           <div style={{ fontSize: '24px', color: '#a3a3a3' }}>
+            {data.author && <p style={{ margin: '10px 0' }}><strong style={{ color: 'white' }}>{authorLabel}:</strong> {data.author}</p>}
             <p style={{ margin: '10px 0' }}><strong style={{ color: 'white' }}>{castLabel}</strong> {data.cast}</p>
             <p style={{ margin: '10px 0' }}><strong style={{ color: 'white' }}>{genreLabel}</strong> {data.genre}</p>
           </div>
@@ -79,7 +82,7 @@ export const PrintLayout = React.memo(function PrintLayout({
           <div key={ep.id} style={{ display: 'flex', gap: '20px', backgroundColor: '#222', padding: '20px', borderRadius: '8px' }}>
             <div style={{ width: '200px', height: '112px', flexShrink: 0, backgroundColor: '#333', borderRadius: '4px', overflow: 'hidden', position: 'relative' }}>
               {ep.thumbnailUrl ? (
-                <img src={ep.thumbnailUrl} alt={ep.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src={ep.thumbnailUrl} alt={ep.altText || ep.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
                 <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666' }}>{noImageLabel}</div>
               )}

@@ -17,5 +17,8 @@
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
 
+/example-assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
 https://:version.seriescreator.workers.dev/*
   X-Robots-Tag: noindex
