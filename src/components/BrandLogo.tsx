@@ -1,17 +1,15 @@
 interface Props {
   className?: string;
-  title: string;
 }
 
 // Inline wordmark so the header brand never depends on a raster asset.
 // Mirrors the square app logo: grey tile + blue play mark, "Series" navy + "Creator" teal.
-export function BrandLogo({ className, title }: Props) {
+export function BrandLogo({ className }: Props) {
   return (
     <svg
       className={className}
       viewBox="0 0 214 60"
-      role="img"
-      aria-label={title}
+      aria-hidden="true"
       xmlns="http://www.w3.org/2000/svg"
     >
       <rect x="2" y="6" width="48" height="48" rx="9" fill="#d7dade" />

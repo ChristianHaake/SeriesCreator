@@ -49,7 +49,7 @@ export function AppHeader({ onExport, onHtmlExport, onImport, onShowExamples, on
   return (
     <header className="app-header">
       <a href="/" className="brand" aria-label={t.appTitle} title={t.appSubtitle}>
-        <BrandLogo title={t.appTitle} className="brand__logo" />
+        <BrandLogo className="brand__logo" />
       </a>
 
       <div className="header-meta">
@@ -69,7 +69,7 @@ export function AppHeader({ onExport, onHtmlExport, onImport, onShowExamples, on
           </div>
 
           <span className="local-badge">
-            <CheckCircle2 aria-hidden="true" size={15} />
+            <CheckCircle2 aria-hidden="true" size={16} strokeWidth={2.5} />
             <span>{t.localProcessing}</span>
           </span>
         </div>
@@ -77,7 +77,7 @@ export function AppHeader({ onExport, onHtmlExport, onImport, onShowExamples, on
         <div className="app-header__controls" role="toolbar" aria-label={t.headerActionsLabel}>
           {onReset && (
             <button type="button" className="btn-header ui-button ui-button--danger" onClick={onReset} aria-label={t.btnReset} title={t.btnReset}>
-              <Trash2 size={18} />
+              <Trash2 size={16} />
               <span>{t.btnReset}</span>
             </button>
           )}
@@ -90,7 +90,7 @@ export function AppHeader({ onExport, onHtmlExport, onImport, onShowExamples, on
               aria-label={t.btnLoad}
               title={t.btnLoad}
             >
-              <Upload size={18} />
+              <Upload size={16} />
               <span>{t.btnLoad}</span>
             </button>
               <input
@@ -106,30 +106,30 @@ export function AppHeader({ onExport, onHtmlExport, onImport, onShowExamples, on
           )}
           {onShowExamples && (
             <button type="button" className="btn-header ui-button" onClick={onShowExamples} aria-label={t.btnExamples} title={t.btnExamples}>
-              <FileText size={18} />
+              <FileText size={16} />
               <span>{t.btnExamples}</span>
             </button>
           )}
           {onExport && (
             <button type="button" className="btn-header ui-button" onClick={onExport} aria-label={t.btnSave} title={t.btnSave}>
-              <Download size={18} />
+              <Download size={16} />
               <span>{t.btnSave}</span>
             </button>
           )}
           {onHtmlExport && (
             <button type="button" className="btn-header ui-button" onClick={onHtmlExport} aria-label={t.btnHtml} title={t.btnHtml}>
-              <Download size={18} />
+              <Download size={16} />
               <span>{t.btnHtml}</span>
             </button>
           )}
           {onPrint && (
             <button type="button" className="btn-header ui-button" onClick={onPrint} aria-label={t.btnPdf} title={t.btnPdf}>
-              <Printer size={18} />
+              <Printer size={16} />
               <span>{t.btnPdf}</span>
             </button>
           )}
           <a href="/lehrkraefte" className="btn-header ui-button" aria-label={t.btnTeachers} title={t.btnTeachers}>
-            <GraduationCap size={18} />
+            <GraduationCap size={16} />
             <span>{t.btnTeachers}</span>
           </a>
         </div>

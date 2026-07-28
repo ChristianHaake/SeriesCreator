@@ -1,4 +1,5 @@
 import { Check, Play, X } from 'lucide-react';
+import { useEffect, useRef, type KeyboardEvent } from 'react';
 import type { ExampleProject, ExampleProjectId } from '../domain/exampleProjects';
 import { useTranslation } from '../i18n';
 
@@ -10,14 +11,61 @@ interface Props {
 
 export function ExampleGallery({ examples, onChoose, onClose }: Props) {
   const { t } = useTranslation();
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    previousFocusRef.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+    closeButtonRef.current?.focus();
+
+    return () => {
+      const previousFocus = previousFocusRef.current;
+      window.setTimeout(() => previousFocus?.focus(), 0);
+    };
+  }, []);
+
+  function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      onClose();
+      return;
+    }
+
+    if (event.key !== 'Tab' || !dialogRef.current) return;
+
+    const focusable = Array.from(
+      dialogRef.current.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ),
+    );
+    if (focusable.length === 0) return;
+
+    event.preventDefault();
+    const currentIndex = focusable.indexOf(
+      document.activeElement as HTMLElement,
+    );
+    const nextIndex = event.shiftKey
+      ? (currentIndex - 1 + focusable.length) % focusable.length
+      : (currentIndex + 1) % focusable.length;
+    focusable[nextIndex].focus();
+  }
 
   return (
-    <div className="example-gallery" role="presentation">
+    <div
+      className="example-gallery"
+      onKeyDown={handleKeyDown}
+      role="presentation"
+    >
       <section
         className="example-gallery__dialog"
         role="dialog"
         aria-modal="true"
         aria-labelledby="example-gallery-title"
+        ref={dialogRef}
       >
         <header className="example-gallery__header">
           <div>
@@ -30,8 +78,9 @@ export function ExampleGallery({ examples, onChoose, onClose }: Props) {
             onClick={onClose}
             aria-label={t.exampleClose}
             title={t.exampleClose}
+            ref={closeButtonRef}
           >
-            <X size={18} />
+            <X aria-hidden="true" size={18} />
           </button>
         </header>
 
