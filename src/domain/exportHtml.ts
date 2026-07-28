@@ -116,14 +116,14 @@ export function exportProjectToHtml(
 
     if (currentIndex === -1) {
       html = '<div class="center-container">';
-      if (data.coverUrl) html += '<img class="cover" src="' + escapeHtml(data.coverUrl) + '" alt="Cover">';
+      if (data.coverUrl) html += '<img class="cover" src="' + escapeHtml(data.coverUrl) + '" alt="${t.lblCoverArt}">';
       html += '<h1>' + escapeHtml(data.title) + '</h1>';
       html += '<p>' + escapeHtml(data.description) + '</p></div>';
     } else if (currentIndex < allEpisodes.length) {
       const ep = allEpisodes[currentIndex];
       html = '<div class="episode-container">';
       if (ep.thumbnailUrl) {
-        html += '<img class="episode-image" src="' + escapeHtml(ep.thumbnailUrl) + '" alt="Thumbnail">';
+        html += '<img class="episode-image" src="' + escapeHtml(ep.thumbnailUrl) + '" alt="' + escapeHtml(ep.altText || ep.title) + '">';
       } else {
         html += '<div class="episode-no-image">${t.noImage}</div>';
       }
@@ -143,7 +143,7 @@ export function exportProjectToHtml(
       html += '<p class="preformatted">' + escapeHtml(data.sources || "${t.noSources}") + '</p></div>';
     } else {
       html = '<div class="credits"><h1>' + escapeHtml(data.title) + '</h1>';
-      html += '<h2>${t.presentationBy}</h2><p class="credit-value">' + escapeHtml(data.cast || "${t.presentationClassFallback}") + '</p>';
+      html += '<h2>${t.presentationBy}</h2><p class="credit-value">' + escapeHtml(data.author || data.cast || "${t.presentationClassFallback}") + '</p>';
       html += '<h2>${t.lblGenre}</h2><p class="credit-value">' + escapeHtml(data.genre) + '</p>';
       html += '<div class="credit-brand">' + escapeHtml(data.previewBrand || "SeriesCreator") + '</div></div>';
     }

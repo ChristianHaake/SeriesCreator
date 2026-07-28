@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Added
+
+- Canonical release feature specification with acceptance criteria, technical
+  limits and explicit non-goals.
+- Versioned project-file format documentation and a separate manual release
+  checklist.
+- Production-preview E2E coverage in Chromium and WebKit for the primary
+  editing, project export, HTML export, presentation, direct-route and 320 px
+  workflows.
+- GitHub Actions release gate, pinned Node.js version and production smoke
+  command for public routes and security headers.
+- Editable project author field, carried into preview, print and presentation
+  credits.
+
+### Changed
+
+- README, project plan, UI concept, architecture and release review now describe
+  the implemented SeriesCreator product instead of the former MVP concept.
+- `npm run verify` now includes the production browser suite.
+- Example assets now receive the same immutable cache policy as fingerprinted
+  build assets.
+
+### Fixed
+
+- The editor now enforces the documented limits of 20 seasons and 100 episodes
+  per season instead of allowing projects that its own import codec rejects.
+- Presentation, print and standalone HTML use episode alternative text instead
+  of generic thumbnail labels.
+- Social metadata now describes the actual fictional-series workflow without
+  claiming unsupported output types.
+
 ## [1.3.0] - 2026-07-21
 
 ### Added

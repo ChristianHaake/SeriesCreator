@@ -38,8 +38,7 @@ export interface ProjectData {
 
 type InitialLocale = 'de' | 'en';
 
-// Locale-specific text for a fresh project. Non-text fields (genre, ageRating)
-// stay German because their editor controls are currently German-only.
+// Locale-specific text for a fresh project.
 const initialProjectText: Record<InitialLocale, {
   title: string;
   description: string;

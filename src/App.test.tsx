@@ -48,11 +48,25 @@ describe('App', () => {
     const user = userEvent.setup();
     renderApp();
 
+    const episodesTab = screen.getByRole('tab', { name: 'Episodes' });
     const backgroundTab = screen.getByRole('tab', { name: 'Concept' });
-    await user.click(backgroundTab);
+    episodesTab.focus();
+    await user.keyboard('{ArrowRight}');
 
     expect(backgroundTab).toHaveAttribute('aria-selected', 'true');
+    expect(backgroundTab).toHaveFocus();
     expect(screen.getByText('No project journey or reflections entered yet.')).toBeInTheDocument();
+  });
+
+  it('closes presentation mode with Escape', async () => {
+    const user = userEvent.setup();
+    renderApp();
+
+    await user.click(screen.getByRole('button', { name: 'Present' }));
+    expect(screen.getByRole('button', { name: 'Close Presentation' })).toBeInTheDocument();
+
+    await user.keyboard('{Escape}');
+    expect(screen.queryByRole('button', { name: 'Close Presentation' })).not.toBeInTheDocument();
   });
 
   it('uses path routing for the educator link', () => {
@@ -62,6 +76,29 @@ describe('App', () => {
       'href',
       expect.stringContaining('/lehrkraefte'),
     );
+  });
+
+  it('switches the complete interface language', async () => {
+    const user = userEvent.setup();
+    renderApp();
+
+    await user.click(screen.getByRole('button', { name: 'DE' }));
+
+    expect(document.documentElement.lang).toBe('de');
+    expect(screen.getByLabelText('Serientitel')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Präsentieren' })).toBeInTheDocument();
+  });
+
+  it('preserves the draft when reset is cancelled', async () => {
+    const user = userEvent.setup();
+    renderApp();
+    vi.mocked(window.confirm).mockReturnValueOnce(false);
+
+    await user.clear(screen.getByLabelText('Series Title'));
+    await user.type(screen.getByLabelText('Series Title'), 'Keep this draft');
+    await user.click(screen.getByRole('button', { name: 'New / Clear' }));
+
+    expect(screen.getByLabelText('Series Title')).toHaveValue('Keep this draft');
   });
 
   it('does not render the dead list action', () => {
@@ -126,6 +163,7 @@ describe('App', () => {
     expect(screen.getByLabelText('Network / Brand')).toBeInTheDocument();
     expect(screen.getByLabelText('Category')).toBeInTheDocument();
     expect(screen.getByLabelText('Series Title')).toBeInTheDocument();
+    expect(screen.getByLabelText('Created by')).toBeInTheDocument();
     expect(screen.getByLabelText('Description')).toBeInTheDocument();
     expect(screen.getByLabelText('Age Rating / Grade')).toBeInTheDocument();
     expect(screen.getByLabelText('Genre')).toBeInTheDocument();

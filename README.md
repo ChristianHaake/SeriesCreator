@@ -1,76 +1,109 @@
 # SeriesCreator
 
-SeriesCreator ist eine browserbasierte Simulationsumgebung für schulische
-Streaming-Serienprojekte. Lernende planen fiktive Serien, strukturieren
-Episoden, ergänzen Quellen und Reflexionsnotizen und präsentieren das Ergebnis
-in einer Streaming-ähnlichen Oberfläche.
+SeriesCreator ist eine lokale, browserbasierte Arbeitsumgebung für schulische
+Serienprojekte. Lernende strukturieren ein Thema als fiktive Streaming-Serie,
+planen Staffeln und Episoden, dokumentieren Quellen und Reflexion und
+präsentieren das Ergebnis.
 
-## Features
+[Live-App öffnen](https://seriescreator.haak3.de)
 
-- **No Accounts, Local-First**: Your series content is processed and stored only in your browser — no login, no server-side storage. Reach is measured with anonymous, cookieless Cloudflare Web Analytics.
-- **Interactive Editor**: Plan your series with titles, cast, genres, and reflection notes.
-- **Seasons & Episodes**: Structure your content with seasons, episodes, and explicit reorder controls (up to 20 seasons and 100 episodes per season).
-- **In-App Example Gallery**: Load complete school projects for climate education and history with seasons, episodes, reflection notes, sources, social copy, and image-generation prompts.
-- **Importable Example Files**: Ready-made `.seriescreator` files are generated in `examples/` with embedded cover and episode images and can be opened through the app's **Load** action.
-- **Automatic Image Handling**: Upload large images; they are automatically optimized and scaled locally to save space.
-- **Presentation Mode**: Pitch your series using a sleek, streaming-style fullscreen interface.
-- **Standalone HTML Export**: Download a fully playable presentation as a single `.html` file that works offline anywhere.
-- **PDF & Project Exports**: Generate print-ready PDFs or save your editable state as a `.seriescreator` file.
-- **Bilingual (DE / EN)**: Full German and English UI, including locale-specific starter content.
+## Release-Funktionen
 
-## Status
+| Bereich | Funktionsumfang |
+| --- | --- |
+| Projektplanung | Titel, Urheber:in, Beschreibung, Anbieter, Kategorie, Alters-/Klassenstufe, Genre, Mitwirkende und automatisch berechneter Projektstatus |
+| Medien | Lokaler Upload von PNG, JPEG oder WebP; Cover und Episodenbilder werden im Browser geprüft und verkleinert; Alternativtexte für Episodenbilder |
+| Struktur | 1–20 Staffeln, bis zu 100 Episoden je Staffel, Umbenennen, Löschen leerer Staffeln und barrierearme Hoch-/Runter-Steuerung für Episoden |
+| Inhalt | Episodentitel und -beschreibungen, Projektverlauf/Reflexion, Quellen und eine frei benennbare Konzeptsektion |
+| Vorschau | Sofort aktualisierte Streaming-Ansicht; mobil expliziter Wechsel zwischen Editor und Vorschau |
+| Präsentation | In-App-Präsentation mit Vollbild-Fallback, Tastatursteuerung, Episoden, Reflexion, Quellen und Credits |
+| Dateien | Versionierte `.seriescreator`-Projektdatei, eigenständige Offline-HTML-Präsentation und Browser-Druck/PDF |
+| Beispiele | Zwei vollständige Schulprojekte zu Klima und Weimar, jeweils auf Deutsch und Englisch sowie mit eingebetteten Bildern |
+| Sprache | Deutsche und englische Oberfläche, Startinhalte und Inhaltsseiten |
+| Speicherung | Automatische lokale Sicherung in `localStorage`; kein Konto und keine serverseitige Speicherung von Projektinhalten |
 
-- Live URL: https://seriescreator.haak3.de
-- Repository: https://github.com/ChristianHaake/SeriesCreator
-- Deployment: Cloudflare Workers Assets
-- License: GPL-3.0-only
+Die verbindliche Definition mit Akzeptanzkriterien, Grenzen und Nicht-Zielen
+steht in [docs/features.md](docs/features.md).
 
 ## Datenschutz und Speicherung
 
-Die Kernfunktionen laufen ohne Login vollständig im Browser. SeriesCreator
-speichert den aktuellen Entwurf und die Spracheinstellung in `localStorage`.
-Projektbackups werden als versionierte `.seriescreator`-Dateien lokal
-heruntergeladen und beim Import vollständig validiert, bevor sie den aktuellen
-Entwurf ersetzen.
+Projektinhalte und hochgeladene Bilder werden im Browser verarbeitet. Der
+aktuelle Entwurf wird unter `series_creator_data`, die Sprache unter
+`series-creator-locale` in `localStorage` gespeichert. Eine
+`.seriescreator`-Datei ist das dauerhafte, nutzerkontrollierte Backup.
 
-Zur anonymen Reichweitenmessung wird Cloudflare Web Analytics ohne Cookies und
-ohne Fingerprinting eingesetzt. Nutzinhalte verlassen das Gerät dabei nicht.
-Details: [Datenschutz](https://seriescreator.haak3.de/datenschutz).
+SeriesCreator hat keine Accounts, keine Inhaltsdatenbank und keinen
+Upload-Endpunkt. Cloudflare verarbeitet technische Verbindungsdaten und
+anonyme, cookielose Reichweitenstatistik. Details stehen in der
+[Datenschutzerklärung](https://seriescreator.haak3.de/datenschutz).
+
+## Projektdateien und Exporte
+
+- `.seriescreator`: versioniertes JSON-Schema 1, maximal 25 MB
+- Bilder: PNG/JPEG/WebP, maximal 60 Megapixel Eingangsgröße
+- HTML: eigenständige Präsentationsdatei für lokale/offline Wiedergabe
+- PDF: über den nativen Druckdialog des Browsers
+
+Das vollständige Format ist in
+[docs/project-file-format.md](docs/project-file-format.md) beschrieben.
 
 ## Entwicklung
 
+Voraussetzungen:
+
+- Node.js `>=22.12.0 <23`
+- npm 10
+
 ```bash
-npm install
+npm ci
+npx playwright install chromium webkit
 npm run dev
 ```
 
-## Verifikation
+## Befehle
+
+| Befehl | Zweck |
+| --- | --- |
+| `npm run dev` | Entwicklungsserver starten |
+| `npm run lint` | ESLint ausführen |
+| `npm run typecheck` | TypeScript prüfen |
+| `npm run build:examples` | Importierbare Beispieldateien erzeugen und validieren |
+| `npm test` | Vitest-Tests ausführen |
+| `npm run build` | Produktions-Build nach `dist/` erstellen |
+| `npm run test:e2e:chromium` | Schnelle Browserprüfung in Chromium |
+| `npm run test:e2e` | Release-Flows in Chromium und WebKit prüfen |
+| `npm run verify` | Lint, Typprüfung, Beispiele, Unit-Tests, Build und Browser-E2E |
+| `npm audit --audit-level=low` | Abhängigkeiten gegen bekannte Schwachstellen prüfen |
+| `npm run smoke:production` | Live-Routen und zentrale Security-Header prüfen |
+
+Für eine andere Ziel-URL:
 
 ```bash
-npm run lint
-npm run typecheck
-npm run build:examples
-npm run test
-npm run build
-npm run verify
-npm audit --audit-level=low
+npm run smoke:production -- https://example.workers.dev
 ```
 
-`npm run verify` ist das lokale Release-Gate und führt Lint, Typecheck,
-Beispieldatei-Generierung, Tests und Build aus.
+## Deployment
 
-## Release-Status
+- Ziel: Cloudflare Workers Assets
+- Build: `npm run build`
+- Ausgabe: `dist`
+- SPA-Fallback: `single-page-application`
+- Runtime-Header: `public/_headers`
 
-- Version: `1.3.0`
-- Stand: 2026-07-21
-- Lokales Release-Gate: `npm run verify`
-- Zusätzliche Release-Checks: `npm audit --audit-level=low`, Chromium-PDF-Smoke,
-  DOM-Check für Accessible Names
+Das automatisierte Release-Gate läuft in GitHub Actions. Manuelle
+Zielbrowser-, Screenreader-, Rechts- und Endgeräteprüfungen bleiben getrennt in
+[docs/manual-release-checks.md](docs/manual-release-checks.md) dokumentiert.
 
-## Bekannte Grenzen
+## Dokumentation
 
-- Ein echter Screenreader-Review mit VoiceOver/NVDA bleibt ein manueller
-  Zielsystem-Check.
-- PDF-Ausgabe nutzt die Druckfunktion des Browsers. Der Chromium-Smoke ist
-  geprüft; finale Zielbrowser sollten vor Veröffentlichung manuell geprüft
-  werden.
+- [Funktionsspezifikation](docs/features.md)
+- [Architektur](docs/architecture.md)
+- [UI-Konzept](docs/ui-concept.md)
+- [Projektdateiformat](docs/project-file-format.md)
+- [Release-Review](docs/review-checklist.md)
+- [Standard-Konformität](docs/standard-conformance.md)
+- [Changelog](CHANGELOG.md)
+
+## Lizenz
+
+SeriesCreator steht unter [GPL-3.0-only](LICENSE).

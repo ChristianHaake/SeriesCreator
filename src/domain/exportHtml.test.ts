@@ -5,6 +5,7 @@ import { exportProjectToHtml } from './exportHtml';
 const translations = {
   exportPresentation: 'Presentation',
   lblClose: 'Close',
+  lblCoverArt: 'Cover art',
   ariaPrevSlide: 'Previous slide',
   ariaNextSlide: 'Next slide',
   noImage: 'No image',
@@ -30,6 +31,7 @@ describe('exportProjectToHtml', () => {
     expect(html).toContain('grid-template-columns: minmax(0, 1fr)');
     expect(html).toContain('class="credits"');
     expect(html).toContain('<svg aria-hidden="true"');
+    expect(html).toContain('ep.altText || ep.title');
     expect(html).not.toContain('scrollUp');
     expect(html).not.toContain('transition: all');
     expect(html).not.toContain('>✕<');

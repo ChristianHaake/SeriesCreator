@@ -102,7 +102,7 @@ export function normalizeProject(value: unknown): ProjectParseResult {
     ...initialProjectData,
     schemaVersion: PROJECT_SCHEMA_VERSION,
     title: limitText(value.title, fieldLimits.title, initialProjectData.title),
-    author: limitText(value.author, 120),
+    author: limitText(value.author, fieldLimits.author),
     description: limitText(
       value.description,
       fieldLimits.description,
@@ -116,19 +116,21 @@ export function normalizeProject(value: unknown): ProjectParseResult {
     ),
     previewCategory: limitText(
       value.previewCategory,
-      60,
+      fieldLimits.previewCategory,
       initialProjectData.previewCategory,
     ),
     matchPercentage: asOptionalPercentage(value.matchPercentage) ?? initialProjectData.matchPercentage,
     completionOverride: asOptionalPercentage(value.completionOverride),
-    ageRating: limitText(value.ageRating, 40, initialProjectData.ageRating),
-    genre: limitText(value.genre, 80, initialProjectData.genre),
+    ageRating: limitText(value.ageRating, fieldLimits.ageRating, initialProjectData.ageRating),
+    genre: limitText(value.genre, fieldLimits.genre, initialProjectData.genre),
     cast: limitText(value.cast, fieldLimits.cast, initialProjectData.cast),
     seasons: seasons as Season[],
     reflection: limitText(value.reflection, fieldLimits.reflection) || undefined,
     sources: limitText(value.sources, fieldLimits.sources) || undefined,
-    customConceptTitle: limitText(value.customConceptTitle, fieldLimits.title) || undefined,
-    customConceptText: limitText(value.customConceptText, fieldLimits.reflection) || undefined,
+    customConceptTitle:
+      limitText(value.customConceptTitle, fieldLimits.customConceptTitle) || undefined,
+    customConceptText:
+      limitText(value.customConceptText, fieldLimits.customConceptText) || undefined,
   };
 
   return { ok: true, data };
@@ -155,6 +157,10 @@ export function serializeProject(data: ProjectData) {
     null,
     2,
   );
+}
+
+export function isProjectFileSizeWithinLimit(data: ProjectData) {
+  return new Blob([serializeProject(data)]).size <= resourceLimits.projectFileBytes;
 }
 
 // Shared filename base so project (.seriescreator) and HTML exports sanitize

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import type { ProjectData, Episode } from '../types';
 import { initialProjectData, createInitialProjectData } from '../types';
 import { normalizeProject, serializeProject } from '../domain/projectCodec';
+import { fieldLimits, resourceLimits } from '../domain/constraints';
 import { useTranslation } from '../i18n';
 
 const STORAGE_KEY = 'series_creator_data';
@@ -62,6 +63,7 @@ export function useProjectStore(onSaveError?: () => void) {
         ...prev,
         seasons: prev.seasons.map(s => {
           if (s.id === seasonId) {
+            if (s.episodes.length >= resourceLimits.maxEpisodesPerSeason) return s;
             return {
               ...s,
               episodes: [...s.episodes, { id: newId, title: t.newEpisode, summary: "" }]
@@ -127,7 +129,9 @@ export function useProjectStore(onSaveError?: () => void) {
   const updateSeason = useCallback((seasonId: string, title: string) => {
     setData(prev => ({
       ...prev,
-      seasons: prev.seasons.map(s => s.id === seasonId ? { ...s, title } : s)
+      seasons: prev.seasons.map(s =>
+        s.id === seasonId ? { ...s, title: title.slice(0, fieldLimits.seasonTitle) } : s,
+      )
     }));
   }, []);
 
