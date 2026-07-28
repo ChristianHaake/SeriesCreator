@@ -246,7 +246,7 @@ function App() {
 
             <div className="streaming-actions">
               <button type="button" className="btn-play" onClick={() => setShowPresentation(true)}>
-                <Presentation size={24} /> {t.btnPlay}
+                <Presentation aria-hidden="true" size={24} strokeWidth={2.5} /> {t.btnPlay}
               </button>
             </div>
 

@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
@@ -151,17 +151,24 @@ describe('App', () => {
     const user = userEvent.setup();
     renderApp();
 
-    await user.click(screen.getByRole('button', { name: 'Examples' }));
+    const examplesButton = screen.getByRole('button', { name: 'Examples' });
+    await user.click(examplesButton);
 
     const dialog = screen.getByRole('dialog', { name: 'Examples in the app' });
+    const closeButton = within(dialog).getByRole('button', { name: 'Close examples' });
+    expect(closeButton).toHaveFocus();
     expect(within(dialog).getByRole('heading', { name: 'The School Climate Code' })).toBeInTheDocument();
     expect(within(dialog).getByRole('heading', { name: 'The Weimar File' })).toBeInTheDocument();
     expect(within(dialog).getAllByText('Social media copy').length).toBeGreaterThan(0);
     expect(within(dialog).getAllByText('Image prompts').length).toBeGreaterThan(0);
     expect(within(dialog).getAllByText(/#SeriesCreator/).length).toBeGreaterThan(0);
 
-    await user.click(within(dialog).getByRole('button', { name: 'Close examples' }));
+    await user.tab({ shift: true });
+    expect(dialog).toContainElement(document.activeElement as HTMLElement);
+
+    await user.keyboard('{Escape}');
     expect(screen.queryByRole('dialog', { name: 'Examples in the app' })).not.toBeInTheDocument();
+    await waitFor(() => expect(examplesButton).toHaveFocus());
   });
 
   it('loads the school climate example into the editor and preview', async () => {
