@@ -16,6 +16,7 @@ test-results
 
 # Local preview server config (not needed in the repo)
 .claude/launch.json
+.claude/settings.local.json
 
 # Playwright MCP page dumps (local automation artifacts)
 .playwright-mcp/

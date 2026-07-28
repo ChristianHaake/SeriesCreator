@@ -20,8 +20,8 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-- README, project plan, UI concept, architecture and release review now describe
-  the implemented SeriesCreator product instead of the former MVP concept.
+- README, UI concept, architecture and release review now describe the
+  implemented SeriesCreator product instead of the former MVP concept.
 - `npm run verify` now includes the production browser suite.
 - Example assets now receive the same immutable cache policy as fingerprinted
   build assets.
@@ -34,6 +34,13 @@ All notable changes to this project will be documented in this file.
   of generic thumbnail labels.
 - Social metadata now describes the actual fictional-series workflow without
   claiming unsupported output types.
+
+### Removed
+
+- Unreferenced historical design screenshots, unused public logo/icon assets
+  and local-only Claude launch and permission settings.
+- The redundant project plan; current scope lives in `docs/features.md` and
+  release criteria in `docs/review-checklist.md`.
 
 ## [1.3.0] - 2026-07-21
 
