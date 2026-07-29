@@ -63,3 +63,26 @@ test('supports direct content routes and narrow responsive editing', async ({ pa
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Help');
   await expect(page.getByRole('link', { name: /Back to App/i })).toHaveAttribute('href', '/');
 });
+
+test('loads a complete current example through the gallery', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Examples' }).click();
+
+  const gallery = page.getByRole('dialog', { name: 'Examples in the app' });
+  const climateCard = gallery
+    .getByRole('heading', { name: 'The School Climate Code' })
+    .locator('xpath=ancestor::article');
+
+  page.once('dialog', (dialog) => dialog.accept());
+  await climateCard.getByRole('button', { name: 'Use example' }).click();
+
+  await expect(page.getByText('Example project loaded.')).toBeVisible();
+  await expect(page.locator('.streaming-title')).toHaveText('The School Climate Code');
+  await expect(page.locator('.completion-score')).toHaveText('Project status 100%');
+  await expect(page.locator('.streaming-facts')).toContainText('Created by: Class 8b');
+  await expect(page.locator('.episode-card__image')).toHaveCount(3);
+
+  await page.getByLabel('Select season').selectOption('climate-season-action');
+  await expect(page.locator('.episode-card__image')).toHaveCount(3);
+  await expect(page.getByRole('heading', { name: '3. A Plan for Monday' })).toBeVisible();
+});

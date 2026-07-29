@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
 import { getExampleProjects } from './domain/exampleProjects';
+import { calculateProjectCompletion, displayCompletion } from './domain/completion';
 import { parseProjectJson, serializeProject } from './domain/projectCodec';
 import { LocaleProvider } from './i18n';
 
@@ -263,14 +264,23 @@ describe('example projects', () => {
     for (const locale of ['de', 'en'] as const) {
       for (const example of getExampleProjects(locale)) {
         const parsed = parseProjectJson(serializeProject(example.project));
+        const availableAgeRatings =
+          locale === 'de'
+            ? ['ab 0', 'ab 6', 'ab 12', 'ab 16', 'ab 18']
+            : ['0+', '6+', '12+', '16+', '18+'];
 
         expect(parsed.ok).toBe(true);
         if (parsed.ok) {
           expect(parsed.data.seasons).toHaveLength(2);
           expect(parsed.data.seasons.flatMap((season) => season.episodes)).toHaveLength(6);
+          expect(parsed.data.author).toBeTruthy();
           expect(parsed.data.reflection).toBeTruthy();
           expect(parsed.data.sources).toBeTruthy();
           expect(parsed.data.customConceptText).toContain('16:9');
+          expect(parsed.data.completionOverride).toBeUndefined();
+          expect(availableAgeRatings).toContain(parsed.data.ageRating);
+          expect(calculateProjectCompletion(parsed.data)).toBe(100);
+          expect(displayCompletion(parsed.data)).toBe(100);
           expect(example.socialCopy).toBeTruthy();
           expect(example.imagePrompts.length).toBeGreaterThan(0);
         }
