@@ -7,6 +7,14 @@ präsentieren das Ergebnis.
 
 [Live-App öffnen](https://seriescreator.haak3.de)
 
+## Methode
+
+Die didaktische Grundlage ist die Streaming-Serien-Methode: Lernende gliedern
+ein Thema in Staffeln und Episoden und treffen dabei inhaltliche Entscheidungen
+über Auswahl, Reihenfolge und Perspektive. Ablauf, Lernziele, Fachbeispiele und
+Bewertungshinweise beschreibt
+[Unterricht als Serie denken: Die Streaming-Serien-Methode](https://haak3.de/unterricht-als-serie-denken-die-streaming-serien-methode/).
+
 ## Release-Funktionen
 
 | Bereich | Funktionsumfang |
@@ -96,6 +104,8 @@ Zielbrowser-, Screenreader-, Rechts- und Endgeräteprüfungen bleiben getrennt i
 
 ## Dokumentation
 
+- [Streaming-Serien-Methode](https://haak3.de/unterricht-als-serie-denken-die-streaming-serien-methode/)
+  (didaktischer Hintergrund)
 - [Funktionsspezifikation](docs/features.md)
 - [Architektur](docs/architecture.md)
 - [UI-Konzept](docs/ui-concept.md)
