@@ -2,12 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [1.4.0] - 2026-08-22
 
 ### Added
 
 - Canonical release feature specification with acceptance criteria, technical
   limits and explicit non-goals.
+- Dedicated 1200×630 Open Graph and Twitter preview image plus a 180 px touch
+  icon, with image dimensions and alternative text in the social metadata.
+- `robots.txt` for the public site.
 - Versioned project-file format documentation and a separate manual release
   checklist.
 - Production-preview E2E coverage in Chromium and WebKit for the primary
@@ -25,6 +28,9 @@ All notable changes to this project will be documented in this file.
 - `npm run verify` now includes the production browser suite.
 - Example assets now receive the same immutable cache policy as fingerprinted
   build assets.
+- Example images now carry a visible `KI-generiert` marker so AI-generated
+  classroom material is recognisable in the app, the exports and the
+  importable example files.
 
 ### Fixed
 
@@ -41,6 +47,9 @@ All notable changes to this project will be documented in this file.
   and local-only Claude launch and permission settings.
 - The redundant project plan; current scope lives in `docs/features.md` and
   release criteria in `docs/review-checklist.md`.
+- The 805 kB square logo that served as favicon, touch icon and social preview
+  at once; purpose-built assets replace it and shrink the deployed bundle from
+  2.5 MB to 1.8 MB.
 
 ## [1.3.0] - 2026-07-21
 

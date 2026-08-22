@@ -16,8 +16,8 @@ thumbnails. No external image files are required after import.
 ## Image Assets
 
 - `assets/source-sheets/`: AI-generated source sheets.
-- `assets/generated/`: cropped 16:9 JPEG assets embedded by
-  `npm run build:examples`.
+- `assets/generated/`: cropped 16:9 JPEG assets, visibly marked
+  `KI-generiert`, embedded by `npm run build:examples`.
 - `../public/example-assets/`: runtime copies used by the in-app example
   gallery before the selected project is converted to embedded data URLs.
 

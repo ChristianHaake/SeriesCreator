@@ -21,6 +21,9 @@ test-results
 # Playwright MCP page dumps (local automation artifacts)
 .playwright-mcp/
 
+# Local Wrangler state written during dev and deploy
+.wrangler/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
