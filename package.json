@@ -1,7 +1,7 @@
 {
   "name": "series-creator",
   "private": true,
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Local-first classroom tool for planning and presenting fictional streaming series.",
   "homepage": "https://seriescreator.haak3.de",
   "repository": {
