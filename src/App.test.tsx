@@ -7,6 +7,11 @@ import { calculateProjectCompletion, displayCompletion } from './domain/completi
 import { parseProjectJson, serializeProject } from './domain/projectCodec';
 import { LocaleProvider } from './i18n';
 
+// Episode fields live in a dialog opened from the list row.
+async function openEpisode(user: ReturnType<typeof userEvent.setup>, index = 0) {
+  await user.click(screen.getAllByRole('button', { name: /^Episode \d+:/ })[index]);
+}
+
 // Secondary actions live behind the header's overflow menu; open it first.
 async function openHeaderMenu(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole('button', { name: 'More actions' }));
@@ -193,6 +198,7 @@ describe('App', () => {
     await user.click(screen.getByRole('button', { name: 'Add Episode' }));
 
     expect(screen.getAllByLabelText('Select season').length).toBeGreaterThan(0);
+    await openEpisode(user);
     expect(screen.getByLabelText('Title')).toBeInTheDocument();
     expect(screen.getByLabelText('Short description')).toBeInTheDocument();
     expect(screen.getByLabelText('Academic deepening')).toBeInTheDocument();

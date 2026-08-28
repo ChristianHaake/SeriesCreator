@@ -1,5 +1,11 @@
 import { expect, test } from '@playwright/test';
 
+/** Episode fields live in a dialog opened from the list row. */
+async function openEpisode(page: import('@playwright/test').Page, index = 0) {
+  await page.locator('.episode-row__open').nth(index).click();
+  await expect(page.locator('dialog.episode-dialog')).toBeVisible();
+}
+
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     window.localStorage.clear();
@@ -15,14 +21,17 @@ test('completes the primary workflow and downloads both portable formats', async
   await page.getByRole('button', { name: '2. Episodes' }).click();
   await page.getByRole('button', { name: 'Add Episode' }).click();
 
-  const editor = page.locator('.editor-sidebar');
-  await editor.getByLabel('Title', { exact: true }).fill('The First Clue');
-  await editor
+  await openEpisode(page);
+  const episode = page.locator('dialog.episode-dialog');
+  await episode.getByLabel('Title', { exact: true }).fill('The First Clue');
+  await episode
     .getByLabel('Short description', { exact: true })
     .fill('The class discovers the first source.');
-  await editor
+  await episode
     .getByLabel('Academic deepening', { exact: true })
     .fill('The class distinguishes an observation from evidence and records a supporting source.');
+  await page.keyboard.press('Escape');
+  await expect(episode).toHaveCount(0);
 
   const preview = page.getByRole('main');
   await expect(preview.getByRole('heading', { name: 'Release Test Series' })).toBeVisible();
@@ -143,9 +152,11 @@ test('advances presentation slides once per keypress and tracks position', async
 
   await page.getByLabel('Series Title').fill('Keyboard Test');
   await page.getByRole('button', { name: '2. Episodes' }).click();
-  for (const title of ['First', 'Second']) {
+  for (const [index, title] of ['First', 'Second'].entries()) {
     await page.getByRole('button', { name: 'Add Episode' }).click();
-    await page.locator('.editor-sidebar').getByLabel('Title', { exact: true }).last().fill(title);
+    await openEpisode(page, index);
+    await page.locator('dialog.episode-dialog').getByLabel('Title', { exact: true }).fill(title);
+    await page.keyboard.press('Escape');
   }
 
   await page.getByRole('button', { name: 'Present' }).click();
@@ -204,14 +215,17 @@ test('reports image upload problems inline instead of in a blocking dialog', asy
   await page.getByRole('button', { name: '2. Episodes' }).click();
   await page.getByRole('button', { name: 'Add Episode' }).click();
 
-  const thumbnail = page.locator('.editor-sidebar input[type="file"]').last();
-  await thumbnail.setInputFiles({
+  // The thumbnail control moved into the episode dialog.
+  await openEpisode(page);
+  const dialog = page.locator('dialog.episode-dialog');
+  await dialog.locator('input[type="file"]').setInputFiles({
     name: 'notes.txt',
     mimeType: 'text/plain',
     buffer: Buffer.from('not an image'),
   });
 
-  await expect(page.getByRole('alert')).toHaveText('Choose a PNG, JPG, or WebP image.');
+  // The error must land next to the control, inside the dialog.
+  await expect(dialog.getByRole('alert')).toHaveText('Choose a PNG, JPG, or WebP image.');
   expect(nativeDialogs).toEqual([]);
 });
 
@@ -340,4 +354,26 @@ test('keeps the full action row inline on a wide viewport', async ({ page }) => 
   for (const action of await actions.all()) {
     await expect(action).toBeVisible();
   }
+});
+
+test('edits an episode in a dialog that previews the real card', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: '2. Episodes' }).click();
+  await page.getByRole('button', { name: 'Add Episode' }).click();
+
+  await openEpisode(page);
+  const dialog = page.locator('dialog.episode-dialog');
+
+  // The preview is the same component the streaming view renders, so it cannot
+  // drift from what students actually see.
+  await expect(dialog.locator('.episode-card')).toHaveCount(1);
+
+  await dialog.getByLabel('Title', { exact: true }).fill('Typed In The Dialog');
+  await expect(dialog.locator('.episode-card h3')).toHaveText('1. Typed In The Dialog');
+
+  // No Save or Cancel: closing keeps the edit, because everything autosaves.
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);
+  await expect(page.locator('.episode-row__title')).toHaveText('Typed In The Dialog');
+  await expect(page.getByRole('main').getByRole('heading', { name: '1. Typed In The Dialog' })).toBeVisible();
 });

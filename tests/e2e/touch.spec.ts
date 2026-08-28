@@ -28,9 +28,14 @@ test('drives the editor by touch without stranding the layout', async ({ page })
   await page.getByRole('button', { name: '2. Episodes' }).tap();
   await page.getByRole('button', { name: 'Add Episode' }).tap();
 
-  const field = page.locator('.editor-sidebar').getByLabel('Academic deepening');
+  await page.locator('.episode-row__open').first().tap();
+  const episode = page.locator('dialog.episode-dialog');
+  await expect(episode).toBeVisible();
+  const field = episode.getByLabel('Academic deepening');
   await field.tap();
   await field.fill('Typed with the on-screen keyboard open.');
+  await page.keyboard.press('Escape');
+  await expect(episode).toHaveCount(0);
 
   expect(await shellMetrics(page)).toEqual({ scrollLeft: 0, scrollTop: 0, overflowsX: false });
 

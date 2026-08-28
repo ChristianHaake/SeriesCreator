@@ -1,6 +1,7 @@
 import { useRef, useState, useMemo, type ChangeEvent } from 'react';
 import { Plus, Edit2, Image as ImageIcon, Trash2, X } from 'lucide-react';
-import { EpisodeEditor } from './EpisodeEditor';
+import { EpisodeRow } from './EpisodeRow';
+import { EpisodeDialog } from './EpisodeDialog';
 import { ConfirmDialog } from './ConfirmDialog';
 import { useProjectStore } from '../store/useProjectStore';
 import { fieldLimits, resourceLimits } from '../domain/constraints';
@@ -44,6 +45,8 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
   const [seasonError, setSeasonError] = useState('');
   // 'rename' opens the dialog in prompt mode; 'delete' as a confirmation.
   const [seasonDialog, setSeasonDialog] = useState<'rename' | 'delete' | null>(null);
+  // Which episode is open in the editor dialog, if any.
+  const [openEpisodeId, setOpenEpisodeId] = useState<string | null>(null);
   const coverInputRef = useRef<HTMLInputElement | null>(null);
   const { t, locale } = useTranslation();
 
@@ -542,17 +545,32 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
           )}
         </div>
         {activeSeason?.episodes.map((ep, index) => (
-          <EpisodeEditor 
-            key={ep.id} 
-            episode={ep} 
-            seasonId={activeSeason.id} 
-            index={index} 
+          <EpisodeRow
+            key={ep.id}
+            episode={ep}
+            seasonId={activeSeason.id}
+            index={index}
             total={activeSeason.episodes.length}
-            onUpdate={updateEpisode}
+            onOpen={setOpenEpisodeId}
             onRemove={removeEpisode}
             onMove={moveEpisode}
           />
         ))}
+
+        {/* One dialog for whichever episode is open, rather than one per row. */}
+        {activeSeason && openEpisodeId && (() => {
+          const openIndex = activeSeason.episodes.findIndex((ep) => ep.id === openEpisodeId);
+          if (openIndex === -1) return null;
+          return (
+            <EpisodeDialog
+              episode={activeSeason.episodes[openIndex]}
+              seasonId={activeSeason.id}
+              index={openIndex}
+              onUpdate={updateEpisode}
+              onClose={() => setOpenEpisodeId(null)}
+            />
+          );
+        })()}
 
         <button
           type="button"

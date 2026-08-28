@@ -89,6 +89,16 @@ test.describe('interactive surfaces', () => {
     expect(results.violations).toEqual([]);
   });
 
+  test('the episode editor dialog has no accessibility violations', async ({ page }) => {
+    await page.getByRole('button', { name: '2. Episodes' }).click();
+    await page.getByRole('button', { name: 'Add Episode' }).click();
+    await page.locator('.episode-row__open').first().click();
+    await expect(page.locator('dialog.episode-dialog')).toBeVisible();
+
+    const results = await audit(page).analyze();
+    expect(results.violations).toEqual([]);
+  });
+
   test('the example gallery has no accessibility violations', async ({ page }) => {
     await page.getByRole('button', { name: 'Examples' }).click();
     await expect(page.getByRole('dialog', { name: 'Examples in the app' })).toBeVisible();
