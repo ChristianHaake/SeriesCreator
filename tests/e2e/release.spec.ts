@@ -267,3 +267,27 @@ test('offers a skip link and labelled landmarks', async ({ page }) => {
   // The streaming chrome imitates a nav bar; only the footer nav is real.
   await expect(page.getByRole('navigation')).toHaveCount(1);
 });
+
+test('shows a not-found page for unknown routes', async ({ page }) => {
+  await page.goto('/definitely-not-a-page');
+
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Page not found');
+  await expect(page.getByRole('link', { name: /Back to App/i })).toHaveAttribute('href', '/');
+  // The editor must not be what a dead link renders.
+  await expect(page.locator('.editor-sidebar')).toHaveCount(0);
+});
+
+test('serves content routes from a lazily loaded chunk', async ({ page }) => {
+  const chunks: string[] = [];
+  page.on('response', (response) => {
+    const url = response.url();
+    if (url.includes('/assets/') && url.endsWith('.js')) chunks.push(url.split('/').pop()!);
+  });
+
+  await page.goto('/');
+  expect(chunks.some((name) => name.startsWith('ContentPage'))).toBe(false);
+
+  await page.goto('/hilfe');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Help');
+  expect(chunks.some((name) => name.startsWith('ContentPage'))).toBe(true);
+});

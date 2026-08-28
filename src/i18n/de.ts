@@ -93,6 +93,8 @@ export const de = {
   lblEpisodeN: "Episode ",
   presentationBy: "Eine Produktion von",
   presentationClassFallback: "Der Klasse",
+  notFoundTitle: "Seite nicht gefunden",
+  notFoundBody: "Diese Seite gibt es nicht. Vielleicht ist der Link veraltet oder enthält einen Tippfehler.",
   skipToEditor: "Zum Editor springen",
   btnLoadExample: "Beispiel laden",
   btnCancel: "Abbrechen",

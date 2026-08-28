@@ -30,7 +30,12 @@ export async function attachExampleImages(project: ProjectData, exampleId: Examp
 
   const episodes = projectWithImages.seasons.flatMap((season) => season.episodes);
   for (const [index, episode] of episodes.entries()) {
-    episode.thumbnailUrl = await toDataUrl(imagePath(exampleId, imageNames[index + 1]));
+    // The bundled examples ship a fixed set of thumbnails. A project with more
+    // episodes than that leaves the rest without one, rather than requesting
+    // an "-undefined.jpg" that 404s and fails the whole load.
+    const imageName = imageNames[index + 1];
+    if (!imageName) break;
+    episode.thumbnailUrl = await toDataUrl(imagePath(exampleId, imageName));
   }
 
   return projectWithImages;

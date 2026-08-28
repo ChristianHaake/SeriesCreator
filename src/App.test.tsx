@@ -109,12 +109,20 @@ describe('App', () => {
     expect(screen.queryByRole('button', { name: /my list/i })).not.toBeInTheDocument();
   });
 
-  it('renders direct content routes', () => {
+  // The content page is code-split, so it resolves a tick after the shell.
+  it('renders direct content routes', async () => {
     renderApp('/lehrkraefte');
 
-    expect(screen.getByRole('heading', { name: 'The Netflix Method' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'The Netflix Method' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Assessing academic deepening' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /back to app/i })).toHaveAttribute('href', '/');
+  });
+
+  it('renders a not-found page for unknown routes', async () => {
+    renderApp('/definitely-not-a-page');
+
+    expect(await screen.findByRole('heading', { name: 'Page not found' })).toBeInTheDocument();
+    expect(document.querySelector('.editor-sidebar')).toBeNull();
   });
 
   it('adds a season, selects it, and updates the preview metadata', async () => {

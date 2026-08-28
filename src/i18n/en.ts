@@ -95,6 +95,8 @@ export const en: Record<TranslationKey, string> = {
   lblEpisodeN: "Episode ",
   presentationBy: "A production by",
   presentationClassFallback: "The Class",
+  notFoundTitle: "Page not found",
+  notFoundBody: "This page does not exist. The link may be out of date or contain a typo.",
   skipToEditor: "Skip to editor",
   btnLoadExample: "Load example",
   btnCancel: "Cancel",

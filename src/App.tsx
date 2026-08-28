@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, type KeyboardEvent } from 'react';
+import { useState, useEffect, useMemo, lazy, Suspense, type KeyboardEvent } from 'react';
 import { useProjectStore } from './store/useProjectStore';
 import { Presentation } from 'lucide-react';
 import { EditorSidebar } from './components/EditorSidebar';
@@ -11,9 +11,7 @@ import { AppFooter } from './components/AppFooter';
 import { ExampleGallery } from './components/ExampleGallery';
 import { ConfirmDialog } from './components/ConfirmDialog';
 import { useTranslation } from './i18n';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import { contentPages, type ContentPath, isContentPath } from './content';
+import { contentPages, isContentPath } from './content';
 import {
   isProjectFileSizeWithinLimit,
   makeExportBaseName,
@@ -27,20 +25,8 @@ import { attachExampleImages } from './domain/exampleImageAssets';
 import { displayCompletion } from './domain/completion';
 import './index.css';
 
-function ContentPage({ pathname }: { pathname: ContentPath }) {
-  const { locale, t } = useTranslation();
-  const page = contentPages[locale][pathname];
-  
-  return (
-    <main className="content-page">
-      <a href="/" className="content-page__back">{t.backToApp}</a>
-      <div className="markdown-content">
-        <h1>{page.title}</h1>
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{page.content}</ReactMarkdown>
-      </div>
-    </main>
-  );
-}
+// Loaded on demand so the markdown renderer stays out of the editor bundle.
+const ContentPage = lazy(() => import('./components/ContentPage'));
 
 type PreviewTab = 'EPISODEN' | 'DETAILS' | 'QUELLEN';
 type MobilePanel = 'editor' | 'preview';
@@ -175,11 +161,32 @@ function App() {
     return <PresentationMode data={data} onClose={() => setShowPresentation(false)} />;
   }
 
+  // Anything that is neither the editor nor a content route is a dead link.
+  if (currentPath !== '/' && !isContentPath(currentPath)) {
+    return (
+      <div className="app-shell app-shell--content-route">
+        <AppHeader />
+        <main className="content-page">
+          <div className="markdown-content">
+            <h1>{t.notFoundTitle}</h1>
+            <p>{t.notFoundBody}</p>
+            <p><a className="content-page__back" href="/">{t.backToApp}</a></p>
+          </div>
+        </main>
+        <AppFooter />
+      </div>
+    );
+  }
+
   if (isContentPath(currentPath)) {
     return (
       <div className="app-shell app-shell--content-route">
         <AppHeader />
-        <ContentPage pathname={currentPath} />
+        {/* The shell is already painted, so the fallback only fills the article
+            area for the moment the chunk takes to arrive. */}
+        <Suspense fallback={<main className="content-page" aria-busy="true" />}>
+          <ContentPage pathname={currentPath} />
+        </Suspense>
         <AppFooter />
       </div>
     );
