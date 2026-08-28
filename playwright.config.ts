@@ -21,15 +21,24 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
+      testIgnore: /touch\.spec\.ts/,
       use: { ...devices['Desktop Chrome'] },
     },
     {
       name: 'webkit',
+      testIgnore: /touch\.spec\.ts/,
       use: { ...devices['Desktop Safari'] },
     },
     {
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
+      testIgnore: /touch\.spec\.ts/,
+    },
+    {
+      // Touch and virtual-keyboard behaviour; only the touch suite runs here.
+      name: 'mobile-chrome',
+      use: { ...devices['Pixel 7'] },
+      testMatch: /touch\.spec\.ts/,
     },
   ],
 });
