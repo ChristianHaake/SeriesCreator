@@ -56,7 +56,9 @@ describe('App', () => {
 
     expect(backgroundTab).toHaveAttribute('aria-selected', 'true');
     expect(backgroundTab).toHaveFocus();
-    expect(screen.getByText('No project journey or reflections entered yet.')).toBeInTheDocument();
+    expect(
+      within(screen.getByRole('tabpanel')).getByText('No project journey or reflections entered yet.'),
+    ).toBeInTheDocument();
   });
 
   it('closes presentation mode with Escape', async () => {
@@ -112,6 +114,7 @@ describe('App', () => {
     renderApp('/lehrkraefte');
 
     expect(screen.getByRole('heading', { name: 'The Netflix Method' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Assessing academic deepening' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /back to app/i })).toHaveAttribute('href', '/');
   });
 
@@ -175,7 +178,13 @@ describe('App', () => {
 
     expect(screen.getAllByLabelText('Select season').length).toBeGreaterThan(0);
     expect(screen.getByLabelText('Title')).toBeInTheDocument();
-    expect(screen.getAllByLabelText('Description').length).toBeGreaterThan(0);
+    expect(screen.getByLabelText('Short description')).toBeInTheDocument();
+    expect(screen.getByLabelText('Academic deepening')).toBeInTheDocument();
+    expect(screen.getByText('0 / 5000 characters')).toBeInTheDocument();
+    const learningDepth = screen.getByLabelText('Academic deepening');
+    expect(learningDepth).toHaveAttribute('aria-describedby', expect.stringContaining('ep-learning-depth-count-'));
+    await user.type(learningDepth, 'Evidence');
+    expect(screen.getByText('8 / 5000 characters')).toBeInTheDocument();
     expect(screen.getByLabelText('Choose thumbnail')).toHaveAttribute('type', 'file');
 
     await user.click(screen.getByRole('button', { name: '3. Details' }));
@@ -230,11 +239,12 @@ describe('App', () => {
     expect(document.querySelectorAll('.episode-card img[src^="data:image/jpeg;base64,"]').length).toBe(3);
 
     await user.click(screen.getByRole('tab', { name: 'Concept' }));
-    expect(screen.getByText('Image prompts and social media kit')).toBeInTheDocument();
-    expect(screen.getByText(/Class 8b turns energy data/)).toBeInTheDocument();
+    const conceptPanel = within(screen.getByRole('tabpanel'));
+    expect(conceptPanel.getByText('Image prompts and social media kit')).toBeInTheDocument();
+    expect(conceptPanel.getByText(/Class 8b turns energy data/)).toBeInTheDocument();
 
     await user.click(screen.getByRole('tab', { name: 'Sources' }));
-    expect(screen.getByText(/Class measurement log/)).toBeInTheDocument();
+    expect(within(screen.getByRole('tabpanel')).getByText(/Class measurement log/)).toBeInTheDocument();
   });
 
   it('loads the Weimar example into the editor and preview', async () => {
@@ -254,8 +264,9 @@ describe('App', () => {
     expect(document.querySelectorAll('.episode-card img[src^="data:image/jpeg;base64,"]').length).toBe(3);
 
     await user.click(screen.getByRole('tab', { name: 'Concept' }));
-    expect(screen.getByText('Image prompts and social media kit')).toBeInTheDocument();
-    expect(screen.getByText(/Weimar Republic into a source-based investigation/)).toBeInTheDocument();
+    const weimarConceptPanel = within(screen.getByRole('tabpanel'));
+    expect(weimarConceptPanel.getByText('Image prompts and social media kit')).toBeInTheDocument();
+    expect(weimarConceptPanel.getByText(/Weimar Republic into a source-based investigation/)).toBeInTheDocument();
   });
 });
 

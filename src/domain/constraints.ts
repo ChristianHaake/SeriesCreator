@@ -9,6 +9,7 @@ export const fieldLimits = {
   cast: 200,
   episodeTitle: 100,
   episodeSummary: 1000,
+  episodeLearningDepth: 5000,
   altText: 125,
   reflection: 5000,
   sources: 5000,

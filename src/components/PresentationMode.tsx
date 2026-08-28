@@ -100,6 +100,14 @@ export function PresentationMode({ data, onClose }: Props) {
               <h2 className="presentation-kicker">{t.lblEpisodeN}{currentIndex + 1}</h2>
               <h1 className="presentation-episode__title">{allEpisodes[currentIndex]?.title}</h1>
               <p className="presentation-copy">{allEpisodes[currentIndex]?.summary}</p>
+              {allEpisodes[currentIndex]?.learningDepth && (
+                <section className="presentation-learning-depth">
+                  <h2>{t.episodeLearningDepthLabel}</h2>
+                  <p className="presentation-copy presentation-copy--preformatted">
+                    {allEpisodes[currentIndex].learningDepth}
+                  </p>
+                </section>
+              )}
             </div>
           </div>
         ) : currentIndex === allEpisodes.length ? (

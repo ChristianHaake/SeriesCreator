@@ -32,6 +32,17 @@ Bei der Netflix-Methode fassen Lernende ein Thema (z.B. eine historische Epoche,
 
 **Reflexionsfragen:** Wie können abstrakte Prozesse für ein breites Publikum spannend als Serie verpackt werden?
 
+## Fachliche Vertiefung bewerten
+
+Die Kurzbeschreibung erklärt, worum es in einer Episode geht. Die **fachliche Vertiefung** macht sichtbar, welches Wissen die Episode vermittelt und wie sie zum Gesamtthema beiträgt. Bewerten Sie vor allem:
+
+- **Fachliche Korrektheit:** Aussagen und Fachbegriffe sind sachlich richtig.
+- **Belege und Beispiele:** Kernaussagen werden mit Quellen, Daten, Textstellen oder nachvollziehbaren Beispielen gestützt.
+- **Auswahl und Gewichtung:** Die Episode konzentriert sich auf Wesentliches, statt möglichst viel Stoff aufzuzählen.
+- **Verbindung zur Gesamtserie:** Die Vertiefung erklärt, warum die Episode an dieser Stelle steht und wie sie an andere Episoden anschließt.
+
+Gestaltung und Streaming-Optik können das Ergebnis unterstützen, ersetzen aber keine fachliche Begründung.
+
 ## Datenschutz und Urheberrecht
 
 Nutzinhalte werden lokal im Browser verarbeitet. Dennoch gilt:

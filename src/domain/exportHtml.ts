@@ -10,6 +10,13 @@ function escapeHtml(unsafe: string | undefined): string {
     .replace(/'/g, "&#039;");
 }
 
+function createCspNonce() {
+  return Array.from(
+    crypto.getRandomValues(new Uint8Array(16)),
+    (byte) => byte.toString(16).padStart(2, '0'),
+  ).join('');
+}
+
 export function exportProjectToHtml(
   data: ProjectData,
   t: Record<string, string>,
@@ -17,13 +24,15 @@ export function exportProjectToHtml(
 ): string {
   // Replace </ to prevent XSS via </script> injection
   const jsonData = JSON.stringify(data).replace(/<\//g, '<\\/');
+  const cspNonce = createCspNonce();
   return `<!DOCTYPE html>
 <html lang="${locale}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; connect-src 'none'; form-action 'none'; frame-ancestors 'none'; img-src data:; object-src 'none'; script-src 'nonce-${cspNonce}'; style-src 'nonce-${cspNonce}'">
 <title>${escapeHtml(data.title)} - ${t.exportPresentation}</title>
-<style>
+<style nonce="${cspNonce}">
   * { box-sizing: border-box; }
   body { margin: 0; background: #111; color: white; font-family: system-ui, sans-serif; overflow: hidden; display: flex; flex-direction: column; height: 100dvh; -webkit-font-smoothing: antialiased; }
   #close { position: absolute; top: clamp(1rem, 3vw, 2rem); right: clamp(1rem, 3vw, 2rem); background: rgba(0,0,0,0.5); border: none; color: white; padding: 0; border-radius: 50%; cursor: pointer; z-index: 110; font-size: 1.5rem; text-decoration: none; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; }
@@ -40,6 +49,9 @@ export function exportProjectToHtml(
   .episode-no-image { background: #333; display: flex; align-items: center; justify-content: center; color: #8a8a8a; font-size: 1.25rem; }
   .episode-text { min-width: 0; max-height: 100%; overflow-y: auto; }
   .episode-title { font-size: clamp(2rem, 5vw, 3.5rem); margin-bottom: clamp(1rem, 3vw, 2rem); line-height: 1.1; }
+  .episode-learning-depth { border-top: 1px solid rgba(255,255,255,0.2); margin-top: 1.25rem; padding-top: 1rem; }
+  .episode-learning-depth h2 { color: #fb923c; font-size: clamp(1.1rem, 2.5vw, 1.4rem); margin: 0 0 0.5rem; }
+  .custom-concept { margin-top: 3rem; }
   h2 { font-size: clamp(1.25rem, 3vw, 2rem); color: #aaa; margin-bottom: 0.5rem; }
   .section-title { color: #fb923c; font-size: clamp(2rem, 5vw, 3rem); margin-bottom: 2rem; }
   .preformatted { text-wrap: wrap; white-space: pre-wrap; text-align: left; }
@@ -82,7 +94,7 @@ export function exportProjectToHtml(
 </style>
 </head>
 <body>
-  <button id="close" aria-label="${t.lblClose}" onclick="window.close()" title="${t.lblClose}">
+  <button id="close" aria-label="${t.lblClose}" title="${t.lblClose}">
     <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
   </button>
   <div id="content"></div>
@@ -94,7 +106,7 @@ export function exportProjectToHtml(
       <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
     </button>
   </div>
-<script>
+<script nonce="${cspNonce}">
   const data = ${jsonData};
   const allEpisodes = data.seasons.flatMap(s => s.episodes);
   let currentIndex = -1;
@@ -103,6 +115,8 @@ export function exportProjectToHtml(
   const contentDiv = document.getElementById('content');
   const prevBtn = document.getElementById('prevBtn');
   const nextBtn = document.getElementById('nextBtn');
+
+  document.getElementById('close').addEventListener('click', () => window.close());
 
   function escapeHtml(unsafe) {
     if (!unsafe) return '';
@@ -129,12 +143,14 @@ export function exportProjectToHtml(
       }
       html += '<div class="episode-text"><h2 class="episode-kicker">${t.lblEpisodeN}' + (currentIndex + 1) + '</h2>';
       html += '<h1 class="episode-title">' + escapeHtml(ep.title) + '</h1>';
-      html += '<p>' + escapeHtml(ep.summary) + '</p></div></div>';
+      html += '<p>' + escapeHtml(ep.summary) + '</p>';
+      if (ep.learningDepth) html += '<section class="episode-learning-depth"><h2>${t.episodeLearningDepthLabel}</h2><p class="preformatted">' + escapeHtml(ep.learningDepth) + '</p></section>';
+      html += '</div></div>';
     } else if (currentIndex === allEpisodes.length) {
       html = '<div class="center-container"><h1 class="section-title">${t.lblReflection}</h1>';
       html += '<p class="preformatted">' + escapeHtml(data.reflection || "${t.noReflection}") + '</p>';
       if (data.customConceptTitle || data.customConceptText) {
-        html += '<div style="margin-top: 3rem;"><h1 class="section-title">' + escapeHtml(data.customConceptTitle || "${t.lblCustomSection}") + '</h1>';
+        html += '<div class="custom-concept"><h1 class="section-title">' + escapeHtml(data.customConceptTitle || "${t.lblCustomSection}") + '</h1>';
         html += '<p class="preformatted">' + escapeHtml(data.customConceptText || "") + '</p></div>';
       }
       html += '</div>';

@@ -18,13 +18,18 @@ test('completes the primary workflow and downloads both portable formats', async
   const editor = page.locator('.editor-sidebar');
   await editor.getByLabel('Title', { exact: true }).fill('The First Clue');
   await editor
-    .getByLabel('Description', { exact: true })
+    .getByLabel('Short description', { exact: true })
     .fill('The class discovers the first source.');
+  await editor
+    .getByLabel('Academic deepening', { exact: true })
+    .fill('The class distinguishes an observation from evidence and records a supporting source.');
 
   const preview = page.getByRole('main');
   await expect(preview.getByRole('heading', { name: 'Release Test Series' })).toBeVisible();
   await expect(preview.getByRole('heading', { name: /1\. The First Clue/ })).toBeVisible();
   await expect(preview.getByText('Created by: Class 8B', { exact: true })).toBeVisible();
+  await preview.getByText('Academic deepening', { exact: true }).click();
+  await expect(preview.getByText('The class distinguishes an observation from evidence and records a supporting source.')).toBeVisible();
 
   const projectDownload = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Save', exact: true }).click();
@@ -43,6 +48,7 @@ test('completes the primary workflow and downloads both portable formats', async
   await expect(
     presentation.getByRole('heading', { name: 'Episode 1', exact: true }),
   ).toBeVisible();
+  await expect(presentation.getByText('The class distinguishes an observation from evidence and records a supporting source.')).toBeVisible();
   await presentation.getByRole('button', { name: 'Close Presentation' }).click();
   await expect(presentation).toBeHidden();
 });
@@ -85,4 +91,46 @@ test('loads a complete current example through the gallery', async ({ page }) =>
   await page.getByLabel('Select season').selectOption('climate-season-action');
   await expect(page.locator('.episode-card__image')).toHaveCount(3);
   await expect(page.getByRole('heading', { name: '3. A Plan for Monday' })).toBeVisible();
+});
+
+test('imports a project through the background validator', async ({ page }) => {
+  await page.goto('/');
+
+  await page.locator('input[type="file"][aria-label="Load"]').setInputFiles({
+    name: 'import.seriescreator',
+    mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify({
+      schemaVersion: 2,
+      title: 'Imported Series',
+      description: 'Validated away from the main UI thread.',
+      seasons: [{ id: 's1', title: 'Season 1', episodes: [] }],
+    })),
+  });
+
+  await expect(page.getByText('Project file loaded.')).toBeVisible();
+  await expect(page.locator('.streaming-title')).toHaveText('Imported Series');
+});
+
+test('renders the print layout with backgrounds and the full details step', async ({ page }) => {
+  await page.goto('/');
+
+  await page.getByLabel('Series Title').fill('Print Test Series');
+  await page.getByRole('button', { name: '3. Details' }).click();
+  await page.getByLabel('Sources').fill('Class measurement log; school archive.');
+
+  const printLayout = page.locator('#print-layout-container');
+
+  // Hidden on screen: it must not be announced or take part in the layout.
+  await expect(printLayout).toBeHidden();
+
+  await page.emulateMedia({ media: 'print' });
+
+  await expect(printLayout).toBeVisible();
+  await expect(printLayout).toContainText('Print Test Series');
+  await expect(printLayout).toContainText('Class measurement log; school archive.');
+
+  // Without this the dark fills are dropped and white text prints onto blank paper.
+  await expect(printLayout).toHaveCSS('print-color-adjust', 'exact');
+
+  await page.emulateMedia({ media: 'screen' });
 });

@@ -1596,6 +1596,12 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
   }
 }
 
+/* Print-only layout: kept out of the screen layout entirely so it cannot be
+   announced by screen readers or inflate the app shell's scrollable area. */
+#print-layout-container {
+  display: none;
+}
+
 @media print {
   html,
   body,
@@ -1624,18 +1630,32 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
   }
 
   #print-layout-container {
+    display: block !important;
     position: static !important;
     inset: auto !important;
     opacity: 1 !important;
     z-index: auto !important;
     width: 100% !important;
     min-height: 0 !important;
-    padding: 2cm !important;
+    padding: 0 !important;
     pointer-events: none !important;
+    /* Without this the dark fills are dropped by default and the white text
+       prints onto blank paper. */
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
+
+  /* Keep episodes and the detail sections whole across page breaks. */
+  #print-layout-container [data-print-episode],
+  #print-layout-container [data-print-section] {
+    break-inside: avoid;
+  }
+
   @page {
     size: A4 portrait;
-    margin: 0;
+    /* Margin belongs on the page box: container padding only applies once,
+       leaving pages 2+ running to the paper edge. */
+    margin: 2cm;
   }
 }
 
@@ -1728,4 +1748,37 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
   text-wrap: pretty;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
+}
+
+.episode-card__learning-depth {
+  border-top: 1px solid rgb(255 255 255 / 12%);
+  margin-top: 0.9rem;
+  padding-top: 0.75rem;
+}
+
+.episode-card__learning-depth summary {
+  color: #fb923c;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.episode-card__learning-depth p {
+  display: block;
+  margin: 0.65rem 0 0;
+  overflow: visible;
+  white-space: pre-wrap;
+  -webkit-line-clamp: unset;
+}
+
+.presentation-learning-depth {
+  border-top: 1px solid oklch(1 0 0 / 20%);
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+}
+
+.presentation-learning-depth h2 {
+  color: #fb923c;
+  font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+  margin: 0 0 0.5rem;
 }

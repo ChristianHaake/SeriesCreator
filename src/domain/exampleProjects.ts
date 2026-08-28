@@ -335,9 +335,53 @@ function weimarProject(locale: ExampleLocale): ProjectData {
   };
 }
 
+const learningDepthByLocale: Record<ExampleLocale, Record<string, string>> = {
+  de: {
+    'klima-ep-strom': 'Kernaussage: Der Stromverbrauch hängt nicht nur von sichtbaren Geräten ab, sondern auch von Standby-Zeiten und Nutzungsroutinen. Belege: Messwerte vergleichen, Verbrauch in Kilowattstunden berechnen und Einsparpotenziale begründen.',
+    'klima-ep-waerme': 'Leitfrage: Welche baulichen und alltäglichen Faktoren beeinflussen den Wärmeverlust? Die Temperaturdaten müssen nach Raum, Zeit und Lüftungsverhalten ausgewertet werden, bevor Maßnahmen vorgeschlagen werden.',
+    'klima-ep-mensa': 'Kernaussage: Die Klimabilanz von Essen umfasst Produktion, Transport und Verschwendung. Die Klasse bewertet regionale Alternativen nicht pauschal, sondern anhand erhobener Mengen und nachvollziehbarer Kriterien.',
+    'klima-ep-daten': 'Fachliche Vertiefung: Aus Beobachtungen werden erst durch Diagramme, Vergleichswerte und Quellen belastbare Argumente. Kostenangaben und Interviews müssen als unterschiedliche Belegarten eingeordnet werden.',
+    'klima-ep-klimarat': 'Leitfrage: Wie werden Zielkonflikte zwischen Kosten, Komfort, Fairness und Klimaschutz entschieden? Die Episode macht sichtbar, dass eine begründete Entscheidung Gegenargumente berücksichtigt.',
+    'klima-ep-montag': 'Kernaussage: Ein Handlungsplan braucht Prioritäten, Zuständigkeiten und überprüfbare Kriterien. Die Klasse unterscheidet kurzfristig umsetzbare Routinen von Maßnahmen, die weitere Entscheidungen erfordern.',
+    'weimar-ep-verfassung': 'Kernaussage: Die Verfassung eröffnete demokratische Beteiligung, enthielt aber auch Spannungen zwischen Parlament, Reichspräsident und Grundrechten. Die Episode ordnet Quellen in den Übergang vom Kaiserreich zur Republik ein.',
+    'weimar-ep-krise': 'Fachliche Vertiefung: Hyperinflation veränderte Alltag und Vertrauen, traf Gruppen aber unterschiedlich. Die Lernenden prüfen, was eine Quelle tatsächlich belegt und wie wirtschaftliche Krisen politisch genutzt wurden.',
+    'weimar-ep-kultur': 'Leitfrage: Woran zeigt sich Modernisierung im Alltag? Kultur, Rollenbilder und Stadtleben werden als unterschiedliche Perspektiven betrachtet; Fortschritt und Konflikt dürfen nicht zu einer einzigen Erzählung vereinfacht werden.',
+    'weimar-ep-propaganda': 'Kernaussage: Plakate und Zeitungen sind interessengeleitete Quellen. Bildsprache, Zielgruppen und ausgelöste Gefühle müssen analysiert werden, bevor ihre historische Aussagekraft bewertet wird.',
+    'weimar-ep-wahl': 'Fachliche Vertiefung: Wahlergebnisse erklären politische Entwicklungen nicht allein. Die Episode verbindet Daten mit Gewalt, Präsidialkabinetten und den eingeschränkten Möglichkeiten parlamentarischer Kompromisse.',
+    'weimar-ep-frage': 'Leitfrage: Welche Ursachen waren strukturell, welche Entscheidungen waren vermeidbar? Die Debatte verlangt eine quellenbasierte Bewertung und unterscheidet Erklären von nachträglicher Schuldzuweisung.',
+  },
+  en: {
+    'climate-ep-electricity': 'Key idea: Electricity use depends on visible devices, standby time, and routines. Evidence: compare measurements, calculate kilowatt-hours, and justify savings potential.',
+    'climate-ep-heat': 'Guiding question: Which building conditions and everyday routines influence heat loss? Temperature data must be compared by room, time, and ventilation before proposing measures.',
+    'climate-ep-cafeteria': 'Key idea: Food-related emissions include production, transport, and waste. The class evaluates regional options using collected quantities and transparent criteria rather than assumptions.',
+    'climate-ep-data': 'Academic deepening: Observations become reliable arguments only through charts, comparison values, and sources. Cost estimates and interviews must be distinguished as different kinds of evidence.',
+    'climate-ep-council': 'Guiding question: How should conflicts between cost, comfort, fairness, and climate protection be decided? A justified decision addresses counterarguments.',
+    'climate-ep-monday': 'Key idea: An action plan needs priorities, responsibilities, and reviewable criteria. The class distinguishes immediate routines from measures that require further decisions.',
+    'weimar-ep-constitution': 'Key idea: The constitution enabled democratic participation but also created tensions between parliament, the president, and rights. Sources are placed in the transition from empire to republic.',
+    'weimar-ep-crisis': 'Academic deepening: Hyperinflation changed everyday life and trust, but affected groups differently. Learners examine what a source proves and how crises were used politically.',
+    'weimar-ep-culture': 'Guiding question: How did modernisation become visible in everyday life? Culture, gender roles, and city life are treated as different perspectives rather than one simple progress narrative.',
+    'weimar-ep-propaganda': 'Key idea: Posters and newspapers are sources shaped by interests. Their imagery, target groups, and emotional appeals must be analysed before judging historical value.',
+    'weimar-ep-election': 'Academic deepening: Election results alone do not explain political change. The episode connects data with violence, presidential cabinets, and shrinking space for parliamentary compromise.',
+    'weimar-ep-question': 'Guiding question: Which causes were structural and which decisions could have been different? The debate requires source-based judgement rather than hindsight blame.',
+  },
+};
+
+function withLearningDepth(project: ProjectData, locale: ExampleLocale): ProjectData {
+  return {
+    ...project,
+    seasons: project.seasons.map((season) => ({
+      ...season,
+      episodes: season.episodes.map((episode) => ({
+        ...episode,
+        learningDepth: learningDepthByLocale[locale][episode.id],
+      })),
+    })),
+  };
+}
+
 export function getExampleProjects(locale: ExampleLocale): ExampleProject[] {
-  const climate = climateProject(locale);
-  const weimar = weimarProject(locale);
+  const climate = withLearningDepth(climateProject(locale), locale);
+  const weimar = withLearningDepth(weimarProject(locale), locale);
 
   if (locale === 'en') {
     return [
@@ -441,5 +485,5 @@ export function getExampleProjects(locale: ExampleLocale): ExampleProject[] {
 }
 
 export function createSchoolEnergyExampleProject(locale: ExampleLocale): ProjectData {
-  return climateProject(locale);
+  return withLearningDepth(climateProject(locale), locale);
 }

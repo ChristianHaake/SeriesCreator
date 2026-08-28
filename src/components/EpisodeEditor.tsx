@@ -16,6 +16,10 @@ interface Props {
 
 export const EpisodeEditor = memo(function EpisodeEditor({ episode, seasonId, index, total, onUpdate, onRemove, onMove }: Props) {
   const { t, locale } = useTranslation();
+  const learningDepthLength = episode.learningDepth?.length ?? 0;
+  const learningDepthCount = t.episodeLearningDepthCount
+    .replace('{count}', String(learningDepthLength))
+    .replace('{limit}', String(fieldLimits.episodeLearningDepth));
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -124,7 +128,7 @@ export const EpisodeEditor = memo(function EpisodeEditor({ episode, seasonId, in
             style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid var(--border-color)' }}
           />
         </div>
-        
+
         <div>
           <label htmlFor={`ep-summary-${episode.id}`} style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.3rem', fontWeight: 500 }}>{t.episodeDescriptionLabel}</label>
           <textarea
@@ -135,6 +139,23 @@ export const EpisodeEditor = memo(function EpisodeEditor({ episode, seasonId, in
             maxLength={fieldLimits.episodeSummary}
             style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid var(--border-color)', resize: 'vertical' }}
           />
+        </div>
+
+        <div>
+          <label htmlFor={`ep-learning-depth-${episode.id}`} style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.3rem', fontWeight: 500 }}>{t.episodeLearningDepthLabel}</label>
+          <p className="field-hint" id={`ep-learning-depth-hint-${episode.id}`}>{t.episodeLearningDepthHint}</p>
+          <textarea
+            id={`ep-learning-depth-${episode.id}`}
+            value={episode.learningDepth || ''}
+            onChange={(e) => onUpdate(seasonId, episode.id, { learningDepth: e.target.value })}
+            rows={5}
+            maxLength={fieldLimits.episodeLearningDepth}
+            aria-describedby={`ep-learning-depth-hint-${episode.id} ep-learning-depth-count-${episode.id}`}
+            style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid var(--border-color)', resize: 'vertical' }}
+          />
+          <p className="field-hint" id={`ep-learning-depth-count-${episode.id}`}>
+            {learningDepthCount}
+          </p>
         </div>
 
         <div>

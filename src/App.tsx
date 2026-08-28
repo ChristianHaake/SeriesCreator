@@ -187,6 +187,8 @@ function App() {
           setActiveSeasonId(importedData.seasons[0]?.id || '');
           showStatus(t.msgImportSuccess, 'success');
         }}
+        onImportStart={() => showStatus(t.msgImporting, 'info')}
+        onImportError={(message) => showStatus(message, 'error')}
         onShowExamples={() => setShowExamples(true)}
         onReset={() => {
           if (window.confirm(t.confirmReset)) {
@@ -237,6 +239,12 @@ function App() {
           episodesLabel={t.tabEpisodes}
           noCoverLabel={t.noCover}
           noImageLabel={t.noImage}
+          episodeLearningDepthLabel={t.episodeLearningDepthLabel}
+          reflectionLabel={t.lblReflection}
+          noReflectionLabel={t.noReflection}
+          customSectionLabel={t.lblCustomSection}
+          sourcesLabel={t.lblSources}
+          noSourcesLabel={t.noSources}
         />
 
       {/* Sidebar Editor */}

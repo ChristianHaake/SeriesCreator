@@ -11,6 +11,12 @@ interface Props {
   episodesLabel: string;
   noCoverLabel: string;
   noImageLabel: string;
+  episodeLearningDepthLabel: string;
+  reflectionLabel: string;
+  noReflectionLabel: string;
+  customSectionLabel: string;
+  sourcesLabel: string;
+  noSourcesLabel: string;
 }
 
 // This component is rendered hidden in the DOM purely for the PDF export
@@ -23,20 +29,22 @@ export const PrintLayout = React.memo(function PrintLayout({
   episodesLabel,
   noCoverLabel,
   noImageLabel,
+  episodeLearningDepthLabel,
+  reflectionLabel,
+  noReflectionLabel,
+  customSectionLabel,
+  sourcesLabel,
+  noSourcesLabel,
 }: Props) {
   const allEpisodes = data.seasons.flatMap(s => s.episodes);
   const completion = displayCompletion(data);
 
   return (
-    <div 
-      id="print-layout-container" 
-      style={{ 
-        position: 'absolute', 
-        left: 0, 
-        top: 0,
-        zIndex: -1, // Keep it behind everything
-        opacity: 0, // Make it invisible but still part of the layout tree for html-to-image
-        pointerEvents: 'none',
+    <div
+      id="print-layout-container"
+      // Hidden from screen and from assistive tech; `@media print` reveals it.
+      aria-hidden="true"
+      style={{
         width: '1200px', // Fixed high-res width
         backgroundColor: '#141414', // Dark mode background
         color: '#ffffff',
@@ -79,7 +87,7 @@ export const PrintLayout = React.memo(function PrintLayout({
       
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '40px' }}>
         {allEpisodes.map((ep, index) => (
-          <div key={ep.id} style={{ display: 'flex', gap: '20px', backgroundColor: '#222', padding: '20px', borderRadius: '8px' }}>
+          <div key={ep.id} data-print-episode style={{ display: 'flex', gap: '20px', backgroundColor: '#222', padding: '20px', borderRadius: '8px' }}>
             <div style={{ width: '200px', height: '112px', flexShrink: 0, backgroundColor: '#333', borderRadius: '4px', overflow: 'hidden', position: 'relative' }}>
               {ep.thumbnailUrl ? (
                 <img src={ep.thumbnailUrl} alt={ep.altText || ep.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -90,10 +98,34 @@ export const PrintLayout = React.memo(function PrintLayout({
             <div>
               <h3 style={{ fontSize: '28px', margin: '0 0 10px 0' }}>{index + 1}. {ep.title}</h3>
               <p style={{ fontSize: '20px', color: '#a3a3a3', margin: 0, lineHeight: '1.4' }}>{ep.summary}</p>
+              {ep.learningDepth && (
+                <section style={{ marginTop: '16px' }}>
+                  <h4 style={{ fontSize: '18px', margin: '0 0 6px', color: '#fb923c' }}>{episodeLearningDepthLabel}</h4>
+                  <p style={{ fontSize: '18px', color: '#d4d4d4', margin: 0, lineHeight: '1.4', whiteSpace: 'pre-wrap' }}>{ep.learningDepth}</p>
+                </section>
+              )}
             </div>
           </div>
         ))}
       </div>
+
+      {/* Details: reflection, optional custom section, sources — mirrors exportHtml */}
+      <section data-print-section style={{ marginTop: '60px' }}>
+        <h2 style={{ fontSize: '48px', borderBottom: '4px solid #fb923c', display: 'inline-block', paddingBottom: '10px', marginBottom: '30px' }}>{reflectionLabel}</h2>
+        <p style={{ fontSize: '20px', lineHeight: '1.5', margin: 0, whiteSpace: 'pre-wrap' }}>{data.reflection || noReflectionLabel}</p>
+      </section>
+
+      {(data.customConceptTitle || data.customConceptText) && (
+        <section data-print-section style={{ marginTop: '50px' }}>
+          <h2 style={{ fontSize: '48px', borderBottom: '4px solid #fb923c', display: 'inline-block', paddingBottom: '10px', marginBottom: '30px' }}>{data.customConceptTitle || customSectionLabel}</h2>
+          <p style={{ fontSize: '20px', lineHeight: '1.5', margin: 0, whiteSpace: 'pre-wrap' }}>{data.customConceptText}</p>
+        </section>
+      )}
+
+      <section data-print-section style={{ marginTop: '50px' }}>
+        <h2 style={{ fontSize: '48px', borderBottom: '4px solid #fb923c', display: 'inline-block', paddingBottom: '10px', marginBottom: '30px' }}>{sourcesLabel}</h2>
+        <p style={{ fontSize: '20px', lineHeight: '1.5', margin: 0, whiteSpace: 'pre-wrap' }}>{data.sources || noSourcesLabel}</p>
+      </section>
     </div>
   );
 });

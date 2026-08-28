@@ -51,7 +51,8 @@ Akzeptiert, wenn:
 ### F-03 Staffeln und Episoden
 
 Ein Projekt enthält 1–20 Staffeln und höchstens 100 Episoden pro Staffel.
-Episoden enthalten Titel, Beschreibung, optionales Bild und Alternativtext.
+Episoden enthalten Titel, Kurzbeschreibung, optionale fachliche Vertiefung,
+optionales Bild und Alternativtext.
 
 Akzeptiert, wenn:
 
@@ -59,6 +60,8 @@ Akzeptiert, wenn:
 - die UI und der Import dieselben Höchstgrenzen durchsetzen;
 - Episoden angelegt, bearbeitet und gelöscht werden können;
 - Hoch-/Runter-Schaltflächen die Reihenfolge ohne Drag-and-drop ändern.
+- die fachliche Vertiefung fachliche Kernaussagen, Leitfragen, Begriffe,
+  Beispiele oder Belege aufnehmen kann, ohne den Projektstatus zu verändern.
 
 ### F-04 Konzept, Reflexion und Quellen
 
@@ -71,7 +74,7 @@ erhalten bleiben.
 ### F-05 Live-Vorschau und responsive Bedienung
 
 Die Vorschau zeigt Serien-Hero, Metadaten, Staffeln, Episoden, Konzept und
-Quellen.
+Quellen. Fachliche Vertiefungen sind je Episode einklappbar.
 
 Akzeptiert, wenn:
 
@@ -83,8 +86,8 @@ Akzeptiert, wenn:
 
 ### F-06 Präsentation
 
-Die In-App-Präsentation zeigt Titel, alle Episoden, Reflexion, Quellen und
-Credits.
+Die In-App-Präsentation zeigt Titel, alle Episoden einschließlich optionaler
+fachlicher Vertiefungen, Reflexion, Quellen und Credits.
 
 Akzeptiert, wenn:
 
@@ -116,7 +119,7 @@ Akzeptiert, wenn:
 - Dateinamen aus dem Projekttitel erzeugt und sicher bereinigt werden;
 - die HTML-Datei ohne externe Assets funktioniert und Tastaturnavigation,
   responsive Layouts und reduzierte Bewegung unterstützt;
-- die Druckansicht Titel und Episoden enthält;
+- die Druckansicht Titel, Episoden und vorhandene fachliche Vertiefungen enthält;
 - die UI PDF korrekt als Browser-Druckpfad bezeichnet, nicht als eigenen
   PDF-Generator.
 
@@ -127,6 +130,7 @@ Die App enthält Klima- und Weimar-Projekte in Deutsch und Englisch.
 Akzeptiert, wenn:
 
 - jedes Beispiel zwei Staffeln, sechs Episoden, Reflexion und Quellen enthält;
+- jedes Beispiel die fachliche Vertiefung je Episode demonstriert;
 - Cover und Episodenbilder eingebettet werden;
 - Galerie und `.seriescreator`-Datei denselben normalen Projektpfad verwenden;
 - das Laden nur nach Bestätigung vorhandene Arbeit ersetzt.
@@ -157,6 +161,7 @@ Akzeptiert, wenn:
 | Beschreibung | 2.000 Zeichen |
 | Episodentitel | 100 Zeichen |
 | Episodenbeschreibung | 1.000 Zeichen |
+| Fachliche Vertiefung je Episode | 5.000 Zeichen |
 | Alternativtext | 125 Zeichen |
 | Reflexion / Quellen | jeweils 5.000 Zeichen |
 

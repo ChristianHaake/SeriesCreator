@@ -8,6 +8,7 @@ import {
 } from './projectCodec';
 import { initialProjectData } from '../types';
 import { calculateProjectCompletion, displayCompletion } from './completion';
+import { fieldLimits } from './constraints';
 
 describe('projectCodec', () => {
   it('normalizes legacy project JSON without replacing it blindly', () => {
@@ -26,6 +27,7 @@ describe('projectCodec', () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.data.schemaVersion).toBe(PROJECT_SCHEMA_VERSION);
+      expect(result.data.seasons[0].episodes).toEqual([]);
       expect(result.data.title).toBe('Legacy');
       expect(result.data.previewBrand).toBe('SeriesCreator');
       expect(result.data.matchPercentage).toBe(89);
@@ -47,6 +49,7 @@ describe('projectCodec', () => {
     const result = parseProjectJson(
       JSON.stringify({
         ...initialProjectData,
+        schemaVersion: 1,
         seasons: [{ id: 's1', title: 'Staffel 1', episodes: [{}] }],
       }),
     );
@@ -60,6 +63,56 @@ describe('projectCodec', () => {
     };
 
     expect(serialized.schemaVersion).toBe(PROJECT_SCHEMA_VERSION);
+  });
+
+  it('keeps optional episode learning depth while accepting legacy episodes without it', () => {
+    const withLearningDepth = parseProjectJson(
+      JSON.stringify({
+        ...initialProjectData,
+        seasons: [{ id: 's1', title: 'Staffel 1', episodes: [{ id: 'ep1', title: 'Eins', summary: 'Kurz', learningDepth: 'Kernaussage\nBeleg' }] }],
+      }),
+    );
+    const legacy = parseProjectJson(
+      JSON.stringify({
+        ...initialProjectData,
+        schemaVersion: 1,
+        seasons: [{ id: 's1', title: 'Staffel 1', episodes: [{ id: 'ep1', title: 'Eins', summary: 'Kurz' }] }],
+      }),
+    );
+
+    expect(withLearningDepth.ok && withLearningDepth.data.seasons[0].episodes[0].learningDepth).toBe('Kernaussage\nBeleg');
+    expect(legacy.ok && legacy.data.seasons[0].episodes[0].learningDepth).toBeUndefined();
+
+    if (withLearningDepth.ok) {
+      const roundTrip = parseProjectJson(serializeProject(withLearningDepth.data));
+      expect(roundTrip.ok && roundTrip.data.schemaVersion).toBe(PROJECT_SCHEMA_VERSION);
+      expect(roundTrip.ok && roundTrip.data.seasons[0].episodes[0].learningDepth).toBe('Kernaussage\nBeleg');
+    }
+  });
+
+  it('rejects invalid schema versions and keeps the initial schema current', () => {
+    const invalidVersion = parseProjectJson(JSON.stringify({ ...initialProjectData, schemaVersion: 1.5 }));
+    expect(invalidVersion.ok).toBe(false);
+    expect(initialProjectData.schemaVersion).toBe(PROJECT_SCHEMA_VERSION);
+  });
+
+  it('discards invalid optional episode learning depth and truncates long text', () => {
+    const result = parseProjectJson(
+      JSON.stringify({
+        ...initialProjectData,
+        seasons: [{ id: 's1', title: 'Staffel 1', episodes: [{ id: 'ep1', title: 'Eins', summary: 'Kurz', learningDepth: 42 }] }],
+      }),
+    );
+
+    expect(result.ok && result.data.seasons[0].episodes[0].learningDepth).toBeUndefined();
+
+    const longText = parseProjectJson(
+      JSON.stringify({
+        ...initialProjectData,
+        seasons: [{ id: 's1', title: 'Staffel 1', episodes: [{ id: 'ep1', title: 'Eins', summary: 'Kurz', learningDepth: 'x'.repeat(fieldLimits.episodeLearningDepth + 1) }] }],
+      }),
+    );
+    expect(longText.ok && longText.data.seasons[0].episodes[0].learningDepth).toHaveLength(fieldLimits.episodeLearningDepth);
   });
 
   it('prevents exporting project files that cannot be imported again', () => {

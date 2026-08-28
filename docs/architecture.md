@@ -30,9 +30,10 @@ The active project is owned by `useProjectStore`. It autosaves to
 `localStorage` under `series_creator_data`; the locale is stored under
 `series-creator-locale`.
 
-Persisted project schema version: `1`. Legacy JSON without `schemaVersion` is
-accepted only after normalization. Future schema versions are rejected without
-replacing the current project. Reset restores `initialProjectData`.
+Persisted project schema version: `2`. Schema-1 projects and legacy JSON
+without `schemaVersion` are normalized forward, including a missing optional
+episode learning depth. Future schema versions are rejected without replacing
+the current project. Reset restores `initialProjectData`.
 
 ## Project files
 
@@ -40,14 +41,16 @@ Editable backups use:
 
 - extension: `.seriescreator`
 - media type: `application/json`
-- schema version: `1`
+- schema version: `2`
 - import limit: 25 MB
 - image upload limit: PNG, JPG/JPEG or WebP with at most 60 megapixels
 - image output width: cover up to 1920 px; episode images up to 800 px
 - structure limits: 1 to 20 seasons, up to 100 episodes per season
 
 Imports are treated as untrusted input. A project replaces state only after full
-runtime validation and normalization.
+runtime validation and normalization. JSON parsing and normalization run in a
+dedicated module worker so valid but large project files do not block the editor;
+older environments fall back to the same validated codec on the main thread.
 
 The serialized `author` field is editable in the project information step and
 is used in preview metadata and presentation credits. See

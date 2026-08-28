@@ -2,7 +2,7 @@ import { fieldLimits, resourceLimits } from './constraints';
 import type { Episode, ProjectData, Season } from '../types';
 import { initialProjectData } from '../types';
 
-export const PROJECT_SCHEMA_VERSION = 1;
+export const PROJECT_SCHEMA_VERSION = 2;
 export const PROJECT_FILE_EXTENSION = 'seriescreator';
 export const PROJECT_FILE_MIME_TYPE = 'application/json';
 
@@ -48,6 +48,7 @@ function normalizeEpisode(value: unknown, index: number): Episode | null {
     id: limitText(value.id, 80) || `ep_${index + 1}`,
     title: limitText(value.title, fieldLimits.episodeTitle) || 'Neue Episode',
     summary: limitText(value.summary, fieldLimits.episodeSummary),
+    learningDepth: limitText(value.learningDepth, fieldLimits.episodeLearningDepth) || undefined,
     thumbnailUrl: asOptionalImageUrl(value.thumbnailUrl),
     altText: limitText(value.altText, fieldLimits.altText) || undefined,
   };
@@ -74,11 +75,16 @@ export function normalizeProject(value: unknown): ProjectParseResult {
     return { ok: false, message: 'Projektdatei enthält kein gültiges Objekt.' };
   }
 
-  const rawVersion = value.schemaVersion;
-  if (typeof rawVersion === 'number' && rawVersion > PROJECT_SCHEMA_VERSION) {
+  const rawVersion = value.schemaVersion === undefined ? 1 : value.schemaVersion;
+  if (
+    typeof rawVersion !== 'number' ||
+    !Number.isInteger(rawVersion) ||
+    rawVersion < 1 ||
+    rawVersion > PROJECT_SCHEMA_VERSION
+  ) {
     return {
       ok: false,
-      message: 'Projektdatei wurde mit einer neueren SeriesCreator-Version gespeichert.',
+      message: 'Projektdatei verwendet eine nicht unterstützte Schema-Version.',
     };
   }
 
@@ -98,6 +104,8 @@ export function normalizeProject(value: unknown): ProjectParseResult {
     return { ok: false, message: 'Projektdatei enthält ungültige Staffeln oder Episoden.' };
   }
 
+  // Schema 1 projects did not contain learningDepth. Normalizing the optional
+  // value below is the explicit forward migration to schema 2.
   const data: ProjectData = {
     ...initialProjectData,
     schemaVersion: PROJECT_SCHEMA_VERSION,

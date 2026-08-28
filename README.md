@@ -22,7 +22,7 @@ Bewertungshinweise beschreibt
 | Projektplanung | Titel, Urheber:in, Beschreibung, Anbieter, Kategorie, Alters-/Klassenstufe, Genre, Mitwirkende und automatisch berechneter Projektstatus |
 | Medien | Lokaler Upload von PNG, JPEG oder WebP; Cover und Episodenbilder werden im Browser geprüft und verkleinert; Alternativtexte für Episodenbilder |
 | Struktur | 1–20 Staffeln, bis zu 100 Episoden je Staffel, Umbenennen, Löschen leerer Staffeln und barrierearme Hoch-/Runter-Steuerung für Episoden |
-| Inhalt | Episodentitel und -beschreibungen, Projektverlauf/Reflexion, Quellen und eine frei benennbare Konzeptsektion |
+| Inhalt | Episodentitel, Kurzbeschreibungen und fachliche Vertiefungen je Episode, Projektverlauf/Reflexion, Quellen und eine frei benennbare Konzeptsektion |
 | Vorschau | Sofort aktualisierte Streaming-Ansicht; mobil expliziter Wechsel zwischen Editor und Vorschau |
 | Präsentation | In-App-Präsentation mit Vollbild-Fallback, Tastatursteuerung, Episoden, Reflexion, Quellen und Credits |
 | Dateien | Versionierte `.seriescreator`-Projektdatei, eigenständige Offline-HTML-Präsentation und Browser-Druck/PDF |
@@ -47,7 +47,7 @@ anonyme, cookielose Reichweitenstatistik. Details stehen in der
 
 ## Projektdateien und Exporte
 
-- `.seriescreator`: versioniertes JSON-Schema 1, maximal 25 MB
+- `.seriescreator`: versioniertes JSON-Schema 2, maximal 25 MB
 - Bilder: PNG/JPEG/WebP, maximal 60 Megapixel Eingangsgröße
 - HTML: eigenständige Präsentationsdatei für lokale/offline Wiedergabe
 - PDF: über den nativen Druckdialog des Browsers

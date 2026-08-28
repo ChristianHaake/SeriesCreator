@@ -79,6 +79,11 @@ describe('useProjectStore hook mutations', () => {
     
     expect(result.current.data.seasons[0].episodes.length).toBe(initialEpisodesCount + 1);
     const newEpisodeId = result.current.data.seasons[0].episodes[initialEpisodesCount].id;
+
+    act(() => {
+      result.current.updateEpisode(initialSeasonId, newEpisodeId, { learningDepth: 'Kernaussage und Beleg' });
+    });
+    expect(result.current.data.seasons[0].episodes[initialEpisodesCount].learningDepth).toBe('Kernaussage und Beleg');
     
     act(() => {
       result.current.removeEpisode(initialSeasonId, newEpisodeId);

@@ -2,6 +2,7 @@ export interface Episode {
   id: string;
   title: string;
   summary: string;
+  learningDepth?: string;
   thumbnailUrl?: string; // Optional image URL or base64
   altText?: string; // Alt text for accessibility
 }
@@ -71,7 +72,7 @@ const initialProjectText: Record<InitialLocale, {
 export function createInitialProjectData(locale: InitialLocale = 'de'): ProjectData {
   const text = initialProjectText[locale];
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     title: text.title,
     author: "",
     description: text.description,

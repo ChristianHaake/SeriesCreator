@@ -1,49 +1,63 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { CheckCircle2, Download, FileText, GraduationCap, Trash2, Upload, Printer } from "lucide-react";
 import type { ProjectData } from "../types";
 import { useTranslation } from "../i18n";
-import { parseProjectJson, PROJECT_FILE_EXTENSION } from '../domain/projectCodec';
+import { PROJECT_FILE_EXTENSION } from '../domain/projectCodec';
 import { resourceLimits } from '../domain/constraints';
+import { parseProjectTextInWorker } from '../domain/projectImport';
 import { BrandLogo } from './BrandLogo';
 
 interface Props {
   onExport?: () => void;
   onHtmlExport?: () => void;
   onImport?: (data: ProjectData) => void;
+  onImportStart?: () => void;
+  onImportError?: (message: string) => void;
   onShowExamples?: () => void;
   onReset?: () => void;
   onPrint?: () => void;
 }
 
-export function AppHeader({ onExport, onHtmlExport, onImport, onShowExamples, onReset, onPrint }: Props) {
+export function AppHeader({
+  onExport,
+  onHtmlExport,
+  onImport,
+  onImportStart,
+  onImportError,
+  onShowExamples,
+  onReset,
+  onPrint,
+}: Props) {
   const { t, locale, setLocale } = useTranslation();
   const importInputRef = useRef<HTMLInputElement | null>(null);
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const [isImporting, setIsImporting] = useState(false);
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const input = event.currentTarget;
     const file = event.target.files?.[0];
     if (!file) return;
 
     if (file.size > resourceLimits.projectFileBytes) {
-      alert(locale === 'de' ? 'Projektdatei ist zu groß.' : 'Project file is too large.');
-      event.target.value = '';
+      onImportError?.(t.msgProjectTooLarge);
+      input.value = '';
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const content = typeof e.target?.result === 'string' ? e.target.result : '';
-      const parsed = parseProjectJson(content);
+    setIsImporting(true);
+    onImportStart?.();
+    try {
+      const content = await file.text();
+      const parsed = await parseProjectTextInWorker(content);
       if (parsed.ok) {
         onImport?.(parsed.data);
       } else {
-        alert(parsed.message);
+        onImportError?.(parsed.message);
       }
-      event.target.value = '';
-    };
-    reader.onerror = () => {
-      alert(locale === 'de' ? 'Datei konnte nicht gelesen werden.' : 'File could not be read.');
-      event.target.value = '';
-    };
-    reader.readAsText(file);
+    } catch {
+      onImportError?.(t.msgImportReadFailed);
+    } finally {
+      input.value = '';
+      setIsImporting(false);
+    }
   };
 
   return (
@@ -89,6 +103,8 @@ export function AppHeader({ onExport, onHtmlExport, onImport, onShowExamples, on
               onClick={() => importInputRef.current?.click()}
               aria-label={t.btnLoad}
               title={t.btnLoad}
+              disabled={isImporting}
+              aria-busy={isImporting || undefined}
             >
               <Upload size={16} />
               <span>{t.btnLoad}</span>
@@ -101,6 +117,7 @@ export function AppHeader({ onExport, onHtmlExport, onImport, onShowExamples, on
                 aria-label={t.btnLoad}
                 tabIndex={-1}
                 onChange={handleFileUpload}
+                disabled={isImporting}
               />
             </>
           )}

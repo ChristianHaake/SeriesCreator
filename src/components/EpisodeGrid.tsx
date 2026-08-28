@@ -44,6 +44,12 @@ export function EpisodeGrid({ episodes }: Props) {
             <p>
               {ep.summary || t.lblNoDescription}
             </p>
+            {ep.learningDepth && (
+              <details className="episode-card__learning-depth">
+                <summary>{t.episodeLearningDepthLabel}</summary>
+                <p>{ep.learningDepth}</p>
+              </details>
+            )}
           </div>
         </div>
       ))}
