@@ -95,6 +95,7 @@ export const en: Record<TranslationKey, string> = {
   lblEpisodeN: "Episode ",
   presentationBy: "A production by",
   presentationClassFallback: "The Class",
+  skipToEditor: "Skip to editor",
   btnLoadExample: "Load example",
   btnCancel: "Cancel",
   btnConfirm: "Confirm",

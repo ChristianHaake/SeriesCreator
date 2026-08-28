@@ -1883,3 +1883,25 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
   gap: 0.6rem;
   justify-content: flex-end;
 }
+
+/* Skip link: off-screen until focused, then pinned over the header so a
+   keyboard user can reach the editor without tabbing the whole toolbar. */
+.skip-link {
+  background: var(--color-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 0 0 6px 0;
+  color: var(--color-text);
+  font-weight: 600;
+  left: 0;
+  padding: 0.6rem 1rem;
+  position: absolute;
+  top: 0;
+  transform: translateY(-120%);
+  z-index: 200;
+}
+
+.skip-link:focus-visible {
+  box-shadow: 0 0 0 3px var(--color-ring);
+  outline: none;
+  transform: translateY(0);
+}

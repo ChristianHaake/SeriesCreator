@@ -187,7 +187,8 @@ function App() {
 
   return (
     <div className={`app-shell app-shell--mobile-${mobilePanel}`}>
-      <AppHeader 
+      <a className="skip-link" href="#editor-panel">{t.skipToEditor}</a>
+      <AppHeader
         onExport={() => {
           try {
             if (!isProjectFileSizeWithinLimit(data)) {
@@ -287,14 +288,16 @@ function App() {
       />
 
         {/* Main Preview */}
-        <main className="preview-main theme-streaming">
-        <header className="preview-header">
+        <main className="preview-main theme-streaming" aria-label={t.mobilePanelPreview}>
+        {/* Decorative streaming chrome: it imitates a nav bar but navigates
+            nowhere, so it is hidden from assistive tech like the cover art. */}
+        <header className="preview-header" aria-hidden="true">
           <div className="preview-header__brand">{data.previewBrand || 'SeriesCreator'}</div>
-          <nav className="preview-header__nav">
+          <div className="preview-header__nav">
             <span>{t.home}</span>
             <strong>{t.series}</strong>
             <span>{data.previewCategory || t.categoryFallback}</span>
-          </nav>
+          </div>
         </header>
 
         <section className="streaming-hero" style={{ backgroundImage: data.coverUrl ? `url(${data.coverUrl})` : 'none', backgroundColor: data.coverUrl ? 'transparent' : '#222' }}>

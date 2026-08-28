@@ -93,6 +93,7 @@ export const de = {
   lblEpisodeN: "Episode ",
   presentationBy: "Eine Produktion von",
   presentationClassFallback: "Der Klasse",
+  skipToEditor: "Zum Editor springen",
   btnLoadExample: "Beispiel laden",
   btnCancel: "Abbrechen",
   btnConfirm: "Bestätigen",

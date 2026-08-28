@@ -126,8 +126,8 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
   };
 
   return (
-    <aside className="editor-sidebar" style={{ padding: '2rem' }}>
-      <h2>{t.editorTitle}</h2>
+    <aside className="editor-sidebar" id="editor-panel" tabIndex={-1} aria-labelledby="editor-panel-heading" style={{ padding: '2rem' }}>
+      <h2 id="editor-panel-heading">{t.editorTitle}</h2>
       <p style={{ marginBottom: '2rem', color: 'var(--color-text-muted)' }}>
         {t.editorDesc}
       </p>

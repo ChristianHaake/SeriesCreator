@@ -237,3 +237,33 @@ test('confirms destructive actions in an in-app dialog', async ({ page }) => {
 
   expect(nativeDialogs).toEqual([]);
 });
+
+test('offers a skip link and labelled landmarks', async ({ page }) => {
+  await page.goto('/');
+
+  const skipLink = page.getByRole('link', { name: 'Skip to editor' });
+
+  // It must come first in the tab order. Asserted from DOM order rather than by
+  // pressing Tab, because Safari does not move focus to links unless the user
+  // has switched on "Press Tab to highlight each item".
+  await expect
+    .poll(() => page.evaluate(() => {
+      const focusable = document.querySelectorAll<HTMLElement>(
+        'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      );
+      return focusable[0]?.className ?? '';
+    }))
+    .toContain('skip-link');
+
+  await skipLink.focus();
+  // Hidden until focused, so it must be on screen once it is.
+  await expect(skipLink).toBeInViewport();
+
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#editor-panel')).toBeFocused();
+
+  await expect(page.getByRole('main')).toHaveAccessibleName('Preview');
+  await expect(page.getByRole('complementary')).toHaveAccessibleName('SeriesCreator Editor');
+  // The streaming chrome imitates a nav bar; only the footer nav is real.
+  await expect(page.getByRole('navigation')).toHaveCount(1);
+});
