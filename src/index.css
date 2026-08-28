@@ -1515,6 +1515,17 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
   z-index: 110;
 }
 
+.presentation-navigation__counter {
+  align-self: center;
+  color: rgb(255 255 255 / 80%);
+  font-size: 0.95rem;
+  /* Keeps the counter from shifting as the digit count changes. */
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  min-width: 5ch;
+  text-align: center;
+}
+
 .presentation-navigation__button {
   align-items: center;
   background: rgb(0 0 0 / 55%);

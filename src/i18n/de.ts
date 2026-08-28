@@ -93,6 +93,8 @@ export const de = {
   lblEpisodeN: "Episode ",
   presentationBy: "Eine Produktion von",
   presentationClassFallback: "Der Klasse",
+  presentationSlideLabel: "Folie ",
+  presentationSlideOf: " von ",
   ariaPrevSlide: "Vorherige Folie",
   ariaNextSlide: "Nächste Folie",
   exportPresentation: "Präsentation",

@@ -15,12 +15,22 @@ export function PresentationMode({ data, onClose }: Props) {
   const [currentIndex, setCurrentIndex] = useState(-1); // -1 is the title screen
 
   const maxIndex = allEpisodes.length + 2;
+  // Title + episodes + reflection + sources + credits, counted from 1.
+  const slideCount = maxIndex + 2;
+  const slideNumber = currentIndex + 2;
 
   // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
       if (e.key === 'ArrowRight' || e.key === ' ') {
+        if (e.key === ' ') {
+          // A focused button activates on space by itself. Without this the
+          // slide would advance twice right after clicking the next arrow.
+          if (e.target instanceof HTMLButtonElement) return;
+          // Otherwise space would also scroll the reflection/sources panels.
+          e.preventDefault();
+        }
         setCurrentIndex(prev => Math.min(prev + 1, maxIndex));
       }
       if (e.key === 'ArrowLeft') {
@@ -163,7 +173,13 @@ export function PresentationMode({ data, onClose }: Props) {
         >
           <ChevronLeft aria-hidden="true" size={36} />
         </button>
-        <button 
+        <p className="presentation-navigation__counter" aria-live="polite">
+          <span aria-hidden="true">{slideNumber} / {slideCount}</span>
+          <span className="visually-hidden">
+            {t.presentationSlideLabel}{slideNumber}{t.presentationSlideOf}{slideCount}
+          </span>
+        </p>
+        <button
           type="button"
           onClick={() => setCurrentIndex(prev => Math.min(prev + 1, maxIndex))}
           disabled={currentIndex === maxIndex}

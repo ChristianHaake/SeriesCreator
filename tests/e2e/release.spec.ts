@@ -134,3 +134,35 @@ test('renders the print layout with backgrounds and the full details step', asyn
 
   await page.emulateMedia({ media: 'screen' });
 });
+
+test('advances presentation slides once per keypress and tracks position', async ({ page }) => {
+  await page.goto('/');
+
+  await page.getByLabel('Series Title').fill('Keyboard Test');
+  await page.getByRole('button', { name: '2. Episodes' }).click();
+  for (const title of ['First', 'Second']) {
+    await page.getByRole('button', { name: 'Add Episode' }).click();
+    await page.locator('.editor-sidebar').getByLabel('Title', { exact: true }).last().fill(title);
+  }
+
+  await page.getByRole('button', { name: 'Present' }).click();
+  const counter = page.locator('.presentation-navigation__counter');
+
+  // Title + 2 episodes + reflection + sources + credits.
+  await expect(counter).toContainText('1 / 6');
+
+  // Clicking the arrow leaves focus on it; space must then advance exactly once,
+  // not twice (the window handler plus the button's own activation).
+  await page.getByRole('button', { name: 'Next Slide' }).click();
+  await expect(counter).toContainText('2 / 6');
+  await page.keyboard.press('Space');
+  await expect(counter).toContainText('3 / 6');
+
+  // Space away from a button still advances, and must not scroll the panel.
+  await page.locator('.presentation-content').click();
+  await page.keyboard.press('Space');
+  await expect(counter).toContainText('4 / 6');
+
+  await page.keyboard.press('ArrowLeft');
+  await expect(counter).toContainText('3 / 6');
+});
