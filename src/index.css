@@ -1920,3 +1920,52 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
 
 .app-error h1 { font-size: 1.6rem; }
 .app-error p { color: var(--color-text-muted); }
+
+/* Header overflow menu.
+   Wide viewports render the closed popover inline, so the desktop toolbar is
+   exactly as it was and the toggle is hidden. Narrow viewports get the real
+   popover, which brings Escape, light dismiss and top-layer stacking with it. */
+.header-actions__menu {
+  background: var(--color-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  box-shadow: 0 14px 40px rgb(0 0 0 / 22%);
+  gap: 0.4rem;
+  inset: auto;
+  margin: 0;
+  padding: 0.6rem;
+  position: fixed;
+  right: 1rem;
+  top: 4.5rem;
+  width: min(18rem, calc(100vw - 2rem));
+}
+
+.header-actions__menu:popover-open {
+  display: grid;
+}
+
+.header-actions__menu .btn-header {
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.header-actions__menu::backdrop {
+  background: rgb(15 17 22 / 35%);
+}
+
+@media (min-width: 901px) {
+  /* display:contents keeps the buttons as direct flex children of the toolbar,
+     so the desktop row is untouched. !important overrides the UA rule that
+     hides a closed popover. */
+  .header-actions__menu {
+    background: none;
+    border: 0;
+    box-shadow: none;
+    display: contents !important;
+    padding: 0;
+  }
+
+  .header-actions__toggle {
+    display: none;
+  }
+}

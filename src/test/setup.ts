@@ -47,3 +47,31 @@ if (typeof HTMLDialogElement !== 'undefined' && !HTMLDialogElement.prototype.sho
     this.dispatchEvent(new Event('close'));
   };
 }
+
+// jsdom hides [popover] through its UA stylesheet but implements none of the
+// Popover API, so the header's overflow menu would be permanently unreachable.
+// Give the tests the parts the app relies on: the two methods, and the
+// popovertarget attribute that opens a menu from its button.
+if (typeof HTMLElement !== 'undefined' && typeof HTMLElement.prototype.showPopover !== 'function') {
+  HTMLElement.prototype.showPopover = function showPopover(this: HTMLElement) {
+    this.style.display = 'block';
+    this.setAttribute('data-popover-open', 'true');
+  };
+  HTMLElement.prototype.hidePopover = function hidePopover(this: HTMLElement) {
+    this.style.removeProperty('display');
+    this.removeAttribute('data-popover-open');
+  };
+  document.addEventListener('click', (event) => {
+    const trigger = (event.target as HTMLElement | null)?.closest?.('[popovertarget]');
+    if (!trigger) return;
+    const target = document.getElementById(trigger.getAttribute('popovertarget')!);
+    if (!target) return;
+    if (target.hasAttribute('data-popover-open')) {
+      target.style.removeProperty('display');
+      target.removeAttribute('data-popover-open');
+    } else {
+      target.style.display = 'block';
+      target.setAttribute('data-popover-open', 'true');
+    }
+  });
+}

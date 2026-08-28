@@ -93,6 +93,7 @@ export const de = {
   lblEpisodeN: "Episode ",
   presentationBy: "Eine Produktion von",
   presentationClassFallback: "Der Klasse",
+  moreActions: "Weitere Aktionen",
   errorTitle: "Etwas ist schiefgelaufen",
   errorBody: "Dein Projekt ist auf diesem Gerät gespeichert und geht nicht verloren. Lade die Seite neu, um weiterzuarbeiten.",
   errorReload: "Seite neu laden",

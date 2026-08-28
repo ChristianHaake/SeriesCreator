@@ -7,6 +7,11 @@ import { calculateProjectCompletion, displayCompletion } from './domain/completi
 import { parseProjectJson, serializeProject } from './domain/projectCodec';
 import { LocaleProvider } from './i18n';
 
+// Secondary actions live behind the header's overflow menu; open it first.
+async function openHeaderMenu(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByRole('button', { name: 'More actions' }));
+}
+
 function renderApp(path = '/') {
   window.history.pushState({}, '', path);
   window.localStorage.setItem('series-creator-locale', 'en');
@@ -70,8 +75,10 @@ describe('App', () => {
     expect(screen.queryByRole('button', { name: 'Close Presentation' })).not.toBeInTheDocument();
   });
 
-  it('uses path routing for the educator link', () => {
+  it('uses path routing for the educator link', async () => {
+    const user = userEvent.setup();
     renderApp();
+    await openHeaderMenu(user);
 
     expect(screen.getByRole('link', { name: 'For Teachers' })).toHaveAttribute(
       'href',
@@ -96,6 +103,7 @@ describe('App', () => {
 
     await user.clear(screen.getByLabelText('Series Title'));
     await user.type(screen.getByLabelText('Series Title'), 'Keep this draft');
+    await openHeaderMenu(user);
     await user.click(screen.getByRole('button', { name: 'New / Clear' }));
 
     await user.click(screen.getByRole('button', { name: 'Cancel' }));
@@ -143,6 +151,7 @@ describe('App', () => {
     await user.click(screen.getByRole('button', { name: 'Save' }));
     expect(screen.getByText('The project was successfully downloaded.')).toBeInTheDocument();
 
+    await openHeaderMenu(user);
     await user.click(screen.getByRole('button', { name: 'Download as HTML' }));
     expect(screen.getByText('HTML presentation download has been prepared.')).toBeInTheDocument();
 
@@ -206,6 +215,7 @@ describe('App', () => {
     const user = userEvent.setup();
     renderApp();
 
+    await openHeaderMenu(user);
     const examplesButton = screen.getByRole('button', { name: 'Examples' });
     await user.click(examplesButton);
 
@@ -230,6 +240,7 @@ describe('App', () => {
     const user = userEvent.setup();
     renderApp();
 
+    await openHeaderMenu(user);
     await user.click(screen.getByRole('button', { name: 'Examples' }));
     const dialog = screen.getByRole('dialog', { name: 'Examples in the app' });
     const climateCard = within(dialog).getByRole('heading', { name: 'The School Climate Code' }).closest('article');
@@ -260,6 +271,7 @@ describe('App', () => {
     const user = userEvent.setup();
     renderApp();
 
+    await openHeaderMenu(user);
     await user.click(screen.getByRole('button', { name: 'Examples' }));
     const dialog = screen.getByRole('dialog', { name: 'Examples in the app' });
     const weimarCard = within(dialog).getByRole('heading', { name: 'The Weimar File' }).closest('article');

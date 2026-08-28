@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { CheckCircle2, Download, FileText, GraduationCap, Trash2, Upload, Printer } from "lucide-react";
+import { CheckCircle2, MoreHorizontal, Download, FileText, GraduationCap, Trash2, Upload, Printer } from "lucide-react";
 import type { ProjectData } from "../types";
 import { useTranslation } from "../i18n";
 import { PROJECT_FILE_EXTENSION } from '../domain/projectCodec';
@@ -89,66 +89,85 @@ export function AppHeader({
         </div>
 
         <div className="app-header__controls" role="toolbar" aria-label={t.headerActionsLabel}>
-          {onReset && (
-            <button type="button" className="btn-header ui-button ui-button--danger" onClick={onReset} aria-label={t.btnReset} title={t.btnReset}>
-              <Trash2 size={16} />
-              <span>{t.btnReset}</span>
-            </button>
-          )}
-          {onImport && (
-            <>
-            <button
-              type="button"
-              className="btn-header ui-button"
-              onClick={() => importInputRef.current?.click()}
-              aria-label={t.btnLoad}
-              title={t.btnLoad}
-              disabled={isImporting}
-              aria-busy={isImporting || undefined}
-            >
-              <Upload size={16} />
-              <span>{t.btnLoad}</span>
-            </button>
-              <input
-                ref={importInputRef}
-                type="file"
-                accept={`.${PROJECT_FILE_EXTENSION},.json,application/json`}
-                className="visually-hidden"
-                aria-label={t.btnLoad}
-                tabIndex={-1}
-                onChange={handleFileUpload}
-                disabled={isImporting}
-              />
-            </>
-          )}
-          {onShowExamples && (
-            <button type="button" className="btn-header ui-button" onClick={onShowExamples} aria-label={t.btnExamples} title={t.btnExamples}>
-              <FileText size={16} />
-              <span>{t.btnExamples}</span>
-            </button>
-          )}
+          {/* Save stays out of the menu: this app has no accounts and no server
+              copy, so the action that preserves work must never be buried. */}
           {onExport && (
             <button type="button" className="btn-header ui-button" onClick={onExport} aria-label={t.btnSave} title={t.btnSave}>
               <Download size={16} />
               <span>{t.btnSave}</span>
             </button>
           )}
-          {onHtmlExport && (
-            <button type="button" className="btn-header ui-button" onClick={onHtmlExport} aria-label={t.btnHtml} title={t.btnHtml}>
-              <Download size={16} />
-              <span>{t.btnHtml}</span>
-            </button>
-          )}
-          {onPrint && (
-            <button type="button" className="btn-header ui-button" onClick={onPrint} aria-label={t.btnPdf} title={t.btnPdf}>
-              <Printer size={16} />
-              <span>{t.btnPdf}</span>
-            </button>
-          )}
-          <a href="/lehrkraefte" className="btn-header ui-button" aria-label={t.btnTeachers} title={t.btnTeachers}>
-            <GraduationCap size={16} />
-            <span>{t.btnTeachers}</span>
-          </a>
+
+          <button
+            type="button"
+            className="btn-header ui-button header-actions__toggle"
+            popoverTarget="header-actions-menu"
+            aria-label={t.moreActions}
+            title={t.moreActions}
+          >
+            <MoreHorizontal size={16} />
+          </button>
+
+          {/* A native popover: Escape, light dismiss and top-layer stacking come
+              from the platform. On wide viewports CSS renders it inline instead,
+              so the desktop toolbar is unchanged and the toggle is hidden. */}
+          <div id="header-actions-menu" popover="auto" className="header-actions__menu">
+            {onImport && (
+              <>
+                <button
+                  type="button"
+                  className="btn-header ui-button"
+                  onClick={() => importInputRef.current?.click()}
+                  aria-label={t.btnLoad}
+                  title={t.btnLoad}
+                  disabled={isImporting}
+                  aria-busy={isImporting || undefined}
+                >
+                  <Upload size={16} />
+                  <span>{t.btnLoad}</span>
+                </button>
+                <input
+                  ref={importInputRef}
+                  type="file"
+                  accept={`.${PROJECT_FILE_EXTENSION},.json,application/json`}
+                  className="visually-hidden"
+                  aria-label={t.btnLoad}
+                  tabIndex={-1}
+                  onChange={handleFileUpload}
+                  disabled={isImporting}
+                />
+              </>
+            )}
+            {onShowExamples && (
+              <button type="button" className="btn-header ui-button" onClick={onShowExamples} aria-label={t.btnExamples} title={t.btnExamples}>
+                <FileText size={16} />
+                <span>{t.btnExamples}</span>
+              </button>
+            )}
+            {onHtmlExport && (
+              <button type="button" className="btn-header ui-button" onClick={onHtmlExport} aria-label={t.btnHtml} title={t.btnHtml}>
+                <Download size={16} />
+                <span>{t.btnHtml}</span>
+              </button>
+            )}
+            {onPrint && (
+              <button type="button" className="btn-header ui-button" onClick={onPrint} aria-label={t.btnPdf} title={t.btnPdf}>
+                <Printer size={16} />
+                <span>{t.btnPdf}</span>
+              </button>
+            )}
+            <a href="/lehrkraefte" className="btn-header ui-button" aria-label={t.btnTeachers} title={t.btnTeachers}>
+              <GraduationCap size={16} />
+              <span>{t.btnTeachers}</span>
+            </a>
+            {/* Destructive, so it sits last rather than first as it did before. */}
+            {onReset && (
+              <button type="button" className="btn-header ui-button ui-button--danger" onClick={onReset} aria-label={t.btnReset} title={t.btnReset}>
+                <Trash2 size={16} />
+                <span>{t.btnReset}</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </header>

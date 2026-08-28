@@ -95,6 +95,7 @@ export const en: Record<TranslationKey, string> = {
   lblEpisodeN: "Episode ",
   presentationBy: "A production by",
   presentationClassFallback: "The Class",
+  moreActions: "More actions",
   errorTitle: "Something went wrong",
   errorBody: "Your project is saved on this device and has not been lost. Reload the page to carry on.",
   errorReload: "Reload the page",

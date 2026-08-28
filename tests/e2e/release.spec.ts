@@ -323,3 +323,21 @@ test('still autosaves normally after a clean load', async ({ page }) => {
   // Nothing was mistaken for an unreadable load.
   expect(await page.evaluate(() => window.localStorage.getItem('series_creator_data.unreadable'))).toBeNull();
 });
+
+test('keeps the full action row inline on a wide viewport', async ({ page }) => {
+  await page.goto('/');
+
+  // The overflow menu is a narrow-viewport affordance; desktop is unchanged.
+  await expect(page.locator('.header-actions__toggle')).toBeHidden();
+
+  // Scoped to the styled buttons: "Load" also matches the hidden file input.
+  const actions = page.locator(
+    '.app-header__controls button.btn-header:not(.header-actions__toggle), .app-header__controls a.btn-header',
+  );
+  await expect(actions).toHaveText([
+    'Save', 'Load', 'Examples', 'Download as HTML', 'Print / Save as PDF', 'For Teachers', 'New / Clear',
+  ]);
+  for (const action of await actions.all()) {
+    await expect(action).toBeVisible();
+  }
+});

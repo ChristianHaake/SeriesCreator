@@ -76,3 +76,26 @@ test('keeps interactive controls large enough to tap', async ({ page }) => {
 
   expect(undersized).toEqual([]);
 });
+
+test('collapses secondary actions behind a menu, keeping Save reachable', async ({ page }) => {
+  await page.goto('/');
+
+  const menu = page.locator('#header-actions-menu');
+  // A closed popover must not render: it would sit over the toggle and eat taps.
+  await expect(menu).toBeHidden();
+
+  // Save is deliberately outside the menu — no accounts, no server copy.
+  await expect(page.getByRole('button', { name: 'Save', exact: true })).toBeVisible();
+
+  const editorTop = await page.evaluate(() =>
+    document.querySelector('.editor-sidebar')!.getBoundingClientRect().top / window.innerHeight);
+  expect(editorTop, 'editor should start in the upper half of the viewport').toBeLessThan(0.55);
+
+  await page.getByRole('button', { name: 'More actions' }).tap();
+  await expect(menu).toBeVisible();
+  await expect(menu.getByRole('button', { name: 'New / Clear' })).toBeVisible();
+
+  // Escape and light dismiss come from the native popover, not from our code.
+  await page.keyboard.press('Escape');
+  await expect(menu).toBeHidden();
+});
