@@ -1900,7 +1900,9 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
   z-index: 200;
 }
 
-.skip-link:focus-visible {
+/* :focus, not :focus-visible — a skip link is only ever reached by keyboard,
+   so the heuristic adds a dependency without adding anything. */
+.skip-link:focus {
   box-shadow: 0 0 0 3px var(--color-ring);
   outline: none;
   transform: translateY(0);
