@@ -1,6 +1,7 @@
 import { useRef, useState, useMemo, type ChangeEvent } from 'react';
 import { Plus, Edit2, Image as ImageIcon, Trash2, X } from 'lucide-react';
 import { EpisodeEditor } from './EpisodeEditor';
+import { ConfirmDialog } from './ConfirmDialog';
 import { useProjectStore } from '../store/useProjectStore';
 import { fieldLimits, resourceLimits } from '../domain/constraints';
 import { useTranslation } from '../i18n';
@@ -40,6 +41,9 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
   const [editorStep, setEditorStep] = useState<1 | 2 | 3>(1);
   const [customGenreSelected, setCustomGenreSelected] = useState(false);
   const [coverError, setCoverError] = useState('');
+  const [seasonError, setSeasonError] = useState('');
+  // 'rename' opens the dialog in prompt mode; 'delete' as a confirmation.
+  const [seasonDialog, setSeasonDialog] = useState<'rename' | 'delete' | null>(null);
   const coverInputRef = useRef<HTMLInputElement | null>(null);
   const { t, locale } = useTranslation();
 
@@ -49,12 +53,6 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
   const seasonLimitReached = data.seasons.length >= resourceLimits.maxSeasons;
   const episodeLimitReached =
     (activeSeason?.episodes.length ?? 0) >= resourceLimits.maxEpisodesPerSeason;
-  const alertText = {
-    unsupportedImage: locale === 'de' ? 'Bitte wähle ein PNG-, JPG- oder WebP-Bild.' : 'Choose a PNG, JPG, or WebP image.',
-    imageReadFailed: locale === 'de' ? 'Das Bild konnte nicht gelesen werden.' : 'The image could not be read.',
-    imageProcessFailed: locale === 'de' ? 'Das Bild konnte nicht verarbeitet werden.' : 'The image could not be processed.',
-    imageTooLarge: locale === 'de' ? 'Das Bild hat zu viele Pixel. Bitte wähle ein kleineres Bild.' : 'The image has too many pixels. Please choose a smaller one.',
-  };
 
   const handleCoverUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -66,7 +64,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
     };
 
     if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
-      setCoverError(alertText.unsupportedImage);
+      setCoverError(t.imageErrorUnsupported);
       resetInput();
       return;
     }
@@ -74,7 +72,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
     const reader = new FileReader();
     reader.onloadend = () => {
       if (typeof reader.result !== 'string') {
-        setCoverError(alertText.imageReadFailed);
+        setCoverError(t.imageErrorRead);
         resetInput();
         return;
       }
@@ -82,7 +80,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
       const image = new Image();
       image.onload = () => {
         if (image.width * image.height > resourceLimits.maxImageInputPixels) {
-          setCoverError(alertText.imageTooLarge);
+          setCoverError(t.imageErrorTooLarge);
           resetInput();
           return;
         }
@@ -100,7 +98,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
         canvas.height = height;
         const context = canvas.getContext('2d');
         if (!context) {
-          setCoverError(alertText.imageProcessFailed);
+          setCoverError(t.imageErrorProcess);
           resetInput();
           return;
         }
@@ -111,13 +109,13 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
         resetInput();
       };
       image.onerror = () => {
-        setCoverError(alertText.imageProcessFailed);
+        setCoverError(t.imageErrorProcess);
         resetInput();
       };
       image.src = reader.result;
     };
     reader.onerror = () => {
-      setCoverError(alertText.imageReadFailed);
+      setCoverError(t.imageErrorRead);
       resetInput();
     };
     reader.readAsDataURL(file);
@@ -417,7 +415,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
             value={data.customConceptTitle || ''}
             onChange={(e) => updateData({ customConceptTitle: e.target.value })}
             maxLength={fieldLimits.customConceptTitle}
-            placeholder={locale === 'de' ? 'z.B. Didaktischer Kommentar' : 'e.g. Didactic Commentary'}
+            placeholder={t.customConceptTitlePlaceholder}
             style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)', marginBottom: '1rem' }}
           />
         </div>
@@ -493,13 +491,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
             )}
             <button
               type="button"
-              onClick={() => {
-                const currentTitle = activeSeason?.title || '';
-                const newTitle = window.prompt(t.promptRename, currentTitle);
-                if (newTitle && newTitle.trim() !== "") {
-                  updateSeason(activeSeasonId, newTitle.trim());
-                }
-              }}
+              onClick={() => setSeasonDialog('rename')}
               className="ui-icon-button"
               aria-label={t.renameSeason}
               title={t.renameSeason}
@@ -510,13 +502,11 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
               type="button"
               onClick={() => {
                 if (activeSeason?.episodes.length > 0) {
-                  alert(t.errorDeleteSeason);
+                  setSeasonError(t.errorDeleteSeason);
                   return;
                 }
-                if (window.confirm(t.confirmDeleteSeason)) {
-                  removeSeason(activeSeasonId);
-                  setActiveSeasonId(data.seasons.find(s => s.id !== activeSeasonId)?.id || '');
-                }
+                setSeasonError('');
+                setSeasonDialog('delete');
               }}
               className="ui-icon-button ui-icon-button--danger"
               aria-label={t.deleteSeason}
@@ -525,6 +515,31 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
               <Trash2 size={16} />
             </button>
           </div>
+          {seasonError && (
+            <p className="field-error" role="alert">{seasonError}</p>
+          )}
+          {seasonDialog === 'rename' && (
+            <ConfirmDialog
+              message={t.promptRename}
+              defaultValue={activeSeason?.title || ''}
+              confirmLabel={t.btnRename}
+              onConfirm={(name) => { updateSeason(activeSeasonId, name); setSeasonDialog(null); }}
+              onCancel={() => setSeasonDialog(null)}
+            />
+          )}
+          {seasonDialog === 'delete' && (
+            <ConfirmDialog
+              message={t.confirmDeleteSeason}
+              confirmLabel={t.btnDelete}
+              destructive
+              onConfirm={() => {
+                removeSeason(activeSeasonId);
+                setActiveSeasonId(data.seasons.find(s => s.id !== activeSeasonId)?.id || '');
+                setSeasonDialog(null);
+              }}
+              onCancel={() => setSeasonDialog(null)}
+            />
+          )}
         </div>
         {activeSeason?.episodes.map((ep, index) => (
           <EpisodeEditor 

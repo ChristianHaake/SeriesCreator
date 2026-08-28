@@ -21,8 +21,6 @@ function renderApp(path = '/') {
 describe('App', () => {
   beforeEach(() => {
     window.localStorage.clear();
-    vi.spyOn(window, 'alert').mockImplementation(() => undefined);
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
     vi.spyOn(window, 'print').mockImplementation(() => undefined);
     Object.defineProperty(URL, 'createObjectURL', {
       configurable: true,
@@ -95,11 +93,12 @@ describe('App', () => {
   it('preserves the draft when reset is cancelled', async () => {
     const user = userEvent.setup();
     renderApp();
-    vi.mocked(window.confirm).mockReturnValueOnce(false);
 
     await user.clear(screen.getByLabelText('Series Title'));
     await user.type(screen.getByLabelText('Series Title'), 'Keep this draft');
     await user.click(screen.getByRole('button', { name: 'New / Clear' }));
+
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
 
     expect(screen.getByLabelText('Series Title')).toHaveValue('Keep this draft');
   });
@@ -229,9 +228,11 @@ describe('App', () => {
     expect(climateCard).not.toBeNull();
     await user.click(within(climateCard!).getByRole('button', { name: 'Use example' }));
 
-    expect(window.confirm).toHaveBeenCalledWith(
-      'Load this example project? This will replace your current draft.',
-    );
+    expect(
+      await screen.findByText('Load this example project? This will replace your current draft.'),
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Load example' }));
+
     expect(await screen.findByText('Example project loaded.')).toBeInTheDocument();
     expect(screen.getAllByRole('heading', { name: 'The School Climate Code' }).length).toBeGreaterThan(0);
     expect(screen.getAllByRole('heading', { name: /1\. The Electricity Detective/ }).length).toBeGreaterThan(0);
@@ -256,6 +257,7 @@ describe('App', () => {
     const weimarCard = within(dialog).getByRole('heading', { name: 'The Weimar File' }).closest('article');
     expect(weimarCard).not.toBeNull();
     await user.click(within(weimarCard!).getByRole('button', { name: 'Use example' }));
+    await user.click(await screen.findByRole('button', { name: 'Load example' }));
 
     expect(await screen.findByText('Example project loaded.')).toBeInTheDocument();
     expect(screen.getAllByRole('heading', { name: 'The Weimar File' }).length).toBeGreaterThan(0);

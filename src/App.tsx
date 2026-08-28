@@ -9,6 +9,7 @@ import { PrintLayout } from './components/PrintLayout';
 import { AppHeader } from './components/AppHeader';
 import { AppFooter } from './components/AppFooter';
 import { ExampleGallery } from './components/ExampleGallery';
+import { ConfirmDialog } from './components/ConfirmDialog';
 import { useTranslation } from './i18n';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -60,6 +61,10 @@ function App() {
   const [showExamples, setShowExamples] = useState(false);
   const [currentPath, setCurrentPath] = useState(window.location.pathname.replace(/\/+$/, "") || "/");
   const [mobilePanel, setMobilePanel] = useState<MobilePanel>('editor');
+  // Pending destructive action awaiting confirmation in the dialog.
+  const [pendingAction, setPendingAction] = useState<
+    { message: string; confirmLabel: string; run: () => void } | null
+  >(null);
   const examples = useMemo(() => getExampleProjects(locale), [locale]);
 
   useEffect(() => {
@@ -145,7 +150,7 @@ function App() {
     const example = examples.find((item) => item.id === id);
     if (!example) return;
 
-    if (window.confirm(t.confirmLoadExample)) {
+    const loadExample = async () => {
       try {
         const exampleProject = await attachExampleImages(example.project, example.id);
         replaceData(exampleProject);
@@ -157,7 +162,13 @@ function App() {
       } catch {
         showStatus(t.msgExampleLoadFailed, 'error');
       }
-    }
+    };
+
+    setPendingAction({
+      message: t.confirmLoadExample,
+      confirmLabel: t.btnLoadExample,
+      run: () => { void loadExample(); },
+    });
   };
 
   if (showPresentation) {
@@ -202,12 +213,21 @@ function App() {
         onImportStart={() => showStatus(t.msgImporting, 'info')}
         onImportError={(message) => showStatus(message, 'error')}
         onShowExamples={() => setShowExamples(true)}
-        onReset={() => {
-          if (window.confirm(t.confirmReset)) {
-            resetData();
-          }
-        }}
+        onReset={() => setPendingAction({
+          message: t.confirmReset,
+          confirmLabel: t.btnDelete,
+          run: resetData,
+        })}
       />
+      {pendingAction && (
+        <ConfirmDialog
+          message={pendingAction.message}
+          confirmLabel={pendingAction.confirmLabel}
+          destructive
+          onConfirm={() => { pendingAction.run(); setPendingAction(null); }}
+          onCancel={() => setPendingAction(null)}
+        />
+      )}
       {showExamples && (
         <ExampleGallery
           examples={examples}

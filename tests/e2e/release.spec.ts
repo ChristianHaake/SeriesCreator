@@ -79,8 +79,11 @@ test('loads a complete current example through the gallery', async ({ page }) =>
     .getByRole('heading', { name: 'The School Climate Code' })
     .locator('xpath=ancestor::article');
 
-  page.once('dialog', (dialog) => dialog.accept());
   await climateCard.getByRole('button', { name: 'Use example' }).click();
+  await page
+    .locator('dialog.confirm-dialog')
+    .getByRole('button', { name: 'Load example' })
+    .click();
 
   await expect(page.getByText('Example project loaded.')).toBeVisible();
   await expect(page.locator('.streaming-title')).toHaveText('The School Climate Code');
@@ -191,4 +194,46 @@ test('labels the season icon buttons for assistive tech', async ({ page }) => {
 
   await expect(page.getByRole('button', { name: 'Rename Season' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Delete Season' })).toBeVisible();
+});
+
+test('reports image upload problems inline instead of in a blocking dialog', async ({ page }) => {
+  const nativeDialogs: string[] = [];
+  page.on('dialog', (dialog) => { nativeDialogs.push(dialog.message()); void dialog.dismiss(); });
+
+  await page.goto('/');
+  await page.getByRole('button', { name: '2. Episodes' }).click();
+  await page.getByRole('button', { name: 'Add Episode' }).click();
+
+  const thumbnail = page.locator('.editor-sidebar input[type="file"]').last();
+  await thumbnail.setInputFiles({
+    name: 'notes.txt',
+    mimeType: 'text/plain',
+    buffer: Buffer.from('not an image'),
+  });
+
+  await expect(page.getByRole('alert')).toHaveText('Choose a PNG, JPG, or WebP image.');
+  expect(nativeDialogs).toEqual([]);
+});
+
+test('confirms destructive actions in an in-app dialog', async ({ page }) => {
+  const nativeDialogs: string[] = [];
+  page.on('dialog', (dialog) => { nativeDialogs.push(dialog.message()); void dialog.dismiss(); });
+
+  await page.goto('/');
+  await page.getByLabel('Series Title').fill('Keep this draft');
+
+  const dialog = page.locator('dialog.confirm-dialog');
+  await page.getByRole('button', { name: 'New / Clear' }).click();
+  await expect(dialog).toBeVisible();
+
+  // Escape must cancel and leave the draft untouched.
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);
+  await expect(page.getByLabel('Series Title')).toHaveValue('Keep this draft');
+
+  await page.getByRole('button', { name: 'New / Clear' }).click();
+  await dialog.getByRole('button', { name: 'Delete', exact: true }).click();
+  await expect(page.getByLabel('Series Title')).not.toHaveValue('Keep this draft');
+
+  expect(nativeDialogs).toEqual([]);
 });

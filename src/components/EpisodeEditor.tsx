@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import type { Episode } from '../types';
 import { ArrowUp, ArrowDown, Trash2, Image as ImageIcon } from 'lucide-react';
 import { fieldLimits, resourceLimits } from '../domain/constraints';
@@ -15,7 +15,10 @@ interface Props {
 }
 
 export const EpisodeEditor = memo(function EpisodeEditor({ episode, seasonId, index, total, onUpdate, onRemove, onMove }: Props) {
-  const { t, locale } = useTranslation();
+  const { t } = useTranslation();
+  // Reported inline next to the control, the way the cover upload does it, so
+  // the message reaches the student without a blocking dialog.
+  const [imageError, setImageError] = useState('');
   const learningDepthLength = episode.learningDepth?.length ?? 0;
   const learningDepthCount = t.episodeLearningDepthCount
     .replace('{count}', String(learningDepthLength))
@@ -23,26 +26,29 @@ export const EpisodeEditor = memo(function EpisodeEditor({ episode, seasonId, in
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setImageError('');
+
+    const fail = (message: string) => {
+      setImageError(message);
+      e.target.value = '';
+    };
 
     if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
-      alert(locale === 'de' ? 'Bitte wähle ein PNG-, JPG- oder WebP-Bild.' : 'Choose a PNG, JPG, or WebP image.');
-      e.target.value = '';
+      fail(t.imageErrorUnsupported);
       return;
     }
 
     const reader = new FileReader();
     reader.onloadend = () => {
       if (typeof reader.result !== 'string') {
-        alert(locale === 'de' ? 'Das Bild konnte nicht gelesen werden.' : 'The image could not be read.');
-        e.target.value = '';
+        fail(t.imageErrorRead);
         return;
       }
 
       const img = new Image();
       img.onload = () => {
         if (img.width * img.height > resourceLimits.maxImageInputPixels) {
-          alert(locale === 'de' ? 'Das Bild hat zu viele Pixel. Bitte wähle ein kleineres Bild.' : 'The image has too many pixels. Please choose a smaller one.');
-          e.target.value = '';
+          fail(t.imageErrorTooLarge);
           return;
         }
 
@@ -59,26 +65,20 @@ export const EpisodeEditor = memo(function EpisodeEditor({ episode, seasonId, in
         canvas.height = height;
         const ctx = canvas.getContext('2d');
         if (!ctx) {
-          alert(locale === 'de' ? 'Das Bild konnte nicht verarbeitet werden.' : 'The image could not be processed.');
-          e.target.value = '';
+          fail(t.imageErrorProcess);
           return;
         }
 
         ctx.drawImage(img, 0, 0, width, height);
         const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
         onUpdate(seasonId, episode.id, { thumbnailUrl: compressedBase64 });
+        setImageError('');
         e.target.value = '';
       };
-      img.onerror = () => {
-        alert(locale === 'de' ? 'Das Bildformat konnte nicht verarbeitet werden.' : 'The image format could not be processed.');
-        e.target.value = '';
-      };
+      img.onerror = () => fail(t.imageErrorFormat);
       img.src = reader.result;
     };
-    reader.onerror = () => {
-      alert(locale === 'de' ? 'Das Bild konnte nicht gelesen werden.' : 'The image could not be read.');
-      e.target.value = '';
-    };
+    reader.onerror = () => fail(t.imageErrorRead);
     reader.readAsDataURL(file);
   };
 
@@ -161,8 +161,20 @@ export const EpisodeEditor = memo(function EpisodeEditor({ episode, seasonId, in
         <div>
           <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.95rem', fontWeight: 500, padding: '0.6rem', border: '1px dashed var(--color-border)', borderRadius: '6px', justifyContent: 'center', backgroundColor: 'var(--color-bg-surface)', transition: 'background-color 0.2s', color: 'var(--color-text-primary)' }}>
             <ImageIcon size={18} /> {t.btnChooseThumbnail}
-            <input type="file" accept="image/*" aria-label={t.btnChooseThumbnail} style={{ display: 'none' }} onChange={handleImageUpload} />
+            <input
+              type="file"
+              accept="image/*"
+              aria-label={t.btnChooseThumbnail}
+              aria-describedby={imageError ? `ep-image-error-${episode.id}` : undefined}
+              style={{ display: 'none' }}
+              onChange={handleImageUpload}
+            />
           </label>
+          {imageError && (
+            <p id={`ep-image-error-${episode.id}`} className="field-error" role="alert" style={{ marginTop: '0.5rem' }}>
+              {imageError}
+            </p>
+          )}
           {episode.thumbnailUrl && (
             <div style={{ marginTop: '0.5rem' }}>
               <img src={episode.thumbnailUrl} alt={episode.altText || "Thumbnail Vorschau"} style={{ width: '100%', height: '80px', objectFit: 'cover', borderRadius: '6px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }} />
