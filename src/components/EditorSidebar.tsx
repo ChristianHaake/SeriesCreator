@@ -501,6 +501,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
                 }
               }}
               className="ui-icon-button"
+              aria-label={t.renameSeason}
               title={t.renameSeason}
             >
               <Edit2 size={16} />
@@ -518,6 +519,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
                 }
               }}
               className="ui-icon-button ui-icon-button--danger"
+              aria-label={t.deleteSeason}
               title={t.deleteSeason}
             >
               <Trash2 size={16} />

@@ -34,6 +34,7 @@ function ContentPage({ pathname }: { pathname: ContentPath }) {
     <main className="content-page">
       <a href="/" className="content-page__back">{t.backToApp}</a>
       <div className="markdown-content">
+        <h1>{page.title}</h1>
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{page.content}</ReactMarkdown>
       </div>
     </main>
@@ -66,6 +67,17 @@ function App() {
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
+
+  // Keep the tab title on the current page and the description in the current
+  // language. The og:/twitter: tags stay static — social scrapers read the
+  // served HTML and never run this.
+  useEffect(() => {
+    const page = isContentPath(currentPath) ? contentPages[locale][currentPath] : null;
+    document.title = page ? `${page.title} · SeriesCreator` : 'SeriesCreator';
+    document
+      .querySelector('meta[name="description"]')
+      ?.setAttribute('content', t.metaDescription);
+  }, [currentPath, locale, t.metaDescription]);
 
 
   const activeSeason = data.seasons.find(s => s.id === activeSeasonId) || data.seasons[0];

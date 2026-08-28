@@ -1,5 +1,3 @@
-# Hilfe
-
 ## Schnellstart
 
 1. Trage Titel, Beschreibung, Alters-/Klassenhinweis, Genre und Mitwirkende ein.

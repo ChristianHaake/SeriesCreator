@@ -1,5 +1,3 @@
-# Help
-
 ## Quick start
 
 1. Enter the title, description, age/class note, genre, and cast.

@@ -166,3 +166,29 @@ test('advances presentation slides once per keypress and tracks position', async
   await page.keyboard.press('ArrowLeft');
   await expect(counter).toContainText('3 / 6');
 });
+
+test('gives every content page one h1, a matching tab title and a localized description', async ({ page }) => {
+  for (const path of ['/hilfe', '/ueber', '/lehrkraefte', '/datenschutz', '/impressum']) {
+    await page.goto(path);
+    const headings = page.locator('.markdown-content h1');
+    await expect(headings).toHaveCount(1);
+    const heading = (await headings.innerText()).trim();
+    await expect(page).toHaveTitle(`${heading} · SeriesCreator`);
+  }
+
+  await page.goto('/');
+  await expect(page).toHaveTitle('SeriesCreator');
+  const description = page.locator('meta[name="description"]');
+  await expect(description).toHaveAttribute('content', /Plan fictional classroom series/);
+
+  await page.getByRole('button', { name: 'DE', exact: true }).click();
+  await expect(description).toHaveAttribute('content', /Plane fiktive Unterrichtsserien/);
+});
+
+test('labels the season icon buttons for assistive tech', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: '2. Episodes' }).click();
+
+  await expect(page.getByRole('button', { name: 'Rename Season' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Delete Season' })).toBeVisible();
+});

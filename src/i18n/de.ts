@@ -93,6 +93,7 @@ export const de = {
   lblEpisodeN: "Episode ",
   presentationBy: "Eine Produktion von",
   presentationClassFallback: "Der Klasse",
+  metaDescription: "Plane fiktive Unterrichtsserien mit Staffeln, Episoden, Quellen und Präsentation – lokal im Browser.",
   presentationSlideLabel: "Folie ",
   presentationSlideOf: " von ",
   ariaPrevSlide: "Vorherige Folie",

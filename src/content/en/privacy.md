@@ -1,5 +1,3 @@
-# Privacy
-
 Last updated: July 9, 2026
 
 ## 1. Controller

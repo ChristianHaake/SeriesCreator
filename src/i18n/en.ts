@@ -95,6 +95,7 @@ export const en: Record<TranslationKey, string> = {
   lblEpisodeN: "Episode ",
   presentationBy: "A production by",
   presentationClassFallback: "The Class",
+  metaDescription: "Plan fictional classroom series with seasons, episodes, sources and presentation — locally in your browser.",
   presentationSlideLabel: "Slide ",
   presentationSlideOf: " of ",
   ariaPrevSlide: "Previous Slide",
