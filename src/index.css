@@ -25,6 +25,11 @@
   --border-color: var(--color-border);
   
   --accent-color: var(--brand-primary);
+
+  /* Accent used as *text*. The brand orange only reaches 2.66:1 on the light
+     workspace, so light and dark grounds need different values. */
+  --accent-on-surface: #c2410c; /* 4.91:1 on #f8f9fa, 5.18:1 on #fff */
+
   color-scheme: light dark;
 }
 
@@ -35,6 +40,7 @@
     --color-text: var(--color-text-dark);
     --color-text-muted: var(--color-text-dark-secondary);
     --border-color: var(--color-border-dark);
+    --accent-on-surface: #fb923c; /* 8.14:1 on #141414 */
   }
 }
 
@@ -46,7 +52,8 @@
   --color-text: var(--color-text-dark);
   --color-text-muted: var(--color-text-dark-secondary);
   --border-color: var(--color-border-dark);
-  
+  --accent-on-surface: #fb923c;
+
   background-color: var(--color-bg);
   color: var(--color-text);
 }
@@ -56,6 +63,20 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+/* Titles and body copy are student-supplied. A single long word — a German
+   compound noun, or a pasted string with no spaces — otherwise overflows its
+   container and is clipped, in the preview and on the projector alike. */
+body {
+  overflow-wrap: break-word;
+}
+
+.streaming-title,
+.presentation-title,
+.presentation-episode__title,
+.episode-card h3 {
+  overflow-wrap: anywhere;
 }
 
 body {
@@ -512,7 +533,9 @@ button {
 .mobile-panel-switch button.is-active {
   background: #f97316;
   border-color: #f97316;
-  color: white;
+  /* White on this orange is 2.8:1; the dark label reaches 6.57:1 and keeps
+     the brand colour. */
+  color: #141414;
 }
 
 .completion-control {
@@ -534,7 +557,7 @@ button {
 }
 
 .completion-control__auto strong {
-  color: #f97316;
+  color: var(--accent-on-surface);
   font-size: 1rem;
 }
 
@@ -598,6 +621,7 @@ button {
   --color-surface: var(--color-bg-surface);
   --color-text: var(--color-text-primary);
   --color-text-muted: var(--color-text-secondary);
+  --accent-on-surface: #c2410c; /* editor stays light in every OS theme */
   width: 400px;
   background-color: var(--color-surface);
   border-right: 1px solid var(--border-color);
@@ -654,7 +678,7 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
   content: '';
   position: absolute;
   inset: 0;
-  background: 
+  background:
     linear-gradient(to top, var(--color-bg-dark) 0%, transparent 60%),
     linear-gradient(to right, rgba(20,20,20,0.8) 0%, transparent 50%);
   z-index: 1;
@@ -694,6 +718,15 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
   padding: 1.5rem 3rem;
   position: absolute;
   z-index: 10;
+  /* The cover art is student-supplied and may be pure white, where the hero's
+     own scrim has already faded out and the nav text became invisible. Scrim
+     the header itself so it scales with the nav, not with the hero's height. */
+  background: linear-gradient(
+    to bottom,
+    rgb(20 20 20 / 88%) 0%,
+    rgb(20 20 20 / 78%) 72%,
+    transparent 100%
+  );
 }
 
 .preview-header__brand {
