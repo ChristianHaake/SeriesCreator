@@ -40,7 +40,7 @@ function App() {
   const store = useProjectStore(() =>
     setStatus({ message: t.msgSaveFailed, tone: 'error' }),
   );
-  const { data, replaceData, resetData } = store;
+  const { data, replaceData, resetData, restoreFailed } = store;
   const [activeSeasonId, setActiveSeasonId] = useState(data.seasons[0]?.id || '');
   const [activeTab, setActiveTab] = useState<PreviewTab>('EPISODEN');
   const [showPresentation, setShowPresentation] = useState(false);
@@ -70,6 +70,12 @@ function App() {
       ?.setAttribute('content', t.metaDescription);
   }, [currentPath, locale, t.metaDescription]);
 
+
+  // A saved project that could not be restored is kept under a backup key; say
+  // so, because the editor otherwise looks like it simply started empty. Derived
+  // rather than set in an effect, and superseded by the next real status.
+  const visibleStatus: AppStatus = status
+    ?? (restoreFailed ? { message: t.msgProjectUnreadable, tone: 'error' } : null);
 
   const activeSeason = data.seasons.find(s => s.id === activeSeasonId) || data.seasons[0];
   const completion = displayCompletion(data);
@@ -244,11 +250,11 @@ function App() {
         />
       )}
       <div
-        className={`app-status${status ? ` app-status--${status.tone}` : ''}`}
+        className={`app-status${visibleStatus ? ` app-status--${visibleStatus.tone}` : ''}`}
         role="status"
         aria-live="polite"
       >
-        {status?.message}
+        {visibleStatus?.message}
       </div>
       <div className="mobile-panel-switch" role="group" aria-label={t.mobilePanelSwitchLabel}>
         <button

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { initialProjectData } from '../types';
 import { resourceLimits } from '../domain/constraints';
-import { loadStoredProject, saveStoredProject, useProjectStore } from './useProjectStore';
+import { loadStoredProject, saveStoredProject, useProjectStore, UNREADABLE_BACKUP_KEY } from './useProjectStore';
 import { LocaleProvider } from '../i18n';
 
 class MemoryStorage implements Storage {
@@ -39,14 +39,46 @@ describe('project storage', () => {
     const saved = { ...initialProjectData, title: 'Saved Project' };
 
     expect(saveStoredProject(storage, saved)).toBe(true);
-    expect(loadStoredProject(storage).title).toBe('Saved Project');
+    expect(loadStoredProject(storage).data.title).toBe('Saved Project');
   });
 
   it('falls back to the default project for corrupt storage', () => {
     const storage = new MemoryStorage();
     storage.setItem('series_creator_data', '{');
 
-    expect(loadStoredProject(storage).title).toBe(initialProjectData.title);
+    expect(loadStoredProject(storage).data.title).toBe(initialProjectData.title);
+  });
+
+  it('keeps unreadable saved data instead of letting it be overwritten', () => {
+    const storage = new MemoryStorage();
+    const originalBytes = '{"title":"Six weeks of work","seasons":[';
+    storage.setItem('series_creator_data', originalBytes);
+
+    const loaded = loadStoredProject(storage);
+
+    expect(loaded.unreadable).toBe(true);
+    expect(storage.getItem(UNREADABLE_BACKUP_KEY)).toBe(originalBytes);
+  });
+
+  it('keeps data that parses but fails validation', () => {
+    const storage = new MemoryStorage();
+    const originalBytes = JSON.stringify({ schemaVersion: 99, title: 'Kept', seasons: 'not-an-array' });
+    storage.setItem('series_creator_data', originalBytes);
+
+    const loaded = loadStoredProject(storage);
+
+    expect(loaded.unreadable).toBe(true);
+    expect(storage.getItem(UNREADABLE_BACKUP_KEY)).toBe(originalBytes);
+  });
+
+  it('reports a clean load as readable', () => {
+    const storage = new MemoryStorage();
+    saveStoredProject(storage, { ...initialProjectData, title: 'Fine' });
+
+    const loaded = loadStoredProject(storage);
+
+    expect(loaded.unreadable).toBe(false);
+    expect(storage.getItem(UNREADABLE_BACKUP_KEY)).toBeNull();
   });
 
   it('reports blocked storage writes without throwing', () => {

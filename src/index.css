@@ -1905,3 +1905,16 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
   outline: none;
   transform: translateY(0);
 }
+
+/* Shown only when the app fails to render at all. */
+.app-error {
+  display: grid;
+  gap: 1rem;
+  justify-items: start;
+  margin: 0 auto;
+  max-width: 34rem;
+  padding: 4rem 1.5rem;
+}
+
+.app-error h1 { font-size: 1.6rem; }
+.app-error p { color: var(--color-text-muted); }

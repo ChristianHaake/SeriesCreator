@@ -6,22 +6,49 @@ import { fieldLimits, resourceLimits } from '../domain/constraints';
 import { useTranslation } from '../i18n';
 
 const STORAGE_KEY = 'series_creator_data';
+/** Single fixed key: one kept copy, overwritten, never an accumulating pile. */
+export const UNREADABLE_BACKUP_KEY = `${STORAGE_KEY}.unreadable`;
+
+export interface StoredProjectLoad {
+  data: ProjectData;
+  /**
+   * True when a saved project existed but could not be restored. The raw bytes
+   * are kept under UNREADABLE_BACKUP_KEY — without that, the autosave would
+   * overwrite the student's only copy within half a second of giving up on it.
+   */
+  unreadable: boolean;
+}
 
 export function loadStoredProject(
   storage: Storage,
   fallback: ProjectData = initialProjectData,
-): ProjectData {
+): StoredProjectLoad {
+  let saved: string | null;
   try {
-    const saved = storage.getItem(STORAGE_KEY);
-    if (!saved) return fallback;
-
-    const parsed = normalizeProject(JSON.parse(saved));
-    if (parsed.ok) return parsed.data;
+    saved = storage.getItem(STORAGE_KEY);
   } catch {
-    // Blocked storage or corrupt JSON falls back to a fresh local project.
+    // Storage is blocked entirely, so there is nothing stored to lose.
+    return { data: fallback, unreadable: false };
   }
 
-  return fallback;
+  if (!saved) return { data: fallback, unreadable: false };
+
+  try {
+    const parsed = normalizeProject(JSON.parse(saved));
+    if (parsed.ok) return { data: parsed.data, unreadable: false };
+  } catch {
+    // Unparseable JSON falls through to the same preservation path as data
+    // that parses but fails validation.
+  }
+
+  try {
+    storage.setItem(UNREADABLE_BACKUP_KEY, saved);
+  } catch {
+    // Out of quota: the original is still in place because the caller
+    // suppresses the next autosave.
+  }
+
+  return { data: fallback, unreadable: true };
 }
 
 export function saveStoredProject(storage: Storage, data: ProjectData) {
@@ -35,15 +62,26 @@ export function saveStoredProject(storage: Storage, data: ProjectData) {
 
 export function useProjectStore(onSaveError?: () => void) {
   const { t, locale } = useTranslation();
-  const [data, setData] = useState<ProjectData>(() => {
-    return loadStoredProject(window.localStorage, createInitialProjectData(locale));
-  });
+  // Read once, on mount. Kept in state rather than a ref so it can be used
+  // during render without reaching into ref.current.
+  const [initialLoad] = useState<StoredProjectLoad>(() =>
+    loadStoredProject(window.localStorage, createInitialProjectData(locale)),
+  );
+  const [data, setData] = useState<ProjectData>(initialLoad.data);
+  const restoreFailed = initialLoad.unreadable;
+  // Hold off the first autosave when the load failed, so the unreadable project
+  // is not replaced before the student has been told about it.
+  const skipFirstSaveRef = useRef(restoreFailed);
   const onSaveErrorRef = useRef(onSaveError);
   useEffect(() => {
     onSaveErrorRef.current = onSaveError;
   }, [onSaveError]);
 
   useEffect(() => {
+    if (skipFirstSaveRef.current) {
+      skipFirstSaveRef.current = false;
+      return;
+    }
     const timeoutId = setTimeout(() => {
       if (!saveStoredProject(window.localStorage, data)) {
         onSaveErrorRef.current?.();
@@ -156,6 +194,7 @@ export function useProjectStore(onSaveError?: () => void) {
 
   return useMemo(() => ({
     data,
+    restoreFailed,
     updateData,
     replaceData,
     addEpisode,
@@ -167,6 +206,7 @@ export function useProjectStore(onSaveError?: () => void) {
     removeSeason,
   }), [
     data,
+    restoreFailed,
     updateData,
     replaceData,
     addEpisode,

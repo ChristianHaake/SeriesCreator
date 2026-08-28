@@ -291,3 +291,35 @@ test('serves content routes from a lazily loaded chunk', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Help');
   expect(chunks.some((name) => name.startsWith('ContentPage'))).toBe(true);
 });
+
+test('keeps a project that cannot be restored, instead of overwriting it', async ({ page }) => {
+  const original = '{"title":"Six weeks of work","seasons":[';
+  await page.addInitScript((data) => {
+    window.localStorage.setItem('series_creator_data', data);
+  }, original);
+
+  await page.goto('/');
+  await expect(page.locator('.app-status')).toContainText('could not be opened');
+
+  // The autosave must not have replaced the only copy while the student read that.
+  await page.waitForTimeout(1200);
+  const storage = await page.evaluate(() => ({
+    backup: window.localStorage.getItem('series_creator_data.unreadable'),
+    main: window.localStorage.getItem('series_creator_data'),
+  }));
+  expect(storage.backup).toBe(original);
+  expect(storage.main).toBe(original);
+});
+
+test('still autosaves normally after a clean load', async ({ page }) => {
+  await page.goto('/');
+  await page.getByLabel('Series Title').fill('Autosave still works');
+
+  await expect.poll(async () => page.evaluate(() => {
+    const raw = window.localStorage.getItem('series_creator_data');
+    return raw ? JSON.parse(raw).title : null;
+  })).toBe('Autosave still works');
+
+  // Nothing was mistaken for an unreadable load.
+  expect(await page.evaluate(() => window.localStorage.getItem('series_creator_data.unreadable'))).toBeNull();
+});
