@@ -6,9 +6,23 @@ export const PROJECT_SCHEMA_VERSION = 2;
 export const PROJECT_FILE_EXTENSION = 'seriescreator';
 export const PROJECT_FILE_MIME_TYPE = 'application/json';
 
+/**
+ * Why a code and not a message: validation runs inside projectImport.worker.ts
+ * and the result crosses a postMessage boundary, where a code survives and a
+ * bound translator does not. The UI maps these to the current locale.
+ */
+export type ProjectParseError =
+  | 'notAnObject'
+  | 'unsupportedSchema'
+  | 'invalidSeasons'
+  | 'seasonCount'
+  | 'invalidSeasonContent'
+  | 'tooLarge'
+  | 'invalidJson';
+
 export type ProjectParseResult =
   | { ok: true; data: ProjectData }
-  | { ok: false; message: string };
+  | { ok: false; code: ProjectParseError };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -54,7 +68,7 @@ function normalizeEpisode(value: unknown, index: number): Episode | null {
   };
 }
 
-function normalizeSeason(value: unknown, index: number): Season | null {
+function normalizeSeason(value: unknown, index: number, seasonFallback: string): Season | null {
   if (!isRecord(value) || !Array.isArray(value.episodes)) return null;
   if (typeof value.title !== 'string') return null;
   if (!Array.isArray(value.episodes)) return null;
@@ -65,14 +79,14 @@ function normalizeSeason(value: unknown, index: number): Season | null {
 
   return {
     id: limitText(value.id, 80) || `s_${index + 1}`,
-    title: limitText(value.title, fieldLimits.seasonTitle) || `Staffel ${index + 1}`,
+    title: limitText(value.title, fieldLimits.seasonTitle) || `${seasonFallback} ${index + 1}`,
     episodes: episodes as Episode[],
   };
 }
 
-export function normalizeProject(value: unknown): ProjectParseResult {
+export function normalizeProject(value: unknown, seasonFallback = 'Season'): ProjectParseResult {
   if (!isRecord(value)) {
-    return { ok: false, message: 'Projektdatei enthält kein gültiges Objekt.' };
+    return { ok: false, code: 'notAnObject' };
   }
 
   const rawVersion = value.schemaVersion === undefined ? 1 : value.schemaVersion;
@@ -84,24 +98,24 @@ export function normalizeProject(value: unknown): ProjectParseResult {
   ) {
     return {
       ok: false,
-      message: 'Projektdatei verwendet eine nicht unterstützte Schema-Version.',
+      code: 'unsupportedSchema',
     };
   }
 
   if (!Array.isArray(value.seasons)) {
-    return { ok: false, message: 'Projektdatei enthält keine gültigen Staffeln.' };
+    return { ok: false, code: 'invalidSeasons' };
   }
 
   if (
     value.seasons.length < resourceLimits.minSeasons ||
     value.seasons.length > resourceLimits.maxSeasons
   ) {
-    return { ok: false, message: 'Projektdatei enthält zu viele oder keine Staffeln.' };
+    return { ok: false, code: 'seasonCount' };
   }
 
-  const seasons = value.seasons.map(normalizeSeason);
+  const seasons = value.seasons.map((season, index) => normalizeSeason(season, index, seasonFallback));
   if (seasons.some((season) => season === null)) {
-    return { ok: false, message: 'Projektdatei enthält ungültige Staffeln oder Episoden.' };
+    return { ok: false, code: 'invalidSeasonContent' };
   }
 
   // Schema 1 projects did not contain learningDepth. Normalizing the optional
@@ -144,15 +158,15 @@ export function normalizeProject(value: unknown): ProjectParseResult {
   return { ok: true, data };
 }
 
-export function parseProjectJson(text: string): ProjectParseResult {
+export function parseProjectJson(text: string, seasonFallback = 'Season'): ProjectParseResult {
   if (new Blob([text]).size > resourceLimits.projectFileBytes) {
-    return { ok: false, message: 'Projektdatei ist zu groß.' };
+    return { ok: false, code: 'tooLarge' };
   }
 
   try {
-    return normalizeProject(JSON.parse(text));
+    return normalizeProject(JSON.parse(text), seasonFallback);
   } catch {
-    return { ok: false, message: 'Projektdatei ist kein gültiges JSON.' };
+    return { ok: false, code: 'invalidJson' };
   }
 }
 
@@ -183,6 +197,6 @@ export function makeExportBaseName(title: string, fallback: string) {
   );
 }
 
-export function makeProjectFilename(title: string) {
-  return `${makeExportBaseName(title, 'SeriesCreator-Projekt')}.${PROJECT_FILE_EXTENSION}`;
+export function makeProjectFilename(title: string, fallback = 'SeriesCreator-Project') {
+  return `${makeExportBaseName(title, fallback)}.${PROJECT_FILE_EXTENSION}`;
 }

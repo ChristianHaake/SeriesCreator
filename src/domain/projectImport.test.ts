@@ -27,7 +27,7 @@ describe('parseProjectTextInWorker', () => {
   it('falls back to the validated codec when workers are unavailable', async () => {
     vi.stubGlobal('Worker', undefined);
 
-    const result = await parseProjectTextInWorker(JSON.stringify(initialProjectData));
+    const result = await parseProjectTextInWorker(JSON.stringify(initialProjectData), 'Season');
 
     expect(result.ok).toBe(true);
   });
@@ -37,7 +37,7 @@ describe('parseProjectTextInWorker', () => {
     TestWorker.response = { ok: true, data: initialProjectData };
     vi.stubGlobal('Worker', TestWorker);
 
-    const result = await parseProjectTextInWorker(JSON.stringify(initialProjectData));
+    const result = await parseProjectTextInWorker(JSON.stringify(initialProjectData), 'Season');
 
     expect(result).toEqual({ ok: true, data: initialProjectData });
   });
@@ -47,7 +47,7 @@ describe('parseProjectTextInWorker', () => {
     TestWorker.response = undefined;
     vi.stubGlobal('Worker', TestWorker);
 
-    const result = await parseProjectTextInWorker(JSON.stringify(initialProjectData));
+    const result = await parseProjectTextInWorker(JSON.stringify(initialProjectData), 'Season');
 
     expect(result).toEqual({ ok: true, data: initialProjectData });
   });
@@ -59,7 +59,7 @@ describe('parseProjectTextInWorker', () => {
       }
     });
 
-    const result = await parseProjectTextInWorker(JSON.stringify(initialProjectData));
+    const result = await parseProjectTextInWorker(JSON.stringify(initialProjectData), 'Season');
 
     expect(result).toEqual({ ok: true, data: initialProjectData });
   });

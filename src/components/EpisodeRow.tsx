@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import type { Episode } from '../types';
-import { ArrowUp, ArrowDown, Trash2, Pencil } from 'lucide-react';
+import { ArrowUp, ArrowDown, Trash2 } from 'lucide-react';
 import { useTranslation } from '../i18n';
 
 interface Props {
@@ -40,12 +40,9 @@ export const EpisodeRow = memo(function EpisodeRow({
         <span className="episode-row__text">
           <span className="episode-row__title">{title}</span>
           <span className="episode-row__meta">
-            {episode.summary
-              ? `${episode.summary.length} / ${t.charactersLabel}`
-              : t.lblNoDescription}
+            {episode.summary || t.lblNoDescription}
           </span>
         </span>
-        <Pencil aria-hidden="true" size={16} />
       </button>
 
       <div className="episode-row__actions">

@@ -132,6 +132,9 @@ describe('projectCodec', () => {
 
   it('creates stable SeriesCreator backup filenames', () => {
     expect(makeProjectFilename('Meine Serie!')).toBe('Meine-Serie.seriescreator');
-    expect(makeProjectFilename('')).toBe('SeriesCreator-Projekt.seriescreator');
+    // The fallback is supplied by the caller so it can follow the interface
+    // language; the default keeps the function usable on its own.
+    expect(makeProjectFilename('')).toBe('SeriesCreator-Project.seriescreator');
+    expect(makeProjectFilename('', 'SeriesCreator-Projekt')).toBe('SeriesCreator-Projekt.seriescreator');
   });
 });

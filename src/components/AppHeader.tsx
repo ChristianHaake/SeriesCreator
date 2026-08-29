@@ -4,6 +4,7 @@ import type { ProjectData } from "../types";
 import { useTranslation } from "../i18n";
 import { PROJECT_FILE_EXTENSION } from '../domain/projectCodec';
 import { resourceLimits } from '../domain/constraints';
+import type { ProjectParseError } from '../domain/projectCodec';
 import { parseProjectTextInWorker } from '../domain/projectImport';
 import { BrandLogo } from './BrandLogo';
 
@@ -36,6 +37,16 @@ export function AppHeader({
     const file = event.target.files?.[0];
     if (!file) return;
 
+    const importErrorMessage = (code: ProjectParseError) => ({
+      notAnObject: t.importErrorNotAnObject,
+      unsupportedSchema: t.importErrorUnsupportedSchema,
+      invalidSeasons: t.importErrorInvalidSeasons,
+      seasonCount: t.importErrorSeasonCount,
+      invalidSeasonContent: t.importErrorInvalidSeasonContent,
+      tooLarge: t.importErrorTooLarge,
+      invalidJson: t.importErrorInvalidJson,
+    }[code]);
+
     if (file.size > resourceLimits.projectFileBytes) {
       onImportError?.(t.msgProjectTooLarge);
       input.value = '';
@@ -46,11 +57,11 @@ export function AppHeader({
     onImportStart?.();
     try {
       const content = await file.text();
-      const parsed = await parseProjectTextInWorker(content);
+      const parsed = await parseProjectTextInWorker(content, t.seasonFallbackLabel);
       if (parsed.ok) {
         onImport?.(parsed.data);
       } else {
-        onImportError?.(parsed.message);
+        onImportError?.(importErrorMessage(parsed.code));
       }
     } catch {
       onImportError?.(t.msgImportReadFailed);

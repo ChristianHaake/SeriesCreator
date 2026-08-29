@@ -1923,47 +1923,63 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
 .app-error p { color: var(--color-text-muted); }
 
 /* Header overflow menu.
-   Wide viewports render the closed popover inline, so the desktop toolbar is
-   exactly as it was and the toggle is hidden. Narrow viewports get the real
-   popover, which brings Escape, light dismiss and top-layer stacking with it. */
-.header-actions__menu {
-  background: var(--color-surface);
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
-  box-shadow: 0 14px 40px rgb(0 0 0 / 22%);
-  gap: 0.4rem;
-  inset: auto;
-  margin: 0;
-  padding: 0.6rem;
-  position: fixed;
-  right: 1rem;
-  top: 4.5rem;
-  width: min(18rem, calc(100vw - 2rem));
-}
+   Narrow viewports get a real popover panel — Escape, light dismiss and
+   top-layer stacking all come from the platform. Wide viewports render the
+   closed popover inline with display:contents, so the toolbar is untouched and
+   the toggle is hidden. Everything that makes it look like a panel must stay
+   inside the narrow media query.
 
-.header-actions__menu:popover-open {
-  display: grid;
-}
-
-.header-actions__menu .btn-header {
-  justify-content: flex-start;
-  width: 100%;
-}
-
-.header-actions__menu::backdrop {
-  background: rgb(15 17 22 / 35%);
-}
-
-@media (min-width: 901px) {
-  /* display:contents keeps the buttons as direct flex children of the toolbar,
-     so the desktop row is untouched. !important overrides the UA rule that
-     hides a closed popover. */
+   The breakpoint is set by measurement, not by the mobile layout: all seven
+   actions need 1320px to sit on one line in English and 1400px in German.
+   Below that the row wrapped to two lines and left the header 163px tall, so
+   the menu takes over up to 1440px. */
+@media (max-width: 1439px) {
   .header-actions__menu {
-    background: none;
-    border: 0;
-    box-shadow: none;
+    background: var(--color-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    box-shadow: 0 14px 40px rgb(0 0 0 / 22%);
+    gap: 0.4rem;
+    inset: auto;
+    margin: 0;
+    padding: 0.6rem;
+    position: fixed;
+    right: 1rem;
+    top: 4.5rem;
+    width: min(18rem, calc(100vw - 2rem));
+  }
+
+  .header-actions__menu:popover-open {
+    /* Safari sizes the top-layer box to the viewport, and a bare grid then
+       stretches every row to fill it — items ballooned to ~200px each and the
+       last fell off screen. Chromium and Firefox size to content, so this only
+       appeared in real Safari. */
+    align-content: start;
+    display: grid;
+    height: fit-content;
+    max-height: calc(100dvh - 6rem);
+    overflow-y: auto;
+  }
+
+  /* Full-width rows belong to the panel only. Left unscoped these also applied
+     on desktop, where the menu is display:contents — so every action became a
+     full-width toolbar child and the row wrapped to seven lines. */
+  .header-actions__menu .btn-header {
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .header-actions__menu::backdrop {
+    background: rgb(15 17 22 / 35%);
+  }
+}
+
+@media (min-width: 1440px) {
+  /* display:contents keeps the buttons as direct flex children of the toolbar,
+     so the wide row is untouched. !important overrides the UA rule that hides a
+     closed popover. */
+  .header-actions__menu {
     display: contents !important;
-    padding: 0;
   }
 
   .header-actions__toggle {
@@ -2012,9 +2028,10 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
 
 .episode-row__thumb {
   aspect-ratio: 16 / 9;
+  flex: none;
   border-radius: 4px;
   object-fit: cover;
-  width: 3.25rem;
+  width: 2.75rem;
 }
 
 .episode-row__thumb--empty {
@@ -2039,9 +2056,20 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
 .episode-row__meta {
   color: var(--color-text-muted);
   font-size: 0.8rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.episode-row__actions { display: flex; gap: 0.25rem; }
+/* Secondary to the title: at a 400px sidebar these were taking 128px against
+   59px of text, which is too little to tell episodes apart. Still well above
+   the 24px minimum target size. */
+.episode-row__actions { display: flex; flex: none; gap: 0.15rem; }
+
+.episode-row__actions .ui-icon-button {
+  min-height: 2rem;
+  width: 2rem;
+}
 
 /* ---- Episode editor dialog ----------------------------------------------- */
 .episode-dialog {
@@ -2081,7 +2109,9 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
 
 .episode-dialog__fields { display: grid; gap: 1.1rem; }
 
-.episode-dialog__fields label {
+/* :not(.ui-button) — otherwise this beats .ui-button on specificity and turns
+   the button-styled upload label into a block, killing its icon/text gap. */
+.episode-dialog__fields label:not(.ui-button) {
   display: block;
   font-weight: 600;
   margin-bottom: 0.35rem;

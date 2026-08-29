@@ -1,8 +1,8 @@
 import { parseProjectJson, type ProjectParseResult } from './projectCodec';
 
-export function parseProjectTextInWorker(text: string): Promise<ProjectParseResult> {
+export function parseProjectTextInWorker(text: string, seasonFallback: string): Promise<ProjectParseResult> {
   if (typeof Worker === 'undefined') {
-    return Promise.resolve(parseProjectJson(text));
+    return Promise.resolve(parseProjectJson(text, seasonFallback));
   }
 
   return new Promise((resolve) => {
@@ -13,7 +13,7 @@ export function parseProjectTextInWorker(text: string): Promise<ProjectParseResu
         { type: 'module' },
       );
     } catch {
-      resolve(parseProjectJson(text));
+      resolve(parseProjectJson(text, seasonFallback));
       return;
     }
     let settled = false;
@@ -25,8 +25,8 @@ export function parseProjectTextInWorker(text: string): Promise<ProjectParseResu
     };
 
     worker.addEventListener('message', (event: MessageEvent<ProjectParseResult>) => finish(event.data));
-    worker.addEventListener('error', () => finish(parseProjectJson(text)));
-    worker.addEventListener('messageerror', () => finish(parseProjectJson(text)));
-    worker.postMessage(text);
+    worker.addEventListener('error', () => finish(parseProjectJson(text, seasonFallback)));
+    worker.addEventListener('messageerror', () => finish(parseProjectJson(text, seasonFallback)));
+    worker.postMessage({ text, seasonFallback });
   });
 }

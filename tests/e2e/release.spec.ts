@@ -339,6 +339,9 @@ test('still autosaves normally after a clean load', async ({ page }) => {
 });
 
 test('keeps the full action row inline on a wide viewport', async ({ page }) => {
+  // Above the measured breakpoint: all seven actions need 1320px in English and
+  // 1400px in German before they fit on one line.
+  await page.setViewportSize({ width: 1500, height: 800 });
   await page.goto('/');
 
   // The overflow menu is a narrow-viewport affordance; desktop is unchanged.
@@ -351,9 +354,23 @@ test('keeps the full action row inline on a wide viewport', async ({ page }) => 
   await expect(actions).toHaveText([
     'Save', 'Load', 'Examples', 'Download as HTML', 'Print / Save as PDF', 'For Teachers', 'New / Clear',
   ]);
-  for (const action of await actions.all()) {
-    await expect(action).toBeVisible();
-  }
+
+  // Geometry, not just text: the panel's full-width rows once leaked out of the
+  // narrow media query and every action became a full-width toolbar child,
+  // wrapping the row onto seven lines. Text and visibility both still passed.
+  const layout = await page.evaluate(() => {
+    const buttons = [...document.querySelectorAll('.app-header__controls .btn-header')]
+      .filter((b) => getComputedStyle(b).display !== 'none');
+    const container = document.querySelector('.app-header__controls')!.getBoundingClientRect().width;
+    return {
+      rows: new Set(buttons.map((b) => Math.round(b.getBoundingClientRect().top))).size,
+      widest: Math.max(...buttons.map((b) => b.getBoundingClientRect().width)),
+      container,
+    };
+  });
+
+  expect(layout.rows, 'the action row should not wrap at this width').toBe(1);
+  expect(layout.widest, 'no action should stretch to the full toolbar').toBeLessThan(layout.container * 0.5);
 });
 
 test('edits an episode in a dialog that previews the real card', async ({ page }) => {
@@ -376,4 +393,67 @@ test('edits an episode in a dialog that previews the real card', async ({ page }
   await expect(dialog).toHaveCount(0);
   await expect(page.locator('.episode-row__title')).toHaveText('Typed In The Dialog');
   await expect(page.getByRole('main').getByRole('heading', { name: '1. Typed In The Dialog' })).toBeVisible();
+});
+
+test('sizes the header menu to its content, not to the viewport', async ({ page }) => {
+  await page.setViewportSize({ width: 414, height: 670 });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'More actions' }).click();
+
+  const menu = page.locator('#header-actions-menu');
+  await expect(menu).toBeVisible();
+
+  // Real Safari sized the top-layer box to the viewport, and the grid then
+  // stretched each item to ~200px, pushing the last one off screen.
+  const layout = await menu.evaluate((element) => {
+    const items = [...element.querySelectorAll('.btn-header')];
+    return {
+      menuHeight: element.getBoundingClientRect().height,
+      tallestItem: Math.max(...items.map((i) => i.getBoundingClientRect().height)),
+      lowestItemBottom: Math.max(...items.map((i) => i.getBoundingClientRect().bottom)),
+      viewportHeight: window.innerHeight,
+    };
+  });
+
+  expect(layout.tallestItem).toBeLessThan(80);
+  expect(layout.menuHeight).toBeLessThan(layout.viewportHeight * 0.75);
+  expect(layout.lowestItemBottom).toBeLessThanOrEqual(layout.viewportHeight);
+});
+
+test('reports import failures in the interface language', async ({ page }) => {
+  const broken = { name: 'broken.seriescreator', mimeType: 'application/json', buffer: Buffer.from('{"seasons": "nope"}') };
+
+  await page.goto('/');
+  // Locale-independent: the input's aria-label is itself translated.
+  const importInput = page.locator('.app-header input[type="file"]');
+  await importInput.setInputFiles(broken);
+  await expect(page.locator('.app-status')).toHaveText('The project file contains no valid seasons.');
+
+  // The codec runs in a worker and cannot reach the translator, so it returns a
+  // code that the UI maps — this is what proves the mapping is wired.
+  await page.getByRole('button', { name: 'DE', exact: true }).click();
+  await importInput.setInputFiles(broken);
+  await expect(page.locator('.app-status')).toHaveText('Die Projektdatei enthält keine gültigen Staffeln.');
+});
+
+test('reloads a project it saved itself', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Examples' }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Use example' }).first().click();
+  await page.locator('dialog.confirm-dialog').getByRole('button', { name: 'Load example' }).click();
+  await expect(page.locator('.completion-score')).toHaveText('Project status 100%');
+
+  const download = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  const saved = await (await download).path();
+
+  // Wipe and re-import the very file the app produced.
+  await page.evaluate(() => window.localStorage.removeItem('series_creator_data'));
+  await page.reload();
+  await page.locator('input[type="file"][aria-label="Load"]').setInputFiles(saved);
+
+  await expect(page.getByText('Project file loaded.')).toBeVisible();
+  await expect(page.locator('.streaming-title')).toHaveText('The School Climate Code');
+  await expect(page.locator('.completion-score')).toHaveText('Project status 100%');
+  await expect(page.locator('.episode-card__image')).toHaveCount(3);
 });

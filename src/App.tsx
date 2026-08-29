@@ -211,7 +211,7 @@ function App() {
             const blob = new Blob([serializeProject(data)], {
               type: PROJECT_FILE_MIME_TYPE,
             });
-            downloadBlob(blob, makeProjectFilename(data.title));
+            downloadBlob(blob, makeProjectFilename(data.title, t.projectFileFallbackName));
             showStatus(t.msgExportSuccess, 'success');
           } catch {
             showStatus(t.msgExportFailed, 'error');

@@ -30,7 +30,7 @@ export function exportProjectToHtml(
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; connect-src 'none'; form-action 'none'; frame-ancestors 'none'; img-src data:; object-src 'none'; script-src 'nonce-${cspNonce}'; style-src 'nonce-${cspNonce}'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; connect-src 'none'; form-action 'none'; img-src data:; object-src 'none'; script-src 'nonce-${cspNonce}'; style-src 'nonce-${cspNonce}'">
 <title>${escapeHtml(data.title)} - ${t.exportPresentation}</title>
 <style nonce="${cspNonce}">
   * { box-sizing: border-box; }
