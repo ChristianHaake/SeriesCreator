@@ -160,6 +160,8 @@ describe('App', () => {
     await user.click(screen.getByRole('button', { name: 'Download as HTML' }));
     expect(screen.getByText('HTML presentation download has been prepared.')).toBeInTheDocument();
 
+    // The menu closes when an action is chosen, so reopen it for the next one.
+    await openHeaderMenu(user);
     await user.click(screen.getByRole('button', { name: 'Print / Save as PDF' }));
     expect(window.print).toHaveBeenCalled();
     expect(screen.getByText('Print dialog opened. Use it to save as PDF if needed.')).toBeInTheDocument();
