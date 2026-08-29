@@ -2,6 +2,80 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.0] - 2026-08-30
+
+### Added
+
+- Full-size episode editor in a native dialog with a live preview card, so
+  writing an episode is no longer confined to the narrow sidebar column.
+- Compact episode rows in the sidebar with reorder and delete controls.
+- Overflow menu for secondary header actions built on the native Popover API.
+  Save stays outside the menu and is always reachable.
+- Error boundary with localized recovery copy, replacing the blank page a
+  render failure used to leave behind.
+- Corrupt-save protection: an unreadable stored project is copied to
+  `series_creator_data.unreadable` and the first autosave is suppressed, so a
+  student's only copy is no longer overwritten within half a second of load.
+- Skip link, editor landmark and labelled preview region for keyboard and
+  screen-reader users.
+- Slide counter in presentation mode, announced to assistive technology.
+- Explicit not-found handling for unknown routes.
+- Localized import error messages. Validation returns stable error codes that
+  survive the worker boundary and are translated in the UI.
+- Automated accessibility (axe), touch and print/PDF test suites, plus a
+  mobile Playwright project running on a Pixel 7 viewport.
+
+### Changed
+
+- Project import validation runs in a module worker, keeping large or
+  malformed files off the main thread (SBP-004).
+- Content pages load as a lazy chunk, keeping the editor bundle small.
+- Header actions collapse into the overflow menu below 1440 px, the width the
+  full toolbar needs in the longer German labels.
+- `New / Clear` moved to the end of the action list, after the non-destructive
+  actions.
+- Episode rows show the episode summary instead of character counts.
+- Blocking `window.confirm` and `window.alert` replaced by an in-app dialog;
+  image upload problems are reported inline instead of interrupting.
+- Standalone HTML export uses a nonce-based content security policy and no
+  inline event handler (SBP-002).
+- Deployment headers and the production smoke test now assert concrete header
+  values (SBP-003).
+
+### Fixed
+
+- Printing produced white text on blank paper whenever background graphics
+  were off, which is the default state of the browser print dialog.
+  `print-color-adjust: exact` keeps the dark layout intact.
+- The 2 cm page margin only applied to the first page; container padding was
+  standing in for a real `@page` margin.
+- The print layout was rendered into the app shell, duplicating every episode
+  for assistive technology and forcing horizontal scrolling at 375 px.
+- Header actions wrapped into seven stacked rows on desktop.
+- The overflow menu stayed open after an action was chosen, so dialogs opened
+  behind it.
+- Space advanced two presentation slides at once and scrolled the page.
+- Focus restore in the example gallery raced with its own timer.
+- Example image attachment requested a `-undefined.jpg` thumbnail when a
+  project had no bundled images.
+- Long student-supplied words overflowed titles and cards instead of wrapping.
+- Contrast failures on the light editor surface and the dark preview surface,
+  including link, accent and secondary text colours.
+
+### Removed
+
+- The inline episode editor, replaced by the dialog editor.
+
+### Verification
+
+- `npm run verify` passes: lint, typecheck, example generation, 46 unit tests,
+  production build and 99 end-to-end tests across Chromium, Firefox, WebKit
+  and mobile Chrome.
+- Print margins and dark-layout fills are asserted by parsing real PDF content
+  streams, replacing the former manual print check.
+- Manual device, screen-reader and legal checks remain open; see the release
+  record for accepted limitations.
+
 ## [1.4.0] - 2026-08-22
 
 ### Added

@@ -37,5 +37,6 @@ iPad behavior.
 - [ ] Cloudflare Web Analytics behavior matches the privacy notice
 - [ ] Final deployment serves the intended version and current security headers
 
-Record device/browser versions, reviewer, date and accepted limitations in the
-release record.
+Record device/browser versions, reviewer, date and accepted limitations in a
+release record next to this file, one per version. `release-record-1.5.0.md`
+is the current one.

@@ -1,4 +1,7 @@
+import { readFileSync } from 'node:fs';
+
 const baseUrl = new URL(process.argv[2] || 'https://seriescreator.haak3.de/');
+const { version } = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 const routes = ['/', '/hilfe', '/datenschutz', '/impressum'];
 const rootSecurityHeaders = {
   'content-security-policy': [
@@ -36,6 +39,10 @@ for (const route of routes) {
     const html = await response.text();
     if (!html.includes('<title>SeriesCreator</title>')) {
       throw new Error('Root document does not identify SeriesCreator.');
+    }
+
+    if (!html.includes(`<meta name="app-version" content="${version}"`)) {
+      throw new Error(`Deployed document does not report version ${version}.`);
     }
 
     for (const [header, expectedValues] of Object.entries(rootSecurityHeaders)) {

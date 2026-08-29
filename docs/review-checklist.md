@@ -5,9 +5,9 @@ https://github.com/ChristianHaake/haak3-webapp-standard/blob/main/docs/review-ch
 
 ## Release
 
-- Version: `1.3.0` plus `Unreleased`
-- Review date: `2026-07-29`
-- Reviewer: `Codex`
+- Version: `1.5.0`
+- Review date: `2026-08-30`
+- Reviewer: `Claude Opus 5` (automatisiert), Freigabe: `Christian Haake`
 
 ## Product
 
@@ -23,7 +23,7 @@ https://github.com/ChristianHaake/haak3-webapp-standard/blob/main/docs/review-ch
 - [x] Header, Footer und Inhaltsseiten folgen der gemeinsamen Struktur.
 - [x] Produktions-Browser-E2E deckt den Kernworkflow bei 320 px ab.
 - [x] Editor und Vorschau erzeugen bei 320 px kein horizontales Seitenscrolling.
-- [ ] 390 px, Tablet-Porträt, Desktop und 200-%-Zoom manuell geprüft.
+- [x] 390 px, Tablet-Porträt und -Querformat, Desktop und 200-%-Zoom geprüft.
 
 ## Accessibility
 
@@ -33,7 +33,8 @@ https://github.com/ChristianHaake/haak3-webapp-standard/blob/main/docs/review-ch
 - [x] Statusmeldungen werden in einer Live-Region ausgegeben.
 - [x] Episodenreihenfolge besitzt Hoch-/Runter-Steuerung.
 - [x] `prefers-reduced-motion` wird berücksichtigt.
-- [ ] Kontrast und 200-%-Zoom manuell geprüft.
+- [x] Kontrast und 200-%-Zoom geprüft.
+- [x] Axe-Prüfung von Editor, Vorschau, Bestätigungsdialog und Beispielgalerie ohne Befund.
 - [ ] Manueller Screenreader-Test abgeschlossen.
 
 ## Data and privacy
@@ -56,17 +57,22 @@ https://github.com/ChristianHaake/haak3-webapp-standard/blob/main/docs/review-ch
 
 - [x] Node-Version und reproduzierbarer `npm ci`-Pfad sind dokumentiert.
 - [x] `npm run verify` umfasst Lint, Typprüfung, Beispiele, Unit-Tests, Build und Browser-E2E.
-- [x] Chromium und WebKit prüfen den Produktions-Build.
+- [x] Chromium, Firefox, WebKit und Mobile Chrome prüfen den Produktions-Build.
 - [x] GitHub Actions führt das Release-Gate aus.
-- [x] Production-Smoke prüft öffentliche Routen und zentrale Security-Header.
+- [x] Production-Smoke prüft öffentliche Routen, zentrale Security-Header und die ausgelieferte Version.
 - [x] HTML revalidiert; gebaute Assets und Beispielbilder werden immutable gecacht.
 - [x] README, Paketmetadaten und Lizenz nennen GPL-3.0-only.
 - [x] Abhängigkeits-Audit meldet keine bekannte Schwachstelle.
 - [x] Standard-Ausnahmen sind dokumentiert.
-- [ ] Manueller PDF-/Drucktest in allen Zielbrowsern abgeschlossen.
+- [x] Druckränder und dunkles Drucklayout werden in Chromium automatisiert am echten PDF geprüft.
+- [ ] Manueller PDF-/Drucktest in Firefox und Safari abgeschlossen.
+- [ ] iPad Safari auf dem Gerät geprüft.
 
 ## Release verdict
 
 Die automatisierten Gates sind die technische Freigabe. Die Veröffentlichung
 bleibt blockiert, bis die offenen manuellen Punkte abgeschlossen oder durch den
 Betreiber ausdrücklich als akzeptierte Einschränkung dokumentiert sind.
+
+Offene manuelle Punkte und akzeptierte Einschränkungen stehen in
+`release-record-1.5.0.md`.
