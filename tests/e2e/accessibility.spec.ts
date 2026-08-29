@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
+import { clickHeaderAction } from './helpers';
 
 // Every content route, plus the app itself. These are the surfaces the release
 // suite already exercises, so a violation here is a real regression.
@@ -34,7 +35,7 @@ for (const locale of ['en', 'de'] as const) {
 
     test('the editor with a loaded example has no accessibility violations', async ({ page }) => {
       await page.goto('/');
-      await page.getByRole('button', { name: locale === 'de' ? 'Beispiele' : 'Examples' }).click();
+      await clickHeaderAction(page, locale === 'de' ? 'Beispiele' : 'Examples');
       await page
         .getByRole('dialog')
         .getByRole('button', { name: locale === 'de' ? 'Beispiel verwenden' : 'Use example' })
@@ -82,7 +83,7 @@ test.describe('interactive surfaces', () => {
   });
 
   test('the confirmation dialog has no accessibility violations', async ({ page }) => {
-    await page.getByRole('button', { name: 'New / Clear' }).click();
+    await clickHeaderAction(page, 'New / Clear');
     await expect(page.locator('dialog.confirm-dialog')).toBeVisible();
 
     const results = await audit(page).analyze();
@@ -100,7 +101,7 @@ test.describe('interactive surfaces', () => {
   });
 
   test('the example gallery has no accessibility violations', async ({ page }) => {
-    await page.getByRole('button', { name: 'Examples' }).click();
+    await clickHeaderAction(page, 'Examples');
     await expect(page.getByRole('dialog', { name: 'Examples in the app' })).toBeVisible();
 
     const results = await audit(page).analyze();

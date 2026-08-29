@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { clickHeaderAction } from './helpers';
 
 /** Episode fields live in a dialog opened from the list row. */
 async function openEpisode(page: import('@playwright/test').Page, index = 0) {
@@ -47,7 +48,7 @@ test('completes the primary workflow and downloads both portable formats', async
   );
 
   const htmlDownload = page.waitForEvent('download');
-  await page.getByRole('button', { name: 'Download as HTML' }).click();
+  await clickHeaderAction(page, 'Download as HTML');
   expect((await htmlDownload).suggestedFilename()).toBe('Release-Test-Series.html');
 
   await page.getByRole('button', { name: 'Present' }).click();
@@ -81,7 +82,7 @@ test('supports direct content routes and narrow responsive editing', async ({ pa
 
 test('loads a complete current example through the gallery', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Examples' }).click();
+  await clickHeaderAction(page, 'Examples');
 
   const gallery = page.getByRole('dialog', { name: 'Examples in the app' });
   const climateCard = gallery
@@ -237,7 +238,7 @@ test('confirms destructive actions in an in-app dialog', async ({ page }) => {
   await page.getByLabel('Series Title').fill('Keep this draft');
 
   const dialog = page.locator('dialog.confirm-dialog');
-  await page.getByRole('button', { name: 'New / Clear' }).click();
+  await clickHeaderAction(page, 'New / Clear');
   await expect(dialog).toBeVisible();
 
   // Escape must cancel and leave the draft untouched.
@@ -245,7 +246,7 @@ test('confirms destructive actions in an in-app dialog', async ({ page }) => {
   await expect(dialog).toHaveCount(0);
   await expect(page.getByLabel('Series Title')).toHaveValue('Keep this draft');
 
-  await page.getByRole('button', { name: 'New / Clear' }).click();
+  await clickHeaderAction(page, 'New / Clear');
   await dialog.getByRole('button', { name: 'Delete', exact: true }).click();
   await expect(page.getByLabel('Series Title')).not.toHaveValue('Keep this draft');
 
@@ -438,7 +439,7 @@ test('reports import failures in the interface language', async ({ page }) => {
 
 test('reloads a project it saved itself', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Examples' }).click();
+  await clickHeaderAction(page, 'Examples');
   await page.getByRole('dialog').getByRole('button', { name: 'Use example' }).first().click();
   await page.locator('dialog.confirm-dialog').getByRole('button', { name: 'Load example' }).click();
   await expect(page.locator('.completion-score')).toHaveText('Project status 100%');

@@ -1,5 +1,6 @@
 import zlib from 'node:zlib';
 import { expect, test } from '@playwright/test';
+import { clickHeaderAction } from './helpers';
 
 // Playwright's page.pdf() injects its own margins and ignores CSS @page, so the
 // margin rule cannot be checked through it. Raw CDP with no margin parameters
@@ -41,7 +42,7 @@ const greyFills = (stream: string) =>
 
 async function printExample(page: import('@playwright/test').Page) {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Examples' }).click();
+  await clickHeaderAction(page, 'Examples');
   await page.getByRole('dialog').getByRole('button', { name: 'Use example' }).first().click();
   await page.locator('dialog.confirm-dialog').getByRole('button', { name: 'Load example' }).click();
   await expect(page.locator('.streaming-title')).toHaveText('The School Climate Code');

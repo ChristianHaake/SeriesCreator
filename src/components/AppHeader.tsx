@@ -122,7 +122,19 @@ export function AppHeader({
           {/* A native popover: Escape, light dismiss and top-layer stacking come
               from the platform. On wide viewports CSS renders it inline instead,
               so the desktop toolbar is unchanged and the toggle is hidden. */}
-          <div id="header-actions-menu" popover="auto" className="header-actions__menu">
+          <div
+            id="header-actions-menu"
+            popover="auto"
+            className="header-actions__menu"
+            // Choosing an action should dismiss the menu; a popover does not
+            // close itself when something inside it is activated, so the
+            // gallery would otherwise open behind an open menu.
+            onClick={(event) => {
+              if ((event.target as HTMLElement).closest('button, a')) {
+                event.currentTarget.hidePopover();
+              }
+            }}
+          >
             {onImport && (
               <>
                 <button
