@@ -5,23 +5,54 @@ import { normalizeProject, serializeProject } from '../domain/projectCodec';
 import { fieldLimits, resourceLimits } from '../domain/constraints';
 import { useTranslation } from '../i18n';
 
-const STORAGE_KEY = 'series_creator_data';
+export const STORAGE_KEY = 'series_creator_data';
+/** Single fixed key: one kept copy, overwritten, never an accumulating pile. */
+export const UNREADABLE_BACKUP_KEY = `${STORAGE_KEY}.unreadable`;
+
+export interface StoredProjectLoad {
+  data: ProjectData;
+  /**
+   * True when a saved project existed but could not be restored. The raw bytes
+   * are copied to UNREADABLE_BACKUP_KEY when storage permits it. If copying
+   * fails, autosave is locked so the primary bytes remain untouched.
+   */
+  unreadable: boolean;
+  /** Whether the unreadable bytes were copied before the active draft fell back. */
+  backupPreserved: boolean;
+}
 
 export function loadStoredProject(
   storage: Storage,
   fallback: ProjectData = initialProjectData,
-): ProjectData {
+): StoredProjectLoad {
+  let saved: string | null;
   try {
-    const saved = storage.getItem(STORAGE_KEY);
-    if (!saved) return fallback;
-
-    const parsed = normalizeProject(JSON.parse(saved));
-    if (parsed.ok) return parsed.data;
+    saved = storage.getItem(STORAGE_KEY);
   } catch {
-    // Blocked storage or corrupt JSON falls back to a fresh local project.
+    // Storage is blocked entirely, so there is nothing stored to lose.
+    return { data: fallback, unreadable: false, backupPreserved: false };
   }
 
-  return fallback;
+  if (!saved) return { data: fallback, unreadable: false, backupPreserved: false };
+
+  try {
+    const parsed = normalizeProject(JSON.parse(saved));
+    if (parsed.ok) return { data: parsed.data, unreadable: false, backupPreserved: false };
+  } catch {
+    // Unparseable JSON falls through to the same preservation path as data
+    // that parses but fails validation.
+  }
+
+  let backupPreserved = false;
+  try {
+    storage.setItem(UNREADABLE_BACKUP_KEY, saved);
+    backupPreserved = true;
+  } catch {
+    // Keep the original key untouched. Autosave remains locked until the user
+    // explicitly confirms a destructive replacement.
+  }
+
+  return { data: fallback, unreadable: true, backupPreserved };
 }
 
 export function saveStoredProject(storage: Storage, data: ProjectData) {
@@ -35,15 +66,26 @@ export function saveStoredProject(storage: Storage, data: ProjectData) {
 
 export function useProjectStore(onSaveError?: () => void) {
   const { t, locale } = useTranslation();
-  const [data, setData] = useState<ProjectData>(() => {
-    return loadStoredProject(window.localStorage, createInitialProjectData(locale));
-  });
+  // Read once, on mount. Kept in state rather than a ref so it can be used
+  // during render without reaching into ref.current.
+  const [initialLoad] = useState<StoredProjectLoad>(() =>
+    loadStoredProject(window.localStorage, createInitialProjectData(locale)),
+  );
+  const [data, setData] = useState<ProjectData>(initialLoad.data);
+  const [restoreFailed, setRestoreFailed] = useState(initialLoad.unreadable);
+  // A failed recovery copy means the original bytes are still the only copy.
+  // Do not let a later edit silently overwrite them.
+  const [persistenceBlocked, setPersistenceBlocked] = useState(
+    initialLoad.unreadable && !initialLoad.backupPreserved,
+  );
+  const writeBlockedRef = useRef(initialLoad.unreadable && !initialLoad.backupPreserved);
   const onSaveErrorRef = useRef(onSaveError);
   useEffect(() => {
     onSaveErrorRef.current = onSaveError;
   }, [onSaveError]);
 
   useEffect(() => {
+    if (writeBlockedRef.current) return;
     const timeoutId = setTimeout(() => {
       if (!saveStoredProject(window.localStorage, data)) {
         onSaveErrorRef.current?.();
@@ -147,15 +189,37 @@ export function useProjectStore(onSaveError?: () => void) {
   }, [t.lblSeasonN]);
 
   const resetData = useCallback(() => {
-    setData(createInitialProjectData(locale));
+    const nextData = createInitialProjectData(locale);
+    // Reset is confirmed in the UI. Persist it before updating React state so
+    // an immediate reload cannot resurrect the project the user just deleted.
+    const saved = saveStoredProject(window.localStorage, nextData);
+    writeBlockedRef.current = false;
+    setPersistenceBlocked(false);
+    setRestoreFailed(false);
+    setData(nextData);
+    if (!saved) onSaveErrorRef.current?.();
   }, [locale]);
 
-  const replaceData = useCallback((nextData: ProjectData) => {
+  const replaceData = useCallback((nextData: ProjectData, allowDiscardUnreadable = false) => {
+    // A normal import must not overwrite unreadable bytes when its recovery
+    // copy failed. The caller may release this lock only after an explicit
+    // destructive confirmation (examples already have one; imports will too).
+    if (!writeBlockedRef.current || allowDiscardUnreadable) {
+      const saved = saveStoredProject(window.localStorage, nextData);
+      if (!saved) onSaveErrorRef.current?.();
+      if (saved) {
+        writeBlockedRef.current = false;
+        setPersistenceBlocked(false);
+        setRestoreFailed(false);
+      }
+    }
     setData(nextData);
   }, []);
 
   return useMemo(() => ({
     data,
+    restoreFailed,
+    persistenceBlocked,
     updateData,
     replaceData,
     addEpisode,
@@ -167,6 +231,8 @@ export function useProjectStore(onSaveError?: () => void) {
     removeSeason,
   }), [
     data,
+    restoreFailed,
+    persistenceBlocked,
     updateData,
     replaceData,
     addEpisode,

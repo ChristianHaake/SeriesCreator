@@ -4,7 +4,7 @@
 
 - Extension: `.seriescreator`
 - Media type: `application/json`
-- Current schema: `1`
+- Current schema: `3`
 - Maximum file size: 25,000,000 bytes
 - Encoding: UTF-8 JSON
 
@@ -31,8 +31,12 @@ customConceptText    optional string, max 5000
 ```
 
 Each season has an ID, a title of at most 60 characters, and 0–100 episodes.
-Each episode has an ID, title, summary, optional image data URL, and optional
-alternative text.
+Each episode has an ID, title, summary, optional `learningDepth` text (max
+5,000 characters), optional image data URL, optional alternative text, and up
+to 20 optional content blocks. A text block has an ID, an optional title (max
+100 characters), and body text (max 5,000 characters). An image block has an
+ID, validated image data URL, alternative text, and an optional caption (max
+250 characters).
 
 ## Images
 
@@ -48,8 +52,11 @@ discarded during normalization.
 
 ## Compatibility
 
-- Files without `schemaVersion` are treated as legacy schema 1 only after full
-  normalization.
+- Schema-1 and schema-2 files (and files without `schemaVersion`) are migrated
+  to schema 3 during full normalization. The migration preserves existing
+  episode data and leaves missing optional fields unset.
+- Older SeriesCreator versions reject newer schema versions instead of loading
+  and silently dropping episode fields.
 - Future schema versions are rejected.
 - Invalid season or episode shapes reject the complete import.
 - Unknown fields are discarded.

@@ -1,9 +1,28 @@
+export interface TextContentBlock {
+  id: string;
+  type: 'text';
+  title?: string;
+  body: string;
+}
+
+export interface ImageContentBlock {
+  id: string;
+  type: 'image';
+  imageUrl: string;
+  altText: string;
+  caption?: string;
+}
+
+export type EpisodeContentBlock = TextContentBlock | ImageContentBlock;
+
 export interface Episode {
   id: string;
   title: string;
   summary: string;
+  learningDepth?: string;
   thumbnailUrl?: string; // Optional image URL or base64
   altText?: string; // Alt text for accessibility
+  contentBlocks?: EpisodeContentBlock[];
 }
 
 export interface Season {
@@ -71,7 +90,7 @@ const initialProjectText: Record<InitialLocale, {
 export function createInitialProjectData(locale: InitialLocale = 'de'): ProjectData {
   const text = initialProjectText[locale];
   return {
-    schemaVersion: 1,
+    schemaVersion: 3,
     title: text.title,
     author: "",
     description: text.description,

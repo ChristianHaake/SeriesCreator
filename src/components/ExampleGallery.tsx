@@ -14,17 +14,25 @@ export function ExampleGallery({ examples, onChoose, onClose }: Props) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
+  const restoreFocusTimerRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
-    previousFocusRef.current =
-      document.activeElement instanceof HTMLElement
-        ? document.activeElement
-        : null;
+    // A restore queued by a previous cleanup would land while the dialog is
+    // still open (StrictMode runs mount → cleanup → mount in development) and
+    // pull focus back out to the trigger.
+    window.clearTimeout(restoreFocusTimerRef.current);
+
+    const active = document.activeElement;
+    // Only remember focus from outside the dialog, so the re-run above does not
+    // record the close button as the element to return to.
+    if (active instanceof HTMLElement && !dialogRef.current?.contains(active)) {
+      previousFocusRef.current = active;
+    }
     closeButtonRef.current?.focus();
 
     return () => {
       const previousFocus = previousFocusRef.current;
-      window.setTimeout(() => previousFocus?.focus(), 0);
+      restoreFocusTimerRef.current = window.setTimeout(() => previousFocus?.focus(), 0);
     };
   }, []);
 

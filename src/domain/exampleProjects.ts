@@ -1,4 +1,4 @@
-import type { ProjectData } from '../types';
+import type { EpisodeContentBlock, ProjectData } from '../types';
 import { PROJECT_SCHEMA_VERSION } from './projectCodec';
 
 type ExampleLocale = 'de' | 'en';
@@ -18,6 +18,10 @@ export interface ExampleProject {
   imagePrompts: string[];
   project: ProjectData;
 }
+
+// A valid fallback keeps the bundled project data importable before the gallery
+// replaces content images with the corresponding local example JPEG.
+const exampleContentImagePlaceholder = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLq7wAAAABJRU5ErkJggg==';
 
 function climateProject(locale: ExampleLocale): ProjectData {
   if (locale === 'en') {
@@ -335,9 +339,121 @@ function weimarProject(locale: ExampleLocale): ProjectData {
   };
 }
 
+const learningDepthByLocale: Record<ExampleLocale, Record<string, string>> = {
+  de: {
+    'klima-ep-strom': 'Kernaussage: Der Stromverbrauch hängt nicht nur von sichtbaren Geräten ab, sondern auch von Standby-Zeiten und Nutzungsroutinen. Belege: Messwerte vergleichen, Verbrauch in Kilowattstunden berechnen und Einsparpotenziale begründen.',
+    'klima-ep-waerme': 'Leitfrage: Welche baulichen und alltäglichen Faktoren beeinflussen den Wärmeverlust? Die Temperaturdaten müssen nach Raum, Zeit und Lüftungsverhalten ausgewertet werden, bevor Maßnahmen vorgeschlagen werden.',
+    'klima-ep-mensa': 'Kernaussage: Die Klimabilanz von Essen umfasst Produktion, Transport und Verschwendung. Die Klasse bewertet regionale Alternativen nicht pauschal, sondern anhand erhobener Mengen und nachvollziehbarer Kriterien.',
+    'klima-ep-daten': 'Fachliche Vertiefung: Aus Beobachtungen werden erst durch Diagramme, Vergleichswerte und Quellen belastbare Argumente. Kostenangaben und Interviews müssen als unterschiedliche Belegarten eingeordnet werden.',
+    'klima-ep-klimarat': 'Leitfrage: Wie werden Zielkonflikte zwischen Kosten, Komfort, Fairness und Klimaschutz entschieden? Die Episode macht sichtbar, dass eine begründete Entscheidung Gegenargumente berücksichtigt.',
+    'klima-ep-montag': 'Kernaussage: Ein Handlungsplan braucht Prioritäten, Zuständigkeiten und überprüfbare Kriterien. Die Klasse unterscheidet kurzfristig umsetzbare Routinen von Maßnahmen, die weitere Entscheidungen erfordern.',
+    'weimar-ep-verfassung': 'Kernaussage: Die Verfassung eröffnete demokratische Beteiligung, enthielt aber auch Spannungen zwischen Parlament, Reichspräsident und Grundrechten. Die Episode ordnet Quellen in den Übergang vom Kaiserreich zur Republik ein.',
+    'weimar-ep-krise': 'Fachliche Vertiefung: Hyperinflation veränderte Alltag und Vertrauen, traf Gruppen aber unterschiedlich. Die Lernenden prüfen, was eine Quelle tatsächlich belegt und wie wirtschaftliche Krisen politisch genutzt wurden.',
+    'weimar-ep-kultur': 'Leitfrage: Woran zeigt sich Modernisierung im Alltag? Kultur, Rollenbilder und Stadtleben werden als unterschiedliche Perspektiven betrachtet; Fortschritt und Konflikt dürfen nicht zu einer einzigen Erzählung vereinfacht werden.',
+    'weimar-ep-propaganda': 'Kernaussage: Plakate und Zeitungen sind interessengeleitete Quellen. Bildsprache, Zielgruppen und ausgelöste Gefühle müssen analysiert werden, bevor ihre historische Aussagekraft bewertet wird.',
+    'weimar-ep-wahl': 'Fachliche Vertiefung: Wahlergebnisse erklären politische Entwicklungen nicht allein. Die Episode verbindet Daten mit Gewalt, Präsidialkabinetten und den eingeschränkten Möglichkeiten parlamentarischer Kompromisse.',
+    'weimar-ep-frage': 'Leitfrage: Welche Ursachen waren strukturell, welche Entscheidungen waren vermeidbar? Die Debatte verlangt eine quellenbasierte Bewertung und unterscheidet Erklären von nachträglicher Schuldzuweisung.',
+  },
+  en: {
+    'climate-ep-electricity': 'Key idea: Electricity use depends on visible devices, standby time, and routines. Evidence: compare measurements, calculate kilowatt-hours, and justify savings potential.',
+    'climate-ep-heat': 'Guiding question: Which building conditions and everyday routines influence heat loss? Temperature data must be compared by room, time, and ventilation before proposing measures.',
+    'climate-ep-cafeteria': 'Key idea: Food-related emissions include production, transport, and waste. The class evaluates regional options using collected quantities and transparent criteria rather than assumptions.',
+    'climate-ep-data': 'Academic deepening: Observations become reliable arguments only through charts, comparison values, and sources. Cost estimates and interviews must be distinguished as different kinds of evidence.',
+    'climate-ep-council': 'Guiding question: How should conflicts between cost, comfort, fairness, and climate protection be decided? A justified decision addresses counterarguments.',
+    'climate-ep-monday': 'Key idea: An action plan needs priorities, responsibilities, and reviewable criteria. The class distinguishes immediate routines from measures that require further decisions.',
+    'weimar-ep-constitution': 'Key idea: The constitution enabled democratic participation but also created tensions between parliament, the president, and rights. Sources are placed in the transition from empire to republic.',
+    'weimar-ep-crisis': 'Academic deepening: Hyperinflation changed everyday life and trust, but affected groups differently. Learners examine what a source proves and how crises were used politically.',
+    'weimar-ep-culture': 'Guiding question: How did modernisation become visible in everyday life? Culture, gender roles, and city life are treated as different perspectives rather than one simple progress narrative.',
+    'weimar-ep-propaganda': 'Key idea: Posters and newspapers are sources shaped by interests. Their imagery, target groups, and emotional appeals must be analysed before judging historical value.',
+    'weimar-ep-election': 'Academic deepening: Election results alone do not explain political change. The episode connects data with violence, presidential cabinets, and shrinking space for parliamentary compromise.',
+    'weimar-ep-question': 'Guiding question: Which causes were structural and which decisions could have been different? The debate requires source-based judgement rather than hindsight blame.',
+  },
+};
+
+const contentBlocksByLocale: Record<ExampleLocale, Record<string, EpisodeContentBlock[]>> = {
+  de: {
+    'klima-ep-strom': [
+      {
+        id: 'klima-strom-befund',
+        type: 'text',
+        title: 'Die Standby-Spur',
+        body: 'Eine Steckdosenleiste kann unsichtbar weiter Strom verbrauchen. Die Klasse vergleicht Messwerte, Nutzungszeiten und Gerätearten, bevor sie Einsparpotenziale begründet.',
+      },
+      {
+        id: 'klima-strom-bild',
+        type: 'image',
+        imageUrl: exampleContentImagePlaceholder,
+        altText: 'Lernende messen den Stromverbrauch von Geräten im Klassenraum.',
+        caption: 'Messwerte machen versteckte Energiefresser sichtbar.',
+      },
+    ],
+    'weimar-ep-verfassung': [
+      {
+        id: 'weimar-verfassung-fragen',
+        type: 'text',
+        title: 'Zwei Perspektiven auf eine Verfassung',
+        body: 'Die Klasse markiert Beteiligungsrechte, die Rolle des Reichspräsidenten und offene Fragen. So wird sichtbar, dass eine Verfassung Chancen und Spannungen zugleich enthalten kann.',
+      },
+      {
+        id: 'weimar-verfassung-bild',
+        type: 'image',
+        imageUrl: exampleContentImagePlaceholder,
+        altText: 'Lernende untersuchen eine Zeitleiste und historische Dokumente zur Weimarer Republik.',
+        caption: 'Die Quellen ordnen den Übergang vom Kaiserreich zur Republik ein.',
+      },
+    ],
+  },
+  en: {
+    'climate-ep-electricity': [
+      {
+        id: 'climate-electricity-finding',
+        type: 'text',
+        title: 'The standby clue',
+        body: 'A power strip can keep using electricity invisibly. The class compares measurements, usage times, and device types before justifying saving potential.',
+      },
+      {
+        id: 'climate-electricity-image',
+        type: 'image',
+        imageUrl: exampleContentImagePlaceholder,
+        altText: 'Learners measure the electricity use of classroom devices.',
+        caption: 'Measurements reveal hidden energy drains.',
+      },
+    ],
+    'weimar-ep-constitution': [
+      {
+        id: 'weimar-constitution-questions',
+        type: 'text',
+        title: 'Two perspectives on a constitution',
+        body: 'The class marks participation rights, the role of the president, and open questions. This shows that a constitution can contain opportunities and tensions at the same time.',
+      },
+      {
+        id: 'weimar-constitution-image',
+        type: 'image',
+        imageUrl: exampleContentImagePlaceholder,
+        altText: 'Learners examine a timeline and historical documents about the Weimar Republic.',
+        caption: 'The sources place the transition from empire to republic in context.',
+      },
+    ],
+  },
+};
+
+function withLearningDepth(project: ProjectData, locale: ExampleLocale): ProjectData {
+  return {
+    ...project,
+    seasons: project.seasons.map((season) => ({
+      ...season,
+      episodes: season.episodes.map((episode) => ({
+        ...episode,
+        learningDepth: learningDepthByLocale[locale][episode.id],
+        contentBlocks: contentBlocksByLocale[locale][episode.id],
+      })),
+    })),
+  };
+}
+
 export function getExampleProjects(locale: ExampleLocale): ExampleProject[] {
-  const climate = climateProject(locale);
-  const weimar = weimarProject(locale);
+  const climate = withLearningDepth(climateProject(locale), locale);
+  const weimar = withLearningDepth(weimarProject(locale), locale);
 
   if (locale === 'en') {
     return [
@@ -351,6 +467,7 @@ export function getExampleProjects(locale: ExampleLocale): ExampleProject[] {
           'A complete school example with measured data, interviews, two seasons, six episodes, reflection, sources, image prompts, and social copy.',
         featureHighlights: [
           'Two seasons with ordered episodes',
+          'Text and image content blocks in key episodes',
           'Author and automatically calculated 100% project status',
           'Concept and source tabs filled',
           'Image prompts and social media kit in the custom section',
@@ -374,6 +491,7 @@ export function getExampleProjects(locale: ExampleLocale): ExampleProject[] {
           'A historical investigation series with archival sources, political debate, media analysis, image prompts, and social copy.',
         featureHighlights: [
           'Historical chronology across two seasons',
+          'Text and image content blocks for source analysis',
           'Author and automatically calculated 100% project status',
           'Source criticism and debate in episode summaries',
           'Concept tab includes reusable social media material',
@@ -401,6 +519,7 @@ export function getExampleProjects(locale: ExampleLocale): ExampleProject[] {
         'Ein vollständiges Schulbeispiel mit Messdaten, Interviews, zwei Staffeln, sechs Episoden, Reflexion, Quellen, Bildprompts und Social-Media-Text.',
       featureHighlights: [
         'Zwei Staffeln mit sortierten Episoden',
+        'Text- und Bild-Inhaltsblöcke in zentralen Episoden',
         'Urheber:in und automatisch berechneter Projektstatus von 100 %',
         'Konzept- und Quellenbereiche ausgefüllt',
         'Bildprompts und Social-Media-Kit in der eigenen Rubrik',
@@ -424,6 +543,7 @@ export function getExampleProjects(locale: ExampleLocale): ExampleProject[] {
         'Eine historische Recherche-Serie mit Archivquellen, politischer Debatte, Medienanalyse, Bildprompts und Social-Media-Text.',
       featureHighlights: [
         'Historische Chronologie über zwei Staffeln',
+        'Text- und Bild-Inhaltsblöcke zur Quellenanalyse',
         'Urheber:in und automatisch berechneter Projektstatus von 100 %',
         'Quellenkritik und Debatte in Episoden sichtbar',
         'Konzept-Tab enthält wiederverwendbares Social-Media-Material',
@@ -441,5 +561,5 @@ export function getExampleProjects(locale: ExampleLocale): ExampleProject[] {
 }
 
 export function createSchoolEnergyExampleProject(locale: ExampleLocale): ProjectData {
-  return climateProject(locale);
+  return withLearningDepth(climateProject(locale), locale);
 }

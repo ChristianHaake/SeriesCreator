@@ -1,5 +1,3 @@
-# Datenschutz
-
 Stand: 9. Juli 2026
 
 ## 1. Verantwortlicher

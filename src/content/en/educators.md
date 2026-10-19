@@ -32,6 +32,17 @@ In the Netflix Method, learners summarize a topic (e.g., a historical era, a nov
 
 **Reflection:** How can abstract processes be packaged excitingly as a series for a broad audience?
 
+## Assessing academic deepening
+
+The short description explains what an episode is about. The **academic deepening** shows what knowledge it conveys and how it contributes to the overall topic. Assess primarily:
+
+- **Factual accuracy:** Claims and subject terminology are correct.
+- **Evidence and examples:** Key ideas are supported by sources, data, quotations, or traceable examples.
+- **Selection and weighting:** The episode focuses on what matters instead of listing as much content as possible.
+- **Connection to the whole series:** The deepening explains why the episode appears at this point and how it connects to others.
+
+Visual design and streaming aesthetics may support the work, but do not replace academic reasoning.
+
 ## Privacy and Copyright
 
 User content is processed locally in the browser. Nevertheless:

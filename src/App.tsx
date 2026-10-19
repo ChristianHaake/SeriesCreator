@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, type KeyboardEvent } from 'react';
+import { useState, useEffect, useMemo, useRef, lazy, Suspense, type KeyboardEvent } from 'react';
 import { useProjectStore } from './store/useProjectStore';
 import { Presentation } from 'lucide-react';
 import { EditorSidebar } from './components/EditorSidebar';
@@ -7,12 +7,12 @@ import { PresentationMode } from './components/PresentationMode';
 import { PrintLayout } from './components/PrintLayout';
 
 import { AppHeader } from './components/AppHeader';
+import type { ProjectImportFailure } from './components/AppHeader';
 import { AppFooter } from './components/AppFooter';
 import { ExampleGallery } from './components/ExampleGallery';
+import { ConfirmDialog } from './components/ConfirmDialog';
 import { useTranslation } from './i18n';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import { contentPages, type ContentPath, isContentPath } from './content';
+import { contentPages, isContentPath } from './content';
 import {
   isProjectFileSizeWithinLimit,
   makeExportBaseName,
@@ -26,39 +26,40 @@ import { attachExampleImages } from './domain/exampleImageAssets';
 import { displayCompletion } from './domain/completion';
 import './index.css';
 
-function ContentPage({ pathname }: { pathname: ContentPath }) {
-  const { locale, t } = useTranslation();
-  const page = contentPages[locale][pathname];
-  
-  return (
-    <main className="content-page">
-      <a href="/" className="content-page__back">{t.backToApp}</a>
-      <div className="markdown-content">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{page.content}</ReactMarkdown>
-      </div>
-    </main>
-  );
-}
+// Loaded on demand so the markdown renderer stays out of the editor bundle.
+const ContentPage = lazy(() => import('./components/ContentPage'));
 
 type PreviewTab = 'EPISODEN' | 'DETAILS' | 'QUELLEN';
 type MobilePanel = 'editor' | 'preview';
 type StatusTone = 'success' | 'error' | 'info';
 type AppStatus = { message: string; tone: StatusTone } | null;
+type PendingAction = { message: string; confirmLabel: string; run: () => void };
 const previewTabOrder: PreviewTab[] = ['EPISODEN', 'DETAILS', 'QUELLEN'];
 
 function App() {
   const { t, locale } = useTranslation();
+  // Import validation finishes asynchronously. Read translations at completion
+  // time so a language switch while the worker is running cannot leave the
+  // replacement confirmation or success status in the previous language.
+  const latestTranslationRef = useRef(t);
+  useEffect(() => {
+    latestTranslationRef.current = t;
+  }, [t]);
   const [status, setStatus] = useState<AppStatus>(null);
+  const [importStatus, setImportStatus] = useState<'importing' | ProjectImportFailure | null>(null);
   const store = useProjectStore(() =>
     setStatus({ message: t.msgSaveFailed, tone: 'error' }),
   );
-  const { data, replaceData, resetData } = store;
+  const { data, replaceData, resetData, restoreFailed, persistenceBlocked } = store;
   const [activeSeasonId, setActiveSeasonId] = useState(data.seasons[0]?.id || '');
   const [activeTab, setActiveTab] = useState<PreviewTab>('EPISODEN');
   const [showPresentation, setShowPresentation] = useState(false);
+  const presentationLauncherRef = useRef<HTMLButtonElement>(null);
   const [showExamples, setShowExamples] = useState(false);
   const [currentPath, setCurrentPath] = useState(window.location.pathname.replace(/\/+$/, "") || "/");
   const [mobilePanel, setMobilePanel] = useState<MobilePanel>('editor');
+  // Pending destructive action awaiting confirmation in the dialog.
+  const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
   const examples = useMemo(() => getExampleProjects(locale), [locale]);
 
   useEffect(() => {
@@ -67,11 +68,51 @@ function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
+  // Keep the tab title on the current page and the description in the current
+  // language. The og:/twitter: tags stay static — social scrapers read the
+  // served HTML and never run this.
+  useEffect(() => {
+    const page = isContentPath(currentPath) ? contentPages[locale][currentPath] : null;
+    document.title = page
+      ? `${page.title} · SeriesCreator`
+      : currentPath === '/' ? 'SeriesCreator' : `${t.notFoundTitle} · SeriesCreator`;
+    document
+      .querySelector('meta[name="description"]')
+      ?.setAttribute('content', t.metaDescription);
+  }, [currentPath, locale, t.metaDescription, t.notFoundTitle]);
+
+
+  // A saved project that could not be restored is kept under a backup key; say
+  // so, because the editor otherwise looks like it simply started empty. Derived
+  // rather than set in an effect, and superseded by the next real status.
+  const importMessage = importStatus && ({
+    importing: t.msgImporting,
+    notAnObject: t.importErrorNotAnObject,
+    unsupportedSchema: t.importErrorUnsupportedSchema,
+    invalidSeasons: t.importErrorInvalidSeasons,
+    seasonCount: t.importErrorSeasonCount,
+    invalidSeasonContent: t.importErrorInvalidSeasonContent,
+    workerTimeout: t.importErrorWorkerTimeout,
+    tooLarge: t.importErrorTooLarge,
+    invalidJson: t.importErrorInvalidJson,
+    readFailed: t.msgImportReadFailed,
+  }[importStatus]);
+  const visibleStatus: AppStatus = status
+    ?? (importMessage ? { message: importMessage, tone: importStatus === 'importing' ? 'info' : 'error' } : null)
+    ?? (restoreFailed
+      ? {
+          message: persistenceBlocked
+            ? t.msgProjectUnreadableBackupFailed
+            : t.msgProjectUnreadable,
+          tone: 'error',
+        }
+      : null);
 
   const activeSeason = data.seasons.find(s => s.id === activeSeasonId) || data.seasons[0];
   const completion = displayCompletion(data);
 
   const showStatus = (message: string, tone: StatusTone = 'success') => {
+    setImportStatus(null);
     setStatus({ message, tone });
   };
 
@@ -133,10 +174,10 @@ function App() {
     const example = examples.find((item) => item.id === id);
     if (!example) return;
 
-    if (window.confirm(t.confirmLoadExample)) {
+    const loadExample = async () => {
       try {
         const exampleProject = await attachExampleImages(example.project, example.id);
-        replaceData(exampleProject);
+        replaceData(exampleProject, true);
         setActiveSeasonId(exampleProject.seasons[0]?.id || '');
         setActiveTab('EPISODEN');
         setMobilePanel('preview');
@@ -145,18 +186,52 @@ function App() {
       } catch {
         showStatus(t.msgExampleLoadFailed, 'error');
       }
-    }
+    };
+
+    setPendingAction({
+      message: t.confirmLoadExample,
+      confirmLabel: t.btnLoadExample,
+      run: () => { void loadExample(); },
+    });
+  };
+
+  const closePresentation = () => {
+    setShowPresentation(false);
+    requestAnimationFrame(() => presentationLauncherRef.current?.focus());
   };
 
   if (showPresentation) {
-    return <PresentationMode data={data} onClose={() => setShowPresentation(false)} />;
+    return <PresentationMode data={data} onClose={closePresentation} />;
+  }
+
+  // Anything that is neither the editor nor a content route is a dead link.
+  if (currentPath !== '/' && !isContentPath(currentPath)) {
+    return (
+      <div className="app-shell app-shell--content-route">
+        <a className="skip-link" href="#main-content">{t.skipToContent}</a>
+        <AppHeader />
+        <main id="main-content" tabIndex={-1} className="content-page">
+          <div className="markdown-content">
+            <h1>{t.notFoundTitle}</h1>
+            <p>{t.notFoundBody}</p>
+            <p><a className="content-page__back" href="/">{t.backToApp}</a></p>
+          </div>
+        </main>
+        <AppFooter />
+      </div>
+    );
   }
 
   if (isContentPath(currentPath)) {
     return (
       <div className="app-shell app-shell--content-route">
+        <a className="skip-link" href="#main-content">{t.skipToContent}</a>
         <AppHeader />
-        <ContentPage pathname={currentPath} />
+        {/* The shell is already painted, so the fallback only fills the article
+            area for the moment the chunk takes to arrive. */}
+        <Suspense fallback={<main id="main-content" tabIndex={-1} className="content-page" aria-busy="true" />}>
+          <ContentPage pathname={currentPath} />
+        </Suspense>
         <AppFooter />
       </div>
     );
@@ -164,7 +239,8 @@ function App() {
 
   return (
     <div className={`app-shell app-shell--mobile-${mobilePanel}`}>
-      <AppHeader 
+      <a className="skip-link" href="#editor-panel">{t.skipToEditor}</a>
+      <AppHeader
         onExport={() => {
           try {
             if (!isProjectFileSizeWithinLimit(data)) {
@@ -174,7 +250,7 @@ function App() {
             const blob = new Blob([serializeProject(data)], {
               type: PROJECT_FILE_MIME_TYPE,
             });
-            downloadBlob(blob, makeProjectFilename(data.title));
+            downloadBlob(blob, makeProjectFilename(data.title, t.projectFileFallbackName));
             showStatus(t.msgExportSuccess, 'success');
           } catch {
             showStatus(t.msgExportFailed, 'error');
@@ -182,18 +258,40 @@ function App() {
         }}
         onHtmlExport={handleHtmlExport}
         onPrint={handleExport}
-        onImport={(importedData) => {
-          replaceData(importedData);
-          setActiveSeasonId(importedData.seasons[0]?.id || '');
-          showStatus(t.msgImportSuccess, 'success');
+        onImportValidated={(importedData) => {
+          const importTranslation = latestTranslationRef.current;
+          setImportStatus(null);
+          setPendingAction({
+            message: importTranslation.confirmImport,
+            confirmLabel: importTranslation.btnLoadImport,
+            run: () => {
+              replaceData(importedData, true);
+              setActiveSeasonId(importedData.seasons[0]?.id || '');
+              showStatus(latestTranslationRef.current.msgImportSuccess, 'success');
+            },
+          });
         }}
+        onImportStart={() => { setStatus(null); setImportStatus('importing'); }}
+        onImportFailure={(failure) => { setStatus(null); setImportStatus(failure); }}
         onShowExamples={() => setShowExamples(true)}
-        onReset={() => {
-          if (window.confirm(t.confirmReset)) {
-            resetData();
-          }
-        }}
+        onReset={() => setPendingAction({
+          message: t.confirmReset,
+          confirmLabel: t.btnDelete,
+          run: resetData,
+        })}
       />
+      {pendingAction && (
+        <ConfirmDialog
+          message={pendingAction.message}
+          confirmLabel={pendingAction.confirmLabel}
+          destructive
+          onConfirm={() => {
+            pendingAction.run();
+            setPendingAction(null);
+          }}
+          onCancel={() => setPendingAction(null)}
+        />
+      )}
       {showExamples && (
         <ExampleGallery
           examples={examples}
@@ -202,11 +300,11 @@ function App() {
         />
       )}
       <div
-        className={`app-status${status ? ` app-status--${status.tone}` : ''}`}
+        className={`app-status${visibleStatus ? ` app-status--${visibleStatus.tone}` : ''}`}
         role="status"
         aria-live="polite"
       >
-        {status?.message}
+        {visibleStatus?.message}
       </div>
       <div className="mobile-panel-switch" role="group" aria-label={t.mobilePanelSwitchLabel}>
         <button
@@ -237,6 +335,12 @@ function App() {
           episodesLabel={t.tabEpisodes}
           noCoverLabel={t.noCover}
           noImageLabel={t.noImage}
+          episodeLearningDepthLabel={t.episodeLearningDepthLabel}
+          reflectionLabel={t.lblReflection}
+          noReflectionLabel={t.noReflection}
+          customSectionLabel={t.lblCustomSection}
+          sourcesLabel={t.lblSources}
+          noSourcesLabel={t.noSources}
         />
 
       {/* Sidebar Editor */}
@@ -247,14 +351,16 @@ function App() {
       />
 
         {/* Main Preview */}
-        <main className="preview-main theme-streaming">
-        <header className="preview-header">
+        <main className="preview-main theme-streaming" aria-label={t.mobilePanelPreview}>
+        {/* Decorative streaming chrome: it imitates a nav bar but navigates
+            nowhere, so it is hidden from assistive tech like the cover art. */}
+        <header className="preview-header" aria-hidden="true">
           <div className="preview-header__brand">{data.previewBrand || 'SeriesCreator'}</div>
-          <nav className="preview-header__nav">
+          <div className="preview-header__nav">
             <span>{t.home}</span>
             <strong>{t.series}</strong>
             <span>{data.previewCategory || t.categoryFallback}</span>
-          </nav>
+          </div>
         </header>
 
         <section className="streaming-hero" style={{ backgroundImage: data.coverUrl ? `url(${data.coverUrl})` : 'none', backgroundColor: data.coverUrl ? 'transparent' : '#222' }}>
@@ -273,7 +379,7 @@ function App() {
             </p>
 
             <div className="streaming-actions">
-              <button type="button" className="btn-play" onClick={() => setShowPresentation(true)}>
+              <button ref={presentationLauncherRef} type="button" className="btn-play" onClick={() => setShowPresentation(true)}>
                 <Presentation aria-hidden="true" size={24} strokeWidth={2.5} /> {t.btnPlay}
               </button>
             </div>

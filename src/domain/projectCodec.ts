@@ -1,14 +1,30 @@
 import { fieldLimits, resourceLimits } from './constraints';
-import type { Episode, ProjectData, Season } from '../types';
+import type { Episode, EpisodeContentBlock, ProjectData, Season } from '../types';
 import { initialProjectData } from '../types';
+import { isImageWithinPixelLimit, parseImageDataUrlDimensions } from './imageDimensions';
 
-export const PROJECT_SCHEMA_VERSION = 1;
+export const PROJECT_SCHEMA_VERSION = 3;
 export const PROJECT_FILE_EXTENSION = 'seriescreator';
 export const PROJECT_FILE_MIME_TYPE = 'application/json';
 
+/**
+ * Why a code and not a message: validation runs inside projectImport.worker.ts
+ * and the result crosses a postMessage boundary, where a code survives and a
+ * bound translator does not. The UI maps these to the current locale.
+ */
+export type ProjectParseError =
+  | 'notAnObject'
+  | 'unsupportedSchema'
+  | 'invalidSeasons'
+  | 'seasonCount'
+  | 'invalidSeasonContent'
+  | 'workerTimeout'
+  | 'tooLarge'
+  | 'invalidJson';
+
 export type ProjectParseResult =
   | { ok: true; data: ProjectData }
-  | { ok: false; message: string };
+  | { ok: false; code: ProjectParseError };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -25,17 +41,51 @@ function limitText(value: unknown, limit: number, fallback = '') {
 function asOptionalImageUrl(value: unknown) {
   if (typeof value !== 'string' || value.length === 0) return undefined;
   if (value.length > resourceLimits.dataUrlLength) return undefined;
-  // Validate the full payload: prefix AND a clean base64 body. Checking only the
-  // prefix would let stray characters (e.g. `")`) survive into inline style url(...).
-  if (!/^data:image\/(png|jpeg|jpg|webp);base64,[A-Za-z0-9+/]+={0,2}$/i.test(value)) {
-    return undefined;
-  }
-  return value;
+  const dimensions = parseImageDataUrlDimensions(value);
+  return dimensions && isImageWithinPixelLimit(dimensions, resourceLimits.maxImageInputPixels)
+    ? value
+    : undefined;
 }
 
 function asOptionalPercentage(value: unknown) {
   if (typeof value !== 'number' || !Number.isFinite(value)) return undefined;
   return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+function normalizeContentBlocks(value: unknown, episodeIndex: number): EpisodeContentBlock[] | null | undefined {
+  if (value === undefined) return undefined;
+  if (!Array.isArray(value) || value.length > resourceLimits.maxContentBlocksPerEpisode) return null;
+
+  const blocks = value.map((block, blockIndex): EpisodeContentBlock | null => {
+    if (!isRecord(block) || typeof block.type !== 'string') return null;
+    const id = limitText(block.id, 80) || `block_${episodeIndex + 1}_${blockIndex + 1}`;
+    if (block.type === 'text') {
+      if (typeof block.body !== 'string') return null;
+      return {
+        id,
+        type: 'text',
+        title: limitText(block.title, fieldLimits.contentBlockTitle) || undefined,
+        body: limitText(block.body, fieldLimits.contentBlockBody),
+      };
+    }
+    if (block.type === 'image') {
+      const imageUrl = asOptionalImageUrl(block.imageUrl);
+      if (!imageUrl || typeof block.altText !== 'string') return null;
+      return {
+        id,
+        type: 'image',
+        imageUrl,
+        altText: limitText(block.altText, fieldLimits.altText),
+        caption: limitText(block.caption, fieldLimits.contentBlockCaption) || undefined,
+      };
+    }
+    return null;
+  });
+  if (blocks.some((block) => block === null)) return null;
+  const normalizedBlocks = blocks as EpisodeContentBlock[];
+  return new Set(normalizedBlocks.map((block) => block.id)).size === normalizedBlocks.length
+    ? normalizedBlocks
+    : null;
 }
 
 function normalizeEpisode(value: unknown, index: number): Episode | null {
@@ -44,16 +94,20 @@ function normalizeEpisode(value: unknown, index: number): Episode | null {
     return null;
   }
 
+  const contentBlocks = normalizeContentBlocks(value.contentBlocks, index);
+  if (contentBlocks === null) return null;
   return {
     id: limitText(value.id, 80) || `ep_${index + 1}`,
     title: limitText(value.title, fieldLimits.episodeTitle) || 'Neue Episode',
     summary: limitText(value.summary, fieldLimits.episodeSummary),
+    learningDepth: limitText(value.learningDepth, fieldLimits.episodeLearningDepth) || undefined,
     thumbnailUrl: asOptionalImageUrl(value.thumbnailUrl),
     altText: limitText(value.altText, fieldLimits.altText) || undefined,
+    contentBlocks,
   };
 }
 
-function normalizeSeason(value: unknown, index: number): Season | null {
+function normalizeSeason(value: unknown, index: number, seasonFallback: string): Season | null {
   if (!isRecord(value) || !Array.isArray(value.episodes)) return null;
   if (typeof value.title !== 'string') return null;
   if (!Array.isArray(value.episodes)) return null;
@@ -64,40 +118,56 @@ function normalizeSeason(value: unknown, index: number): Season | null {
 
   return {
     id: limitText(value.id, 80) || `s_${index + 1}`,
-    title: limitText(value.title, fieldLimits.seasonTitle) || `Staffel ${index + 1}`,
+    title: limitText(value.title, fieldLimits.seasonTitle) || `${seasonFallback} ${index + 1}`,
     episodes: episodes as Episode[],
   };
 }
 
-export function normalizeProject(value: unknown): ProjectParseResult {
+export function normalizeProject(value: unknown, seasonFallback = 'Season'): ProjectParseResult {
   if (!isRecord(value)) {
-    return { ok: false, message: 'Projektdatei enthält kein gültiges Objekt.' };
+    return { ok: false, code: 'notAnObject' };
   }
 
-  const rawVersion = value.schemaVersion;
-  if (typeof rawVersion === 'number' && rawVersion > PROJECT_SCHEMA_VERSION) {
+  const rawVersion = value.schemaVersion === undefined ? 1 : value.schemaVersion;
+  if (
+    typeof rawVersion !== 'number' ||
+    !Number.isInteger(rawVersion) ||
+    rawVersion < 1 ||
+    rawVersion > PROJECT_SCHEMA_VERSION
+  ) {
     return {
       ok: false,
-      message: 'Projektdatei wurde mit einer neueren SeriesCreator-Version gespeichert.',
+      code: 'unsupportedSchema',
     };
   }
 
   if (!Array.isArray(value.seasons)) {
-    return { ok: false, message: 'Projektdatei enthält keine gültigen Staffeln.' };
+    return { ok: false, code: 'invalidSeasons' };
   }
 
   if (
     value.seasons.length < resourceLimits.minSeasons ||
     value.seasons.length > resourceLimits.maxSeasons
   ) {
-    return { ok: false, message: 'Projektdatei enthält zu viele oder keine Staffeln.' };
+    return { ok: false, code: 'seasonCount' };
   }
 
-  const seasons = value.seasons.map(normalizeSeason);
+  const seasons = value.seasons.map((season, index) => normalizeSeason(season, index, seasonFallback));
   if (seasons.some((season) => season === null)) {
-    return { ok: false, message: 'Projektdatei enthält ungültige Staffeln oder Episoden.' };
+    return { ok: false, code: 'invalidSeasonContent' };
+  }
+  const normalizedSeasons = seasons as Season[];
+  const seasonIds = new Set(normalizedSeasons.map((season) => season.id));
+  const episodeIds = new Set(normalizedSeasons.flatMap((season) => season.episodes.map((episode) => episode.id)));
+  if (
+    seasonIds.size !== normalizedSeasons.length
+    || episodeIds.size !== normalizedSeasons.reduce((count, season) => count + season.episodes.length, 0)
+  ) {
+    return { ok: false, code: 'invalidSeasonContent' };
   }
 
+  // Schema 1 projects did not contain learningDepth. Normalizing the optional
+  // value below is the explicit forward migration to schema 2.
   const data: ProjectData = {
     ...initialProjectData,
     schemaVersion: PROJECT_SCHEMA_VERSION,
@@ -124,7 +194,7 @@ export function normalizeProject(value: unknown): ProjectParseResult {
     ageRating: limitText(value.ageRating, fieldLimits.ageRating, initialProjectData.ageRating),
     genre: limitText(value.genre, fieldLimits.genre, initialProjectData.genre),
     cast: limitText(value.cast, fieldLimits.cast, initialProjectData.cast),
-    seasons: seasons as Season[],
+    seasons: normalizedSeasons,
     reflection: limitText(value.reflection, fieldLimits.reflection) || undefined,
     sources: limitText(value.sources, fieldLimits.sources) || undefined,
     customConceptTitle:
@@ -136,15 +206,15 @@ export function normalizeProject(value: unknown): ProjectParseResult {
   return { ok: true, data };
 }
 
-export function parseProjectJson(text: string): ProjectParseResult {
+export function parseProjectJson(text: string, seasonFallback = 'Season'): ProjectParseResult {
   if (new Blob([text]).size > resourceLimits.projectFileBytes) {
-    return { ok: false, message: 'Projektdatei ist zu groß.' };
+    return { ok: false, code: 'tooLarge' };
   }
 
   try {
-    return normalizeProject(JSON.parse(text));
+    return normalizeProject(JSON.parse(text), seasonFallback);
   } catch {
-    return { ok: false, message: 'Projektdatei ist kein gültiges JSON.' };
+    return { ok: false, code: 'invalidJson' };
   }
 }
 
@@ -175,6 +245,6 @@ export function makeExportBaseName(title: string, fallback: string) {
   );
 }
 
-export function makeProjectFilename(title: string) {
-  return `${makeExportBaseName(title, 'SeriesCreator-Projekt')}.${PROJECT_FILE_EXTENSION}`;
+export function makeProjectFilename(title: string, fallback = 'SeriesCreator-Project') {
+  return `${makeExportBaseName(title, fallback)}.${PROJECT_FILE_EXTENSION}`;
 }

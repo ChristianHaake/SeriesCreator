@@ -5,7 +5,18 @@ import App from './App';
 import { getExampleProjects } from './domain/exampleProjects';
 import { calculateProjectCompletion, displayCompletion } from './domain/completion';
 import { parseProjectJson, serializeProject } from './domain/projectCodec';
+import { initialProjectData } from './types';
 import { LocaleProvider } from './i18n';
+
+// Episode fields live in a dialog opened from the list row.
+async function openEpisode(user: ReturnType<typeof userEvent.setup>, index = 0) {
+  await user.click(screen.getAllByRole('button', { name: /^Episode \d+:/ })[index]);
+}
+
+// Secondary actions live behind the header's overflow menu; open it first.
+async function openHeaderMenu(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByRole('button', { name: 'More actions' }));
+}
 
 function renderApp(path = '/') {
   window.history.pushState({}, '', path);
@@ -18,11 +29,30 @@ function renderApp(path = '/') {
   );
 }
 
+class DeferredImportWorker {
+  static latest: DeferredImportWorker | undefined;
+  readonly listeners = new Map<string, EventListener>();
+
+  constructor() {
+    DeferredImportWorker.latest = this;
+  }
+
+  addEventListener(type: string, listener: EventListener) {
+    this.listeners.set(type, listener);
+  }
+
+  postMessage() {}
+
+  terminate() {}
+
+  respond(data: unknown) {
+    this.listeners.get('message')?.({ data } as unknown as Event);
+  }
+}
+
 describe('App', () => {
   beforeEach(() => {
     window.localStorage.clear();
-    vi.spyOn(window, 'alert').mockImplementation(() => undefined);
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
     vi.spyOn(window, 'print').mockImplementation(() => undefined);
     Object.defineProperty(URL, 'createObjectURL', {
       configurable: true,
@@ -43,6 +73,7 @@ describe('App', () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
+    DeferredImportWorker.latest = undefined;
   });
 
   it('renders keyboard-operable preview tabs', async () => {
@@ -56,7 +87,9 @@ describe('App', () => {
 
     expect(backgroundTab).toHaveAttribute('aria-selected', 'true');
     expect(backgroundTab).toHaveFocus();
-    expect(screen.getByText('No project journey or reflections entered yet.')).toBeInTheDocument();
+    expect(
+      within(screen.getByRole('tabpanel')).getByText('No project journey or reflections entered yet.'),
+    ).toBeInTheDocument();
   });
 
   it('closes presentation mode with Escape', async () => {
@@ -64,14 +97,19 @@ describe('App', () => {
     renderApp();
 
     await user.click(screen.getByRole('button', { name: 'Present' }));
-    expect(screen.getByRole('button', { name: 'Close Presentation' })).toBeInTheDocument();
+    const close = screen.getByRole('button', { name: 'Close Presentation' });
+    expect(screen.getByRole('dialog', { name: 'Presentation mode' })).toHaveAttribute('aria-modal', 'true');
+    expect(close).toHaveFocus();
 
     await user.keyboard('{Escape}');
     expect(screen.queryByRole('button', { name: 'Close Presentation' })).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Present' })).toHaveFocus());
   });
 
-  it('uses path routing for the educator link', () => {
+  it('uses path routing for the educator link', async () => {
+    const user = userEvent.setup();
     renderApp();
+    await openHeaderMenu(user);
 
     expect(screen.getByRole('link', { name: 'For Teachers' })).toHaveAttribute(
       'href',
@@ -93,13 +131,81 @@ describe('App', () => {
   it('preserves the draft when reset is cancelled', async () => {
     const user = userEvent.setup();
     renderApp();
-    vi.mocked(window.confirm).mockReturnValueOnce(false);
 
     await user.clear(screen.getByLabelText('Series Title'));
     await user.type(screen.getByLabelText('Series Title'), 'Keep this draft');
+    await openHeaderMenu(user);
     await user.click(screen.getByRole('button', { name: 'New / Clear' }));
 
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+
     expect(screen.getByLabelText('Series Title')).toHaveValue('Keep this draft');
+  });
+
+  it('validates an import before asking whether it may replace the current draft', async () => {
+    const user = userEvent.setup();
+    renderApp();
+    await user.clear(screen.getByLabelText('Series Title'));
+    await user.type(screen.getByLabelText('Series Title'), 'Keep this draft');
+
+    const imported = serializeProject({ ...initialProjectData, title: 'Imported project' });
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]');
+    expect(input).not.toBeNull();
+    await user.upload(input!, new File([imported], 'import.seriescreator', {
+      type: 'application/json',
+    }));
+
+    expect(await screen.findByText('Load this project file? This will replace your current draft.')).toBeInTheDocument();
+    expect(screen.getByLabelText('Series Title')).toHaveValue('Keep this draft');
+
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(screen.getByLabelText('Series Title')).toHaveValue('Keep this draft');
+
+    await user.upload(input!, new File([imported], 'import.seriescreator', {
+      type: 'application/json',
+    }));
+    await user.click(await screen.findByRole('button', { name: 'Load project file' }));
+    expect(screen.getByLabelText('Series Title')).toHaveValue('Imported project');
+  });
+
+  it('uses the current locale when a delayed import finishes', async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal('Worker', DeferredImportWorker);
+    renderApp();
+
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]');
+    expect(input).not.toBeNull();
+    await user.upload(input!, new File([serializeProject(initialProjectData)], 'import.seriescreator', {
+      type: 'application/json',
+    }));
+    await waitFor(() => expect(DeferredImportWorker.latest).toBeDefined());
+
+    await user.click(screen.getByRole('button', { name: 'DE' }));
+    DeferredImportWorker.latest?.respond({ ok: true, data: initialProjectData });
+
+    await screen.findByText('Möchtest du diese Projektdatei laden? Dein aktueller Entwurf wird dadurch ersetzt.');
+    await user.click(screen.getByRole('button', { name: 'Projektdatei laden' }));
+    expect(screen.getByText('Projektdatei wurde geladen.')).toBeInTheDocument();
+  });
+
+  it('confirms episode deletion and announces an episode reorder', async () => {
+    const user = userEvent.setup();
+    renderApp();
+    await user.click(screen.getByRole('button', { name: '2. Episodes' }));
+    await user.click(screen.getByRole('button', { name: 'Add Episode' }));
+    await user.click(screen.getByRole('button', { name: 'Add Episode' }));
+
+    const deleteButtons = screen.getAllByRole('button', { name: /^Delete episode:/ });
+    const rowsBeforeDelete = screen.getAllByRole('button', { name: /^Episode \d+:/ }).length;
+    await user.click(deleteButtons[0]);
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(screen.getAllByRole('button', { name: /^Episode \d+:/ })).toHaveLength(rowsBeforeDelete);
+    await waitFor(() => expect(deleteButtons[0]).toHaveFocus());
+
+    const moveDown = screen.getAllByRole('button', { name: /^Move episode down:/ })[0];
+    await user.click(moveDown);
+    expect(screen.getByText(/is now at position 2\./)).toBeInTheDocument();
   });
 
   it('does not render the dead list action', () => {
@@ -108,11 +214,21 @@ describe('App', () => {
     expect(screen.queryByRole('button', { name: /my list/i })).not.toBeInTheDocument();
   });
 
-  it('renders direct content routes', () => {
+  // The content page is code-split, so it resolves a tick after the shell.
+  it('renders direct content routes', async () => {
     renderApp('/lehrkraefte');
 
-    expect(screen.getByRole('heading', { name: 'The Netflix Method' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'The Netflix Method' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Assessing academic deepening' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /back to app/i })).toHaveAttribute('href', '/');
+  });
+
+  it('renders a not-found page for unknown routes', async () => {
+    renderApp('/definitely-not-a-page');
+
+    expect(await screen.findByRole('heading', { name: 'Page not found' })).toBeInTheDocument();
+    expect(document.title).toBe('Page not found · SeriesCreator');
+    expect(document.querySelector('.editor-sidebar')).toBeNull();
   });
 
   it('adds a season, selects it, and updates the preview metadata', async () => {
@@ -133,9 +249,12 @@ describe('App', () => {
     await user.click(screen.getByRole('button', { name: 'Save' }));
     expect(screen.getByText('The project was successfully downloaded.')).toBeInTheDocument();
 
+    await openHeaderMenu(user);
     await user.click(screen.getByRole('button', { name: 'Download as HTML' }));
     expect(screen.getByText('HTML presentation download has been prepared.')).toBeInTheDocument();
 
+    // The menu closes when an action is chosen, so reopen it for the next one.
+    await openHeaderMenu(user);
     await user.click(screen.getByRole('button', { name: 'Print / Save as PDF' }));
     expect(window.print).toHaveBeenCalled();
     expect(screen.getByText('Print dialog opened. Use it to save as PDF if needed.')).toBeInTheDocument();
@@ -174,8 +293,15 @@ describe('App', () => {
     await user.click(screen.getByRole('button', { name: 'Add Episode' }));
 
     expect(screen.getAllByLabelText('Select season').length).toBeGreaterThan(0);
+    await openEpisode(user);
     expect(screen.getByLabelText('Title')).toBeInTheDocument();
-    expect(screen.getAllByLabelText('Description').length).toBeGreaterThan(0);
+    expect(screen.getByLabelText('Short description')).toBeInTheDocument();
+    expect(screen.getByLabelText('Academic deepening')).toBeInTheDocument();
+    expect(screen.getByText('0 / 5000 characters')).toBeInTheDocument();
+    const learningDepth = screen.getByLabelText('Academic deepening');
+    expect(learningDepth).toHaveAttribute('aria-describedby', expect.stringContaining('ep-learning-depth-count-'));
+    await user.type(learningDepth, 'Evidence');
+    expect(screen.getByText('8 / 5000 characters')).toBeInTheDocument();
     expect(screen.getByLabelText('Choose thumbnail')).toHaveAttribute('type', 'file');
 
     await user.click(screen.getByRole('button', { name: '3. Details' }));
@@ -190,6 +316,7 @@ describe('App', () => {
     const user = userEvent.setup();
     renderApp();
 
+    await openHeaderMenu(user);
     const examplesButton = screen.getByRole('button', { name: 'Examples' });
     await user.click(examplesButton);
 
@@ -214,48 +341,55 @@ describe('App', () => {
     const user = userEvent.setup();
     renderApp();
 
+    await openHeaderMenu(user);
     await user.click(screen.getByRole('button', { name: 'Examples' }));
     const dialog = screen.getByRole('dialog', { name: 'Examples in the app' });
     const climateCard = within(dialog).getByRole('heading', { name: 'The School Climate Code' }).closest('article');
     expect(climateCard).not.toBeNull();
     await user.click(within(climateCard!).getByRole('button', { name: 'Use example' }));
 
-    expect(window.confirm).toHaveBeenCalledWith(
-      'Load this example project? This will replace your current draft.',
-    );
+    expect(
+      await screen.findByText('Load this example project? This will replace your current draft.'),
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Load example' }));
+
     expect(await screen.findByText('Example project loaded.')).toBeInTheDocument();
     expect(screen.getAllByRole('heading', { name: 'The School Climate Code' }).length).toBeGreaterThan(0);
     expect(screen.getAllByRole('heading', { name: /1\. The Electricity Detective/ }).length).toBeGreaterThan(0);
     expect(screen.getAllByRole('heading', { name: /2\. Heat on the Run/ }).length).toBeGreaterThan(0);
-    expect(document.querySelectorAll('.episode-card img[src^="data:image/jpeg;base64,"]').length).toBe(3);
+    expect(document.querySelectorAll('.episode-card img[src^="data:image/jpeg;base64,"]').length).toBe(4);
 
     await user.click(screen.getByRole('tab', { name: 'Concept' }));
-    expect(screen.getByText('Image prompts and social media kit')).toBeInTheDocument();
-    expect(screen.getByText(/Class 8b turns energy data/)).toBeInTheDocument();
+    const conceptPanel = within(screen.getByRole('tabpanel'));
+    expect(conceptPanel.getByText('Image prompts and social media kit')).toBeInTheDocument();
+    expect(conceptPanel.getByText(/Class 8b turns energy data/)).toBeInTheDocument();
 
     await user.click(screen.getByRole('tab', { name: 'Sources' }));
-    expect(screen.getByText(/Class measurement log/)).toBeInTheDocument();
+    expect(within(screen.getByRole('tabpanel')).getByText(/Class measurement log/)).toBeInTheDocument();
   });
 
   it('loads the Weimar example into the editor and preview', async () => {
     const user = userEvent.setup();
     renderApp();
 
+    await openHeaderMenu(user);
     await user.click(screen.getByRole('button', { name: 'Examples' }));
     const dialog = screen.getByRole('dialog', { name: 'Examples in the app' });
     const weimarCard = within(dialog).getByRole('heading', { name: 'The Weimar File' }).closest('article');
     expect(weimarCard).not.toBeNull();
     await user.click(within(weimarCard!).getByRole('button', { name: 'Use example' }));
+    await user.click(await screen.findByRole('button', { name: 'Load example' }));
 
     expect(await screen.findByText('Example project loaded.')).toBeInTheDocument();
     expect(screen.getAllByRole('heading', { name: 'The Weimar File' }).length).toBeGreaterThan(0);
     expect(screen.getAllByRole('heading', { name: /1\. A New Start/ }).length).toBeGreaterThan(0);
     expect(screen.getAllByRole('heading', { name: /2\. Inflation in the Street/ }).length).toBeGreaterThan(0);
-    expect(document.querySelectorAll('.episode-card img[src^="data:image/jpeg;base64,"]').length).toBe(3);
+    expect(document.querySelectorAll('.episode-card img[src^="data:image/jpeg;base64,"]').length).toBe(4);
 
     await user.click(screen.getByRole('tab', { name: 'Concept' }));
-    expect(screen.getByText('Image prompts and social media kit')).toBeInTheDocument();
-    expect(screen.getByText(/Weimar Republic into a source-based investigation/)).toBeInTheDocument();
+    const weimarConceptPanel = within(screen.getByRole('tabpanel'));
+    expect(weimarConceptPanel.getByText('Image prompts and social media kit')).toBeInTheDocument();
+    expect(weimarConceptPanel.getByText(/Weimar Republic into a source-based investigation/)).toBeInTheDocument();
   });
 });
 
@@ -277,6 +411,11 @@ describe('example projects', () => {
           expect(parsed.data.reflection).toBeTruthy();
           expect(parsed.data.sources).toBeTruthy();
           expect(parsed.data.customConceptText).toContain('16:9');
+          const contentBlocks = parsed.data.seasons.flatMap((season) =>
+            season.episodes.flatMap((episode) => episode.contentBlocks ?? []),
+          );
+          expect(contentBlocks.some((block) => block.type === 'text')).toBe(true);
+          expect(contentBlocks.some((block) => block.type === 'image')).toBe(true);
           expect(parsed.data.completionOverride).toBeUndefined();
           expect(availableAgeRatings).toContain(parsed.data.ageRating);
           expect(calculateProjectCompletion(parsed.data)).toBe(100);

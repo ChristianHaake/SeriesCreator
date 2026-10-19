@@ -1,49 +1,66 @@
-import React, { useRef } from 'react';
-import { CheckCircle2, Download, FileText, GraduationCap, Trash2, Upload, Printer } from "lucide-react";
+import React, { useRef, useState } from 'react';
+import { CheckCircle2, MoreHorizontal, Download, FileText, GraduationCap, Trash2, Upload, Printer } from "lucide-react";
 import type { ProjectData } from "../types";
 import { useTranslation } from "../i18n";
-import { parseProjectJson, PROJECT_FILE_EXTENSION } from '../domain/projectCodec';
+import { PROJECT_FILE_EXTENSION } from '../domain/projectCodec';
 import { resourceLimits } from '../domain/constraints';
+import type { ProjectParseError } from '../domain/projectCodec';
+import { parseProjectTextInWorker } from '../domain/projectImport';
 import { BrandLogo } from './BrandLogo';
+
+export type ProjectImportFailure = ProjectParseError | 'readFailed';
 
 interface Props {
   onExport?: () => void;
   onHtmlExport?: () => void;
-  onImport?: (data: ProjectData) => void;
+  onImportValidated?: (data: ProjectData) => void;
+  onImportStart?: () => void;
+  onImportFailure?: (failure: ProjectImportFailure) => void;
   onShowExamples?: () => void;
   onReset?: () => void;
   onPrint?: () => void;
 }
 
-export function AppHeader({ onExport, onHtmlExport, onImport, onShowExamples, onReset, onPrint }: Props) {
+export function AppHeader({
+  onExport,
+  onHtmlExport,
+  onImportValidated,
+  onImportStart,
+  onImportFailure,
+  onShowExamples,
+  onReset,
+  onPrint,
+}: Props) {
   const { t, locale, setLocale } = useTranslation();
   const importInputRef = useRef<HTMLInputElement | null>(null);
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const [isImporting, setIsImporting] = useState(false);
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const input = event.currentTarget;
     const file = event.target.files?.[0];
     if (!file) return;
 
     if (file.size > resourceLimits.projectFileBytes) {
-      alert(locale === 'de' ? 'Projektdatei ist zu groß.' : 'Project file is too large.');
-      event.target.value = '';
+      onImportFailure?.('tooLarge');
+      input.value = '';
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const content = typeof e.target?.result === 'string' ? e.target.result : '';
-      const parsed = parseProjectJson(content);
+    setIsImporting(true);
+    onImportStart?.();
+    try {
+      const content = await file.text();
+      const parsed = await parseProjectTextInWorker(content, t.seasonFallbackLabel);
       if (parsed.ok) {
-        onImport?.(parsed.data);
+        onImportValidated?.(parsed.data);
       } else {
-        alert(parsed.message);
+        onImportFailure?.(parsed.code);
       }
-      event.target.value = '';
-    };
-    reader.onerror = () => {
-      alert(locale === 'de' ? 'Datei konnte nicht gelesen werden.' : 'File could not be read.');
-      event.target.value = '';
-    };
-    reader.readAsText(file);
+    } catch {
+      onImportFailure?.('readFailed');
+    } finally {
+      input.value = '';
+      setIsImporting(false);
+    }
   };
 
   return (
@@ -75,63 +92,97 @@ export function AppHeader({ onExport, onHtmlExport, onImport, onShowExamples, on
         </div>
 
         <div className="app-header__controls" role="toolbar" aria-label={t.headerActionsLabel}>
-          {onReset && (
-            <button type="button" className="btn-header ui-button ui-button--danger" onClick={onReset} aria-label={t.btnReset} title={t.btnReset}>
-              <Trash2 size={16} />
-              <span>{t.btnReset}</span>
-            </button>
-          )}
-          {onImport && (
-            <>
-            <button
-              type="button"
-              className="btn-header ui-button"
-              onClick={() => importInputRef.current?.click()}
-              aria-label={t.btnLoad}
-              title={t.btnLoad}
-            >
-              <Upload size={16} />
-              <span>{t.btnLoad}</span>
-            </button>
-              <input
-                ref={importInputRef}
-                type="file"
-                accept={`.${PROJECT_FILE_EXTENSION},.json,application/json`}
-                className="visually-hidden"
-                aria-label={t.btnLoad}
-                tabIndex={-1}
-                onChange={handleFileUpload}
-              />
-            </>
-          )}
-          {onShowExamples && (
-            <button type="button" className="btn-header ui-button" onClick={onShowExamples} aria-label={t.btnExamples} title={t.btnExamples}>
-              <FileText size={16} />
-              <span>{t.btnExamples}</span>
-            </button>
-          )}
+          {/* Save stays out of the menu: this app has no accounts and no server
+              copy, so the action that preserves work must never be buried. */}
           {onExport && (
             <button type="button" className="btn-header ui-button" onClick={onExport} aria-label={t.btnSave} title={t.btnSave}>
               <Download size={16} />
               <span>{t.btnSave}</span>
             </button>
           )}
-          {onHtmlExport && (
-            <button type="button" className="btn-header ui-button" onClick={onHtmlExport} aria-label={t.btnHtml} title={t.btnHtml}>
-              <Download size={16} />
-              <span>{t.btnHtml}</span>
-            </button>
-          )}
-          {onPrint && (
-            <button type="button" className="btn-header ui-button" onClick={onPrint} aria-label={t.btnPdf} title={t.btnPdf}>
-              <Printer size={16} />
-              <span>{t.btnPdf}</span>
-            </button>
-          )}
-          <a href="/lehrkraefte" className="btn-header ui-button" aria-label={t.btnTeachers} title={t.btnTeachers}>
-            <GraduationCap size={16} />
-            <span>{t.btnTeachers}</span>
-          </a>
+
+          <button
+            type="button"
+            className="btn-header ui-button header-actions__toggle"
+            popoverTarget="header-actions-menu"
+            aria-label={t.moreActions}
+            title={t.moreActions}
+          >
+            <MoreHorizontal size={16} />
+          </button>
+
+          {/* A native popover: Escape, light dismiss and top-layer stacking come
+              from the platform. On wide viewports CSS renders it inline instead,
+              so the desktop toolbar is unchanged and the toggle is hidden. */}
+          <div
+            id="header-actions-menu"
+            popover="auto"
+            className="header-actions__menu"
+            // Choosing an action should dismiss the menu; a popover does not
+            // close itself when something inside it is activated, so the
+            // gallery would otherwise open behind an open menu.
+            onClick={(event) => {
+              if ((event.target as HTMLElement).closest('button, a')) {
+                event.currentTarget.hidePopover();
+              }
+            }}
+          >
+            {onImportValidated && (
+              <>
+                <button
+                  type="button"
+                  className="btn-header ui-button"
+                  onClick={() => importInputRef.current?.click()}
+                  aria-label={t.btnLoad}
+                  title={t.btnLoad}
+                  disabled={isImporting}
+                  aria-busy={isImporting || undefined}
+                >
+                  <Upload size={16} />
+                  <span>{t.btnLoad}</span>
+                </button>
+                <input
+                  ref={importInputRef}
+                  type="file"
+                  accept={`.${PROJECT_FILE_EXTENSION},.json,application/json`}
+                  className="visually-hidden"
+                  aria-label={t.btnLoad}
+                  tabIndex={-1}
+                  onChange={handleFileUpload}
+                  disabled={isImporting}
+                />
+              </>
+            )}
+            {onShowExamples && (
+              <button type="button" className="btn-header ui-button" onClick={onShowExamples} aria-label={t.btnExamples} title={t.btnExamples}>
+                <FileText size={16} />
+                <span>{t.btnExamples}</span>
+              </button>
+            )}
+            {onHtmlExport && (
+              <button type="button" className="btn-header ui-button" onClick={onHtmlExport} aria-label={t.btnHtml} title={t.btnHtml}>
+                <Download size={16} />
+                <span>{t.btnHtml}</span>
+              </button>
+            )}
+            {onPrint && (
+              <button type="button" className="btn-header ui-button" onClick={onPrint} aria-label={t.btnPdf} title={t.btnPdf}>
+                <Printer size={16} />
+                <span>{t.btnPdf}</span>
+              </button>
+            )}
+            <a href="/lehrkraefte" className="btn-header ui-button" aria-label={t.btnTeachers} title={t.btnTeachers}>
+              <GraduationCap size={16} />
+              <span>{t.btnTeachers}</span>
+            </a>
+            {/* Destructive, so it sits last rather than first as it did before. */}
+            {onReset && (
+              <button type="button" className="btn-header ui-button ui-button--danger" onClick={onReset} aria-label={t.btnReset} title={t.btnReset}>
+                <Trash2 size={16} />
+                <span>{t.btnReset}</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </header>

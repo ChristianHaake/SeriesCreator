@@ -1,4 +1,11 @@
 import { expect, test } from '@playwright/test';
+import { clickHeaderAction } from './helpers';
+
+/** Episode fields live in a dialog opened from the list row. */
+async function openEpisode(page: import('@playwright/test').Page, index = 0) {
+  await page.locator('.episode-row__open').nth(index).click();
+  await expect(page.locator('dialog.episode-dialog')).toBeVisible();
+}
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
@@ -15,16 +22,26 @@ test('completes the primary workflow and downloads both portable formats', async
   await page.getByRole('button', { name: '2. Episodes' }).click();
   await page.getByRole('button', { name: 'Add Episode' }).click();
 
-  const editor = page.locator('.editor-sidebar');
-  await editor.getByLabel('Title', { exact: true }).fill('The First Clue');
-  await editor
-    .getByLabel('Description', { exact: true })
+  await openEpisode(page);
+  const episode = page.locator('dialog.episode-dialog');
+  await episode.getByLabel('Title', { exact: true }).fill('The First Clue');
+  await episode
+    .getByLabel('Short description', { exact: true })
     .fill('The class discovers the first source.');
+  await episode
+    .getByLabel('Academic deepening', { exact: true })
+    .fill('The class distinguishes an observation from evidence and records a supporting source.');
+  await episode.getByRole('button', { name: 'Add text block' }).click();
+  await episode.getByLabel('Content', { exact: true }).fill('The evidence sequence continues here.');
+  await page.keyboard.press('Escape');
+  await expect(episode).toHaveCount(0);
 
   const preview = page.getByRole('main');
   await expect(preview.getByRole('heading', { name: 'Release Test Series' })).toBeVisible();
   await expect(preview.getByRole('heading', { name: /1\. The First Clue/ })).toBeVisible();
   await expect(preview.getByText('Created by: Class 8B', { exact: true })).toBeVisible();
+  await preview.getByText('Academic deepening', { exact: true }).click();
+  await expect(preview.getByText('The class distinguishes an observation from evidence and records a supporting source.')).toBeVisible();
 
   const projectDownload = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Save', exact: true }).click();
@@ -33,18 +50,25 @@ test('completes the primary workflow and downloads both portable formats', async
   );
 
   const htmlDownload = page.waitForEvent('download');
-  await page.getByRole('button', { name: 'Download as HTML' }).click();
+  await clickHeaderAction(page, 'Download as HTML');
   expect((await htmlDownload).suggestedFilename()).toBe('Release-Test-Series.html');
 
   await page.getByRole('button', { name: 'Present' }).click();
   const presentation = page.locator('.presentation-mode');
   await expect(presentation).toBeVisible();
+  await expect(presentation.getByRole('button', { name: 'Close Presentation' })).toBeFocused();
+  await page.keyboard.press('ArrowRight');
+  await expect(presentation.getByRole('heading', { name: 'Season 1', exact: true })).toBeVisible();
   await page.keyboard.press('ArrowRight');
   await expect(
     presentation.getByRole('heading', { name: 'Episode 1', exact: true }),
   ).toBeVisible();
+  await expect(presentation.getByText('The class distinguishes an observation from evidence and records a supporting source.')).toBeVisible();
+  await page.keyboard.press('ArrowRight');
+  await expect(presentation.getByText('The evidence sequence continues here.')).toBeVisible();
   await presentation.getByRole('button', { name: 'Close Presentation' }).click();
   await expect(presentation).toBeHidden();
+  await expect(page.getByRole('button', { name: 'Present' })).toBeFocused();
 });
 
 test('supports direct content routes and narrow responsive editing', async ({ page }) => {
@@ -66,23 +90,435 @@ test('supports direct content routes and narrow responsive editing', async ({ pa
 
 test('loads a complete current example through the gallery', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Examples' }).click();
+  await clickHeaderAction(page, 'Examples');
 
   const gallery = page.getByRole('dialog', { name: 'Examples in the app' });
   const climateCard = gallery
     .getByRole('heading', { name: 'The School Climate Code' })
     .locator('xpath=ancestor::article');
 
-  page.once('dialog', (dialog) => dialog.accept());
   await climateCard.getByRole('button', { name: 'Use example' }).click();
+  await page
+    .locator('dialog.confirm-dialog')
+    .getByRole('button', { name: 'Load example' })
+    .click();
 
   await expect(page.getByText('Example project loaded.')).toBeVisible();
   await expect(page.locator('.streaming-title')).toHaveText('The School Climate Code');
   await expect(page.locator('.completion-score')).toHaveText('Project status 100%');
   await expect(page.locator('.streaming-facts')).toContainText('Created by: Class 8b');
   await expect(page.locator('.episode-card__image')).toHaveCount(3);
+  const firstEpisode = page.locator('.episode-card').first();
+  await firstEpisode.getByText('Content blocks', { exact: true }).click();
+  await expect(firstEpisode.getByRole('heading', { name: 'The standby clue' })).toBeVisible();
+  await expect(firstEpisode.getByText('Measurements reveal hidden energy drains.', { exact: true })).toBeVisible();
+  await expect(firstEpisode.getByRole('img', { name: 'Learners measure the electricity use of classroom devices.' })).toBeVisible();
 
   await page.getByLabel('Select season').selectOption('climate-season-action');
   await expect(page.locator('.episode-card__image')).toHaveCount(3);
   await expect(page.getByRole('heading', { name: '3. A Plan for Monday' })).toBeVisible();
+});
+
+test('imports a project through the background validator', async ({ page }) => {
+  await page.goto('/');
+  await page.getByLabel('Series Title').fill('Keep this draft');
+
+  const importFile = {
+    name: 'import.seriescreator',
+    mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify({
+      schemaVersion: 2,
+      title: 'Imported Series',
+      description: 'Validated away from the main UI thread.',
+      seasons: [{ id: 's1', title: 'Season 1', episodes: [] }],
+    })),
+  };
+  const importInput = page.locator('input[type="file"][aria-label="Load"]');
+  await importInput.setInputFiles(importFile);
+
+  await expect(page.getByRole('dialog')).toContainText('Load this project file?');
+  await page.getByRole('dialog').getByRole('button', { name: 'Cancel' }).click();
+  await expect(page.getByLabel('Series Title')).toHaveValue('Keep this draft');
+
+  await importInput.setInputFiles(importFile);
+  await expect(page.getByRole('dialog')).toContainText('Load this project file?');
+  await page.getByRole('dialog').getByRole('button', { name: 'Load project file' }).click();
+  await expect(page.getByText('Project file loaded.')).toBeVisible();
+  await expect(page.locator('.streaming-title')).toHaveText('Imported Series');
+});
+
+test('renders the print layout with backgrounds and the full details step', async ({ page }) => {
+  await page.goto('/');
+
+  await page.getByLabel('Series Title').fill('Print Test Series');
+  await page.getByRole('button', { name: '3. Details' }).click();
+  await page.getByLabel('Sources').fill('Class measurement log; school archive.');
+
+  const printLayout = page.locator('#print-layout-container');
+
+  // Hidden on screen: it must not be announced or take part in the layout.
+  await expect(printLayout).toBeHidden();
+
+  await page.emulateMedia({ media: 'print' });
+
+  await expect(printLayout).toBeVisible();
+  await expect(printLayout).toContainText('Print Test Series');
+  await expect(printLayout).toContainText('Class measurement log; school archive.');
+
+  // Without this the dark fills are dropped and white text prints onto blank paper.
+  await expect(printLayout).toHaveCSS('print-color-adjust', 'exact');
+
+  await page.emulateMedia({ media: 'screen' });
+});
+
+test('advances presentation slides once per keypress and tracks position', async ({ page }) => {
+  await page.goto('/');
+
+  await page.getByLabel('Series Title').fill('Keyboard Test');
+  await page.getByRole('button', { name: '2. Episodes' }).click();
+  for (const [index, title] of ['First', 'Second'].entries()) {
+    await page.getByRole('button', { name: 'Add Episode' }).click();
+    await openEpisode(page, index);
+    await page.locator('dialog.episode-dialog').getByLabel('Title', { exact: true }).fill(title);
+    await page.keyboard.press('Escape');
+  }
+
+  await page.getByRole('button', { name: 'Present' }).click();
+  const counter = page.locator('.presentation-navigation__counter');
+
+  // Title + season overview + 2 episodes + reflection + sources + credits.
+  await expect(counter).toContainText('1 / 7');
+
+  // Clicking the arrow leaves focus on it; space must then advance exactly once,
+  // not twice (the window handler plus the button's own activation).
+  await page.getByRole('button', { name: 'Next Slide' }).click();
+  await expect(counter).toContainText('2 / 7');
+  await expect(page.getByRole('heading', { name: 'Season 1' })).toBeVisible();
+  await page.keyboard.press('Space');
+  await expect(counter).toContainText('3 / 7');
+
+  // Space away from a button still advances, and must not scroll the panel.
+  await page.locator('.presentation-content').click();
+  await page.keyboard.press('Space');
+  await expect(counter).toContainText('4 / 7');
+
+  await page.keyboard.press('ArrowLeft');
+  await expect(counter).toContainText('3 / 7');
+});
+
+test('gives every content page one h1, a matching tab title and a localized description', async ({ page }) => {
+  for (const path of ['/hilfe', '/ueber', '/lehrkraefte', '/datenschutz', '/impressum']) {
+    await page.goto(path);
+    const headings = page.locator('.markdown-content h1');
+    await expect(headings).toHaveCount(1);
+    const heading = (await headings.innerText()).trim();
+    await expect(page).toHaveTitle(`${heading} · SeriesCreator`);
+  }
+
+  await page.goto('/');
+  await expect(page).toHaveTitle('SeriesCreator');
+  const description = page.locator('meta[name="description"]');
+  await expect(description).toHaveAttribute('content', /Plan fictional classroom series/);
+
+  await page.getByRole('button', { name: 'DE', exact: true }).click();
+  await expect(description).toHaveAttribute('content', /Plane fiktive Unterrichtsserien/);
+});
+
+test('labels the season icon buttons for assistive tech', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: '2. Episodes' }).click();
+
+  await expect(page.getByRole('button', { name: 'Rename Season' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Delete Season' })).toBeVisible();
+});
+
+test('announces an episode reorder with its title and new position', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: '2. Episodes' }).click();
+  await page.getByRole('button', { name: 'Add Episode' }).click();
+  await page.getByRole('button', { name: 'Add Episode' }).click();
+
+  await openEpisode(page);
+  const episode = page.locator('dialog.episode-dialog');
+  await episode.getByLabel('Title', { exact: true }).fill('Episode to move');
+  await page.keyboard.press('Escape');
+
+  await page.getByRole('button', { name: 'Move episode down: Episode to move' }).click();
+  await expect(page.locator('.visually-hidden[role="status"]')).toHaveText(
+    '“Episode to move” is now at position 2.',
+  );
+});
+
+test('reports image upload problems inline instead of in a blocking dialog', async ({ page }) => {
+  const nativeDialogs: string[] = [];
+  page.on('dialog', (dialog) => { nativeDialogs.push(dialog.message()); void dialog.dismiss(); });
+
+  await page.goto('/');
+  await page.getByRole('button', { name: '2. Episodes' }).click();
+  await page.getByRole('button', { name: 'Add Episode' }).click();
+
+  // The thumbnail control moved into the episode dialog.
+  await openEpisode(page);
+  const dialog = page.locator('dialog.episode-dialog');
+  await dialog.getByLabel('Choose thumbnail').setInputFiles({
+    name: 'notes.txt',
+    mimeType: 'text/plain',
+    buffer: Buffer.from('not an image'),
+  });
+
+  // The error must land next to the control, inside the dialog.
+  await expect(dialog.getByRole('alert')).toHaveText('Choose a PNG, JPG, or WebP image.');
+  expect(nativeDialogs).toEqual([]);
+});
+
+test('confirms destructive actions in an in-app dialog', async ({ page }) => {
+  const nativeDialogs: string[] = [];
+  page.on('dialog', (dialog) => { nativeDialogs.push(dialog.message()); void dialog.dismiss(); });
+
+  await page.goto('/');
+  await page.getByLabel('Series Title').fill('Keep this draft');
+
+  const dialog = page.locator('dialog.confirm-dialog');
+  await clickHeaderAction(page, 'New / Clear');
+  await expect(dialog).toBeVisible();
+
+  // Escape must cancel and leave the draft untouched.
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);
+  await expect(page.getByLabel('Series Title')).toHaveValue('Keep this draft');
+
+  await clickHeaderAction(page, 'New / Clear');
+  await dialog.getByRole('button', { name: 'Delete', exact: true }).click();
+  await expect(page.getByLabel('Series Title')).not.toHaveValue('Keep this draft');
+  await page.reload();
+  await expect(page.getByLabel('Series Title')).toHaveValue('My New Series');
+
+  expect(nativeDialogs).toEqual([]);
+});
+
+test('offers a skip link and labelled landmarks', async ({ page }) => {
+  await page.goto('/');
+
+  const skipLink = page.getByRole('link', { name: 'Skip to editor' });
+
+  // It must come first in the tab order. Asserted from DOM order rather than by
+  // pressing Tab, because Safari does not move focus to links unless the user
+  // has switched on "Press Tab to highlight each item".
+  await expect
+    .poll(() => page.evaluate(() => {
+      const focusable = document.querySelectorAll<HTMLElement>(
+        'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      );
+      return focusable[0]?.className ?? '';
+    }))
+    .toContain('skip-link');
+
+  await skipLink.focus();
+  // Hidden until focused, so it must be on screen once it is.
+  await expect(skipLink).toBeInViewport();
+
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#editor-panel')).toBeFocused();
+
+  await expect(page.getByRole('main')).toHaveAccessibleName('Preview');
+  await expect(page.getByRole('complementary')).toHaveAccessibleName('SeriesCreator Editor');
+  // The streaming chrome imitates a nav bar; only the footer nav is real.
+  await expect(page.getByRole('navigation')).toHaveCount(1);
+});
+
+test('shows a not-found page for unknown routes', async ({ page }) => {
+  await page.goto('/definitely-not-a-page');
+
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Page not found');
+  await expect(page.getByRole('link', { name: /Back to App/i })).toHaveAttribute('href', '/');
+  await expect(page).toHaveTitle('Page not found · SeriesCreator');
+  await page.getByRole('button', { name: 'DE', exact: true }).click();
+  await expect(page).toHaveTitle('Seite nicht gefunden · SeriesCreator');
+  // The editor must not be what a dead link renders.
+  await expect(page.locator('.editor-sidebar')).toHaveCount(0);
+});
+
+test('offers a content skip link on content and not-found routes', async ({ page }) => {
+  for (const path of ['/hilfe', '/definitely-not-a-page']) {
+    await page.goto(path);
+    const skipLink = page.getByRole('link', { name: 'Skip to content' });
+    await skipLink.focus();
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#main-content')).toBeFocused();
+  }
+});
+
+test('serves content routes from a lazily loaded chunk', async ({ page }) => {
+  const chunks: string[] = [];
+  page.on('response', (response) => {
+    const url = response.url();
+    if (url.includes('/assets/') && url.endsWith('.js')) chunks.push(url.split('/').pop()!);
+  });
+
+  await page.goto('/');
+  expect(chunks.some((name) => name.startsWith('ContentPage'))).toBe(false);
+
+  await page.goto('/hilfe');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Help');
+  expect(chunks.some((name) => name.startsWith('ContentPage'))).toBe(true);
+});
+
+test('keeps a project that cannot be restored, instead of overwriting it', async ({ page }) => {
+  const original = '{"title":"Six weeks of work","seasons":[';
+  await page.addInitScript((data) => {
+    window.localStorage.setItem('series_creator_data', data);
+  }, original);
+
+  await page.goto('/');
+  await expect(page.locator('.app-status')).toContainText('could not be opened');
+
+  // The unreadable source is preserved before the fallback project can autosave.
+  await page.waitForTimeout(1200);
+  const storage = await page.evaluate(() => ({
+    backup: window.localStorage.getItem('series_creator_data.unreadable'),
+    main: window.localStorage.getItem('series_creator_data'),
+  }));
+  expect(storage.backup).toBe(original);
+  expect(storage.main).not.toBe(original);
+  expect(JSON.parse(storage.main!)).toMatchObject({ title: 'My New Series' });
+});
+
+test('still autosaves normally after a clean load', async ({ page }) => {
+  await page.goto('/');
+  await page.getByLabel('Series Title').fill('Autosave still works');
+
+  await expect.poll(async () => page.evaluate(() => {
+    const raw = window.localStorage.getItem('series_creator_data');
+    return raw ? JSON.parse(raw).title : null;
+  })).toBe('Autosave still works');
+
+  // Nothing was mistaken for an unreadable load.
+  expect(await page.evaluate(() => window.localStorage.getItem('series_creator_data.unreadable'))).toBeNull();
+});
+
+test('keeps the full action row inline on a wide viewport', async ({ page }) => {
+  // Above the measured breakpoint: all seven actions need 1320px in English and
+  // 1400px in German before they fit on one line.
+  await page.setViewportSize({ width: 1500, height: 800 });
+  await page.goto('/');
+
+  // The overflow menu is a narrow-viewport affordance; desktop is unchanged.
+  await expect(page.locator('.header-actions__toggle')).toBeHidden();
+
+  // Scoped to the styled buttons: "Load" also matches the hidden file input.
+  const actions = page.locator(
+    '.app-header__controls button.btn-header:not(.header-actions__toggle), .app-header__controls a.btn-header',
+  );
+  await expect(actions).toHaveText([
+    'Save', 'Load', 'Examples', 'Download as HTML', 'Print / Save as PDF', 'For Teachers', 'New / Clear',
+  ]);
+
+  // Geometry, not just text: the panel's full-width rows once leaked out of the
+  // narrow media query and every action became a full-width toolbar child,
+  // wrapping the row onto seven lines. Text and visibility both still passed.
+  const layout = await page.evaluate(() => {
+    const buttons = [...document.querySelectorAll('.app-header__controls .btn-header')]
+      .filter((b) => getComputedStyle(b).display !== 'none');
+    const container = document.querySelector('.app-header__controls')!.getBoundingClientRect().width;
+    return {
+      rows: new Set(buttons.map((b) => Math.round(b.getBoundingClientRect().top))).size,
+      widest: Math.max(...buttons.map((b) => b.getBoundingClientRect().width)),
+      container,
+    };
+  });
+
+  expect(layout.rows, 'the action row should not wrap at this width').toBe(1);
+  expect(layout.widest, 'no action should stretch to the full toolbar').toBeLessThan(layout.container * 0.5);
+});
+
+test('edits an episode in a dialog that previews the real card', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: '2. Episodes' }).click();
+  await page.getByRole('button', { name: 'Add Episode' }).click();
+
+  await openEpisode(page);
+  const dialog = page.locator('dialog.episode-dialog');
+
+  // The preview is the same component the streaming view renders, so it cannot
+  // drift from what students actually see.
+  await expect(dialog.locator('.episode-card')).toHaveCount(1);
+
+  await dialog.getByLabel('Title', { exact: true }).fill('Typed In The Dialog');
+  await expect(dialog.locator('.episode-card h3')).toHaveText('1. Typed In The Dialog');
+
+  await dialog.getByRole('button', { name: 'Add text block' }).click();
+  await dialog.getByLabel('Content', { exact: true }).fill('First observation');
+  await expect(dialog.locator('.episode-card__content-blocks')).toContainText('First observation');
+
+  // No Save or Cancel: closing keeps the edit, because everything autosaves.
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);
+  await expect(page.locator('.episode-row__title')).toHaveText('Typed In The Dialog');
+  await expect(page.getByRole('main').getByRole('heading', { name: '1. Typed In The Dialog' })).toBeVisible();
+  await page.getByRole('main').locator('.episode-card__content-blocks summary').click();
+  await expect(page.getByRole('main').getByText('First observation')).toBeVisible();
+});
+
+test('sizes the header menu to its content, not to the viewport', async ({ page }) => {
+  await page.setViewportSize({ width: 414, height: 670 });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'More actions' }).click();
+
+  const menu = page.locator('#header-actions-menu');
+  await expect(menu).toBeVisible();
+
+  // Real Safari sized the top-layer box to the viewport, and the grid then
+  // stretched each item to ~200px, pushing the last one off screen.
+  const layout = await menu.evaluate((element) => {
+    const items = [...element.querySelectorAll('.btn-header')];
+    return {
+      menuHeight: element.getBoundingClientRect().height,
+      tallestItem: Math.max(...items.map((i) => i.getBoundingClientRect().height)),
+      lowestItemBottom: Math.max(...items.map((i) => i.getBoundingClientRect().bottom)),
+      viewportHeight: window.innerHeight,
+    };
+  });
+
+  expect(layout.tallestItem).toBeLessThan(80);
+  expect(layout.menuHeight).toBeLessThan(layout.viewportHeight * 0.75);
+  expect(layout.lowestItemBottom).toBeLessThanOrEqual(layout.viewportHeight);
+});
+
+test('reports import failures in the interface language', async ({ page }) => {
+  const broken = { name: 'broken.seriescreator', mimeType: 'application/json', buffer: Buffer.from('{"seasons": "nope"}') };
+
+  await page.goto('/');
+  // Locale-independent: the input's aria-label is itself translated.
+  const importInput = page.locator('.app-header input[type="file"]');
+  await importInput.setInputFiles(broken);
+  await expect(page.locator('.app-status')).toHaveText('The project file contains no valid seasons.');
+
+  // The codec runs in a worker and cannot reach the translator, so it returns a
+  // code that the UI maps — this is what proves the mapping is wired.
+  await page.getByRole('button', { name: 'DE', exact: true }).click();
+  await importInput.setInputFiles(broken);
+  await expect(page.locator('.app-status')).toHaveText('Die Projektdatei enthält keine gültigen Staffeln.');
+});
+
+test('reloads a project it saved itself', async ({ page }) => {
+  await page.goto('/');
+  await clickHeaderAction(page, 'Examples');
+  await page.getByRole('dialog').getByRole('button', { name: 'Use example' }).first().click();
+  await page.locator('dialog.confirm-dialog').getByRole('button', { name: 'Load example' }).click();
+  await expect(page.locator('.completion-score')).toHaveText('Project status 100%');
+
+  const download = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  const saved = await (await download).path();
+
+  // Wipe and re-import the very file the app produced.
+  await page.evaluate(() => window.localStorage.removeItem('series_creator_data'));
+  await page.reload();
+  await page.locator('input[type="file"][aria-label="Load"]').setInputFiles(saved);
+
+  await page.getByRole('dialog').getByRole('button', { name: 'Load project file' }).click();
+  await expect(page.getByText('Project file loaded.')).toBeVisible();
+  await expect(page.locator('.streaming-title')).toHaveText('The School Climate Code');
+  await expect(page.locator('.completion-score')).toHaveText('Project status 100%');
+  await expect(page.locator('.episode-card__image')).toHaveCount(3);
 });

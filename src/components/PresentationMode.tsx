@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
-import type { ProjectData } from '../types';
+import { useState, useEffect, useMemo, useRef, type KeyboardEvent as ReactKeyboardEvent } from 'react';
+import type { Episode, EpisodeContentBlock, ProjectData, Season } from '../types';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from '../i18n';
 
@@ -8,28 +8,79 @@ interface Props {
   onClose: () => void;
 }
 
+type PresentationSlide =
+  | { type: 'title' }
+  | { type: 'season'; season: Season; seasonIndex: number }
+  | { type: 'episode'; episode: Episode; episodeIndex: number }
+  | { type: 'contentBlock'; block: EpisodeContentBlock }
+  | { type: 'reflection' }
+  | { type: 'sources' }
+  | { type: 'credits' };
+
 export function PresentationMode({ data, onClose }: Props) {
   const { t } = useTranslation();
-  // Collect all episodes across seasons
-  const allEpisodes = useMemo(() => data.seasons.flatMap(s => s.episodes), [data.seasons]);
-  const [currentIndex, setCurrentIndex] = useState(-1); // -1 is the title screen
+  const slides = useMemo<PresentationSlide[]>(() => [
+    { type: 'title' },
+    ...data.seasons.flatMap((season, seasonIndex) => [
+      { type: 'season' as const, season, seasonIndex },
+      ...season.episodes.flatMap((episode, episodeIndex) => [
+        { type: 'episode' as const, episode, episodeIndex },
+        ...(episode.contentBlocks ?? []).map((block) => ({ type: 'contentBlock' as const, block })),
+      ]),
+    ]),
+    { type: 'reflection' },
+    { type: 'sources' },
+    { type: 'credits' },
+  ], [data.seasons]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
-  const maxIndex = allEpisodes.length + 2;
+  const maxIndex = slides.length - 1;
+  const slide = slides[currentIndex];
+  const slideCount = slides.length;
+  const slideNumber = currentIndex + 1;
 
   // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
       if (e.key === 'ArrowRight' || e.key === ' ') {
+        if (e.key === ' ') {
+          // A focused button activates on space by itself. Without this the
+          // slide would advance twice right after clicking the next arrow.
+          if (e.target instanceof HTMLButtonElement) return;
+          // Otherwise space would also scroll the reflection/sources panels.
+          e.preventDefault();
+        }
         setCurrentIndex(prev => Math.min(prev + 1, maxIndex));
       }
       if (e.key === 'ArrowLeft') {
-        setCurrentIndex(prev => Math.max(prev - 1, -1));
+        setCurrentIndex(prev => Math.max(prev - 1, 0));
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [maxIndex, onClose]);
+
+  useEffect(() => {
+    closeButtonRef.current?.focus();
+  }, []);
+
+  const handleDialogKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== 'Tab') return;
+    const controls = [...(dialogRef.current?.querySelectorAll<HTMLButtonElement>('button:not(:disabled)') ?? [])];
+    if (controls.length === 0) return;
+    const first = controls[0];
+    const last = controls.at(-1)!;
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
 
   // Request fullscreen on mount
   useEffect(() => {
@@ -55,9 +106,10 @@ export function PresentationMode({ data, onClose }: Props) {
   }, [onClose]);
 
   return (
-    <div className="presentation-mode">
+    <div ref={dialogRef} className="presentation-mode" role="dialog" aria-modal="true" aria-label={t.presentationDialogLabel} onKeyDown={handleDialogKeyDown}>
       <button 
         type="button"
+        ref={closeButtonRef}
         onClick={onClose}
         aria-label={t.ariaClosePresentation}
         className="presentation-close"
@@ -67,7 +119,7 @@ export function PresentationMode({ data, onClose }: Props) {
 
       <div className="presentation-content">
         
-        {currentIndex === -1 ? (
+        {slide.type === 'title' ? (
           // Title Screen
           <div className="presentation-title-slide">
             {data.coverUrl && (
@@ -80,15 +132,35 @@ export function PresentationMode({ data, onClose }: Props) {
             <h1 className="presentation-title">{data.title}</h1>
             <p className="presentation-description">{data.description}</p>
           </div>
-        ) : currentIndex < allEpisodes.length ? (
+        ) : slide.type === 'season' ? (
+          <section className="presentation-season-overview" aria-label={`${t.season} ${slide.seasonIndex + 1}`}>
+            <p className="presentation-kicker">{t.season} {slide.seasonIndex + 1}</p>
+            <h1 className="presentation-section-title">{slide.season.title}</h1>
+            {slide.season.episodes.length > 0 ? (
+              <ol className="presentation-season-overview__episodes">
+                {slide.season.episodes.map((episode, episodeIndex) => (
+                  <li key={episode.id}>
+                    <span>{episodeIndex + 1}</span>
+                    <div>
+                      <h2>{episode.title}</h2>
+                      <p>{episode.summary || t.lblNoDescription}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className="presentation-copy">{t.lblNoEpisodes}</p>
+            )}
+          </section>
+        ) : slide.type === 'episode' ? (
           // Episode Screen
           <div className="presentation-episode">
             <div className="presentation-episode__media">
-              {allEpisodes[currentIndex]?.thumbnailUrl ? (
+              {slide.episode.thumbnailUrl ? (
                 <img 
                   className="presentation-episode__image"
-                  src={allEpisodes[currentIndex].thumbnailUrl} 
-                  alt={allEpisodes[currentIndex].altText || allEpisodes[currentIndex].title} 
+                  src={slide.episode.thumbnailUrl}
+                  alt={slide.episode.altText || slide.episode.title}
                 />
               ) : (
                 <div className="presentation-episode__placeholder">
@@ -97,12 +169,34 @@ export function PresentationMode({ data, onClose }: Props) {
               )}
             </div>
             <div className="presentation-episode__text">
-              <h2 className="presentation-kicker">{t.lblEpisodeN}{currentIndex + 1}</h2>
-              <h1 className="presentation-episode__title">{allEpisodes[currentIndex]?.title}</h1>
-              <p className="presentation-copy">{allEpisodes[currentIndex]?.summary}</p>
+              <h2 className="presentation-kicker">{t.lblEpisodeN}{slide.episodeIndex + 1}</h2>
+              <h1 className="presentation-episode__title">{slide.episode.title}</h1>
+              <p className="presentation-copy">{slide.episode.summary}</p>
+              {slide.episode.learningDepth && (
+                <section className="presentation-learning-depth">
+                  <h2>{t.episodeLearningDepthLabel}</h2>
+                  <p className="presentation-copy presentation-copy--preformatted">
+                    {slide.episode.learningDepth}
+                  </p>
+                </section>
+              )}
             </div>
           </div>
-        ) : currentIndex === allEpisodes.length ? (
+        ) : slide.type === 'contentBlock' ? (
+          <section className="presentation-content-block">
+            {slide.block.type === 'text' ? (
+              <>
+                {slide.block.title && <h1 className="presentation-section-title">{slide.block.title}</h1>}
+                <p className="presentation-copy presentation-copy--preformatted">{slide.block.body}</p>
+              </>
+            ) : (
+              <>
+                <img className="presentation-content-block__image" src={slide.block.imageUrl} alt={slide.block.altText} />
+                {slide.block.caption && <p className="presentation-copy">{slide.block.caption}</p>}
+              </>
+            )}
+          </section>
+        ) : slide.type === 'reflection' ? (
           // Details / Reflexion
           <div className="presentation-scroll-panel">
             <h1 className="presentation-section-title">{t.lblReflection}</h1>
@@ -118,7 +212,7 @@ export function PresentationMode({ data, onClose }: Props) {
               </div>
             )}
           </div>
-        ) : currentIndex === allEpisodes.length + 1 ? (
+        ) : slide.type === 'sources' ? (
           // Sources
           <div className="presentation-scroll-panel">
             <h1 className="presentation-section-title">{t.lblSources}</h1>
@@ -148,14 +242,20 @@ export function PresentationMode({ data, onClose }: Props) {
       <div className="presentation-navigation">
         <button 
           type="button"
-          onClick={() => setCurrentIndex(prev => Math.max(prev - 1, -1))}
-          disabled={currentIndex === -1}
+          onClick={() => setCurrentIndex(prev => Math.max(prev - 1, 0))}
+          disabled={currentIndex === 0}
           aria-label={t.ariaPrevSlide}
           className="presentation-navigation__button"
         >
           <ChevronLeft aria-hidden="true" size={36} />
         </button>
-        <button 
+        <p className="presentation-navigation__counter" aria-live="polite">
+          <span aria-hidden="true">{slideNumber} / {slideCount}</span>
+          <span className="visually-hidden">
+            {t.presentationSlideLabel}{slideNumber}{t.presentationSlideOf}{slideCount}
+          </span>
+        </p>
+        <button
           type="button"
           onClick={() => setCurrentIndex(prev => Math.min(prev + 1, maxIndex))}
           disabled={currentIndex === maxIndex}
