@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [2.0.0] - In preparation
+## [2.0.0] - 2026-10-19
 
 ### Added
 
@@ -16,6 +16,13 @@ All notable changes to this project will be documented in this file.
 - The episode-reorder browser regression test now creates and targets a
   deterministically named episode and checks the actual live announcement,
   instead of depending on an obsolete default title.
+
+### Security
+
+- Updated Vitest and compatible transitive dependencies to patched releases,
+  resolving the dependency audit findings in `@vitest/mocker`,
+  `baseline-browser-mapping`, `brace-expansion`, `browserslist`,
+  `source-map-js` and `undici`.
 
 ## [1.5.0] - 2026-08-30
 
