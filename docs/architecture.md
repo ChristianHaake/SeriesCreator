@@ -30,10 +30,11 @@ The active project is owned by `useProjectStore`. It autosaves to
 `localStorage` under `series_creator_data`; the locale is stored under
 `series-creator-locale`.
 
-Persisted project schema version: `2`. Schema-1 projects and legacy JSON
-without `schemaVersion` are normalized forward, including a missing optional
-episode learning depth. Future schema versions are rejected without replacing
-the current project. Reset restores `initialProjectData`.
+Persisted project schema version: `3`. Schema-1 and schema-2 projects and
+legacy JSON without `schemaVersion` are normalized forward, including missing
+optional episode learning depth and content blocks. Future schema versions are
+rejected without replacing the current project. Reset restores
+`initialProjectData`.
 
 ## Project files
 
@@ -41,7 +42,7 @@ Editable backups use:
 
 - extension: `.seriescreator`
 - media type: `application/json`
-- schema version: `2`
+- schema version: `3`
 - import limit: 25 MB
 - image upload limit: PNG, JPG/JPEG or WebP with at most 60 megapixels
 - image output width: cover up to 1920 px; episode images up to 800 px

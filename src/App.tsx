@@ -33,13 +33,18 @@ type PreviewTab = 'EPISODEN' | 'DETAILS' | 'QUELLEN';
 type MobilePanel = 'editor' | 'preview';
 type StatusTone = 'success' | 'error' | 'info';
 type AppStatus = { message: string; tone: StatusTone } | null;
-type PendingAction =
-  | { type: 'callback'; message: string; confirmLabel: string; run: () => void }
-  | { type: 'import'; data: import('./types').ProjectData };
+type PendingAction = { message: string; confirmLabel: string; run: () => void };
 const previewTabOrder: PreviewTab[] = ['EPISODEN', 'DETAILS', 'QUELLEN'];
 
 function App() {
   const { t, locale } = useTranslation();
+  // Import validation finishes asynchronously. Read translations at completion
+  // time so a language switch while the worker is running cannot leave the
+  // replacement confirmation or success status in the previous language.
+  const latestTranslationRef = useRef(t);
+  useEffect(() => {
+    latestTranslationRef.current = t;
+  }, [t]);
   const [status, setStatus] = useState<AppStatus>(null);
   const [importStatus, setImportStatus] = useState<'importing' | ProjectImportFailure | null>(null);
   const store = useProjectStore(() =>
@@ -184,7 +189,6 @@ function App() {
     };
 
     setPendingAction({
-      type: 'callback',
       message: t.confirmLoadExample,
       confirmLabel: t.btnLoadExample,
       run: () => { void loadExample(); },
@@ -255,14 +259,22 @@ function App() {
         onHtmlExport={handleHtmlExport}
         onPrint={handleExport}
         onImportValidated={(importedData) => {
+          const importTranslation = latestTranslationRef.current;
           setImportStatus(null);
-          setPendingAction({ type: 'import', data: importedData });
+          setPendingAction({
+            message: importTranslation.confirmImport,
+            confirmLabel: importTranslation.btnLoadImport,
+            run: () => {
+              replaceData(importedData, true);
+              setActiveSeasonId(importedData.seasons[0]?.id || '');
+              showStatus(latestTranslationRef.current.msgImportSuccess, 'success');
+            },
+          });
         }}
         onImportStart={() => { setStatus(null); setImportStatus('importing'); }}
         onImportFailure={(failure) => { setStatus(null); setImportStatus(failure); }}
         onShowExamples={() => setShowExamples(true)}
         onReset={() => setPendingAction({
-          type: 'callback',
           message: t.confirmReset,
           confirmLabel: t.btnDelete,
           run: resetData,
@@ -270,17 +282,11 @@ function App() {
       />
       {pendingAction && (
         <ConfirmDialog
-          message={pendingAction.type === 'import' ? t.confirmImport : pendingAction.message}
-          confirmLabel={pendingAction.type === 'import' ? t.btnLoadImport : pendingAction.confirmLabel}
+          message={pendingAction.message}
+          confirmLabel={pendingAction.confirmLabel}
           destructive
           onConfirm={() => {
-            if (pendingAction.type === 'import') {
-              replaceData(pendingAction.data, true);
-              setActiveSeasonId(pendingAction.data.seasons[0]?.id || '');
-              showStatus(t.msgImportSuccess, 'success');
-            } else {
-              pendingAction.run();
-            }
+            pendingAction.run();
             setPendingAction(null);
           }}
           onCancel={() => setPendingAction(null)}

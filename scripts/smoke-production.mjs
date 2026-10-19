@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 const baseUrl = new URL(process.argv[2] || 'https://seriescreator.haak3.de/');
 const { version } = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 const routes = ['/', '/hilfe', '/datenschutz', '/impressum'];
+const exampleAssetPath = '/example-assets/school-climate-code-cover.jpg';
 const rootSecurityHeaders = {
   'content-security-policy': [
     "default-src 'self'",
@@ -60,3 +61,13 @@ for (const route of routes) {
 
   console.log(`ok ${response.status} ${new URL(route, baseUrl)}`);
 }
+
+const exampleAssetResponse = await fetch(new URL(exampleAssetPath, baseUrl), { redirect: 'follow' });
+if (!exampleAssetResponse.ok) {
+  throw new Error(`${exampleAssetPath} returned HTTP ${exampleAssetResponse.status}`);
+}
+const exampleAssetCacheControl = exampleAssetResponse.headers.get('cache-control');
+if (!exampleAssetCacheControl?.includes('max-age=0') || !exampleAssetCacheControl.includes('must-revalidate')) {
+  throw new Error(`${exampleAssetPath} must revalidate instead of serving a stale immutable asset.`);
+}
+console.log(`ok ${exampleAssetResponse.status} ${new URL(exampleAssetPath, baseUrl)}`);

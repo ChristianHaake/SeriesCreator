@@ -50,6 +50,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
   const [episodePendingDelete, setEpisodePendingDelete] = useState<string | null>(null);
   const [episodeAnnouncement, setEpisodeAnnouncement] = useState('');
   const focusAfterEpisodeDeleteRef = useRef<string | 'add' | null>(null);
+  const episodeDeleteLauncherRef = useRef<string | null>(null);
   const coverInputRef = useRef<HTMLInputElement | null>(null);
   const { t, locale } = useTranslation();
 
@@ -84,6 +85,15 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
     focusAfterEpisodeDeleteRef.current = remaining[Math.min(index, remaining.length - 1)]?.id ?? 'add';
     removeEpisode(activeSeason.id, episodePendingDelete);
     setEpisodePendingDelete(null);
+  };
+
+  const handleEpisodeDeleteCancel = () => {
+    const episodeId = episodeDeleteLauncherRef.current;
+    episodeDeleteLauncherRef.current = null;
+    setEpisodePendingDelete(null);
+    if (episodeId) {
+      window.requestAnimationFrame(() => document.getElementById(`episode-delete-${episodeId}`)?.focus());
+    }
   };
 
   const handleCoverUpload = (event: ChangeEvent<HTMLInputElement>) => {
@@ -581,7 +591,10 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
             index={index}
             total={activeSeason.episodes.length}
             onOpen={setOpenEpisodeId}
-            onRemove={(_, episodeId) => setEpisodePendingDelete(episodeId)}
+            onRemove={(_, episodeId) => {
+              episodeDeleteLauncherRef.current = episodeId;
+              setEpisodePendingDelete(episodeId);
+            }}
             onMove={handleEpisodeMove}
           />
         ))}
@@ -595,7 +608,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
               confirmLabel={t.btnDelete}
               destructive
               onConfirm={handleEpisodeDeleteConfirm}
-              onCancel={() => setEpisodePendingDelete(null)}
+              onCancel={handleEpisodeDeleteCancel}
             />
           );
         })()}

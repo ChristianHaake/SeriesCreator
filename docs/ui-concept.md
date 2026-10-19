@@ -48,13 +48,17 @@ Die Staffelwahl bestimmt, welche Episoden im Raster sichtbar sind.
 
 ## Präsentation und Ausgabe
 
-Der Präsentationsmodus führt durch Titelfolie, alle Episoden, Reflexion,
-Quellen und Credits. Pfeiltasten und Leertaste navigieren; Escape beendet.
+Der Präsentationsmodus führt durch Titelfolie, Staffelübersichten, die
+zugehörigen Episoden und deren Inhaltsblöcke, Reflexion, Quellen und Credits.
+Pfeiltasten und Leertaste navigieren; Escape beendet.
 Wenn Fullscreen nicht verfügbar oder abgelehnt ist, bleibt die Präsentation im
 Browserfenster nutzbar.
 
-Die HTML-Präsentation bildet denselben Ablauf als eigenständige Datei ab. Der
-PDF-Pfad verwendet eine gesonderte Druckansicht und den nativen Druckdialog.
+Die HTML-Ausgabe startet mit einer Netflix-artigen Staffelübersicht. Von dort
+öffnen Episodenkarten ihre Detailansicht; dort folgen die Inhaltsblöcke der
+Episode. Die Rückkehr führt zur selben Staffel zurück und fokussiert die zuvor
+geöffnete Karte. Die lineare Ausgabe bleibt über die Pfeilnavigation erreichbar.
+Der PDF-Pfad verwendet eine gesonderte Druckansicht und den nativen Druckdialog.
 
 ## Barrierefreiheit
 

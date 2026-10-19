@@ -52,4 +52,61 @@ describe('exportProjectToHtml', () => {
     expect(html).not.toContain('transition: all');
     expect(html).not.toContain('>✕<');
   });
+
+  it('starts with a season-preserving overview and opens episode details from it', () => {
+    const project = getExampleProjects('en')[0].project;
+    const html = exportProjectToHtml(project, translations, 'en');
+
+    expect(project.seasons).toHaveLength(2);
+    expect(html).toContain('class="series-overview"');
+    expect(html).toContain('class="series-overview__season"');
+    expect(html).toContain("data-episode-index=\"' + (episodeOffset + episodeIndex)");
+    expect(html).toContain('currentIndex = -2');
+    expect(html).toContain("currentIndex = -2;\n      render();");
+    expect(html.indexOf(project.seasons[0].title)).toBeLessThan(html.indexOf(project.seasons[1].title));
+  });
+
+  it('returns from an episode to its season and restores focus to that card', () => {
+    const project = getExampleProjects('en')[0].project;
+    const html = exportProjectToHtml(project, translations, 'en');
+
+    expect(html).toContain('let selectedSeasonIndex = null');
+    expect(html).toContain('function getSeasonIndexForEpisode(episodeIndex)');
+    expect(html).toContain("data-season-index=\"' + seasonIndex + '\"");
+    expect(html).toContain("selectedSeasonIndex = getSeasonIndexForEpisode(currentIndex)");
+    expect(html).toContain("document.getElementById('episode-card-' + focusEpisodeIndex)?.focus()");
+    expect(html).toContain('id="backToAllSeasons"');
+
+    const script = html.match(/<script nonce="[a-f0-9]{32}">([\s\S]*?)<\/script>/)?.[1];
+    expect(script).toBeDefined();
+    const previousMarkup = document.body.innerHTML;
+    document.body.innerHTML = '<button id="close"></button><div id="content"></div><button id="prevBtn"></button><button id="nextBtn"></button>';
+    try {
+      new Function('document', 'window', script!)(document, window);
+      const seasonTwoEpisode = document.querySelector<HTMLButtonElement>('[data-season-index="1"][data-episode-index="3"]');
+      seasonTwoEpisode?.click();
+      expect(document.querySelector('.episode-title')?.textContent).toBe(project.seasons[1].episodes[0].title);
+
+      document.querySelector<HTMLButtonElement>('#backToOverview')?.click();
+      expect(document.querySelector('.series-overview__hero h1')?.textContent).toContain('Season 2');
+      expect(document.activeElement?.id).toBe('episode-card-3');
+    } finally {
+      document.body.innerHTML = previousMarkup;
+    }
+  });
+
+  it('includes episode content blocks in the offline detail view', () => {
+    const project = getExampleProjects('en')[0].project;
+    project.seasons[0].episodes[0].contentBlocks = [
+      { id: 'text-1', type: 'text', title: 'Timeline', body: 'First observation' },
+      { id: 'image-1', type: 'image', imageUrl: 'data:image/png;base64,AAAA', altText: 'Chart', caption: 'Measured values' },
+    ];
+
+    const html = exportProjectToHtml(project, translations, 'en');
+
+    expect(html).toContain('episode-content-block');
+    expect(html).toContain("(ep.contentBlocks || []).forEach");
+    expect(html).toContain('Timeline');
+    expect(html).toContain('Measured values');
+  });
 });

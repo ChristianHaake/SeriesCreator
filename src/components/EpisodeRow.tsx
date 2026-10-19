@@ -69,6 +69,7 @@ export const EpisodeRow = memo(function EpisodeRow({
         </button>
         <button
           type="button"
+          id={`episode-delete-${episode.id}`}
           onClick={() => onRemove(seasonId, episode.id)}
           className="ui-icon-button ui-icon-button--danger"
           aria-label={`${t.episodeDelete}: ${title}`}
