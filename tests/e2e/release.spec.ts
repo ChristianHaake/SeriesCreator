@@ -233,8 +233,15 @@ test('announces an episode reorder with its title and new position', async ({ pa
   await page.getByRole('button', { name: 'Add Episode' }).click();
   await page.getByRole('button', { name: 'Add Episode' }).click();
 
-  await page.getByRole('button', { name: 'Move episode down: Untitled episode' }).first().click();
-  await expect(page.getByRole('status')).toHaveText('Untitled episode is now at position 2.');
+  await openEpisode(page);
+  const episode = page.locator('dialog.episode-dialog');
+  await episode.getByLabel('Title', { exact: true }).fill('Episode to move');
+  await page.keyboard.press('Escape');
+
+  await page.getByRole('button', { name: 'Move episode down: Episode to move' }).click();
+  await expect(page.locator('.visually-hidden[role="status"]')).toHaveText(
+    '“Episode to move” is now at position 2.',
+  );
 });
 
 test('reports image upload problems inline instead of in a blocking dialog', async ({ page }) => {
