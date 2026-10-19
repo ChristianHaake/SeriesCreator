@@ -31,6 +31,8 @@ test('completes the primary workflow and downloads both portable formats', async
   await episode
     .getByLabel('Academic deepening', { exact: true })
     .fill('The class distinguishes an observation from evidence and records a supporting source.');
+  await episode.getByRole('button', { name: 'Add text block' }).click();
+  await episode.getByLabel('Content', { exact: true }).fill('The evidence sequence continues here.');
   await page.keyboard.press('Escape');
   await expect(episode).toHaveCount(0);
 
@@ -62,6 +64,8 @@ test('completes the primary workflow and downloads both portable formats', async
     presentation.getByRole('heading', { name: 'Episode 1', exact: true }),
   ).toBeVisible();
   await expect(presentation.getByText('The class distinguishes an observation from evidence and records a supporting source.')).toBeVisible();
+  await page.keyboard.press('ArrowRight');
+  await expect(presentation.getByText('The evidence sequence continues here.')).toBeVisible();
   await presentation.getByRole('button', { name: 'Close Presentation' }).click();
   await expect(presentation).toBeHidden();
   await expect(page.getByRole('button', { name: 'Present' })).toBeFocused();
