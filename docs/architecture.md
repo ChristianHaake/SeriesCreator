@@ -61,9 +61,10 @@ is used in preview metadata and presentation credits. See
 
 The app ships with school-themed climate and history examples. Loading one is a
 state replacement guarded by confirmation, just like reset/import risk paths.
-The examples intentionally exercise seasons, episode ordering, reflection,
-sources, presentation, HTML export, PDF/print, project-file export, social copy,
-and image-generation prompts.
+The examples intentionally exercise seasons, episode ordering, academic
+deepening, text and image content blocks, reflection, sources, presentation,
+HTML export, PDF/print, project-file export, social copy and image-generation
+prompts.
 
 The same examples are generated as importable `.seriescreator` files in
 `examples/` via `npm run build:examples`. These artifacts embed generated cover
@@ -91,9 +92,9 @@ Cloudflare-hosted app origin and Cloudflare Web Analytics endpoints declared in
 
 - Vitest covers codec, persistence, examples, export mapping and component
   behavior.
-- Playwright runs the production build in Chromium and WebKit and covers the
-  primary workflow, portable downloads, presentation, direct content routes and
-  320 px responsive behavior.
+- Playwright runs the production build in Chromium, Firefox, WebKit and Mobile
+  Chrome and covers the primary workflow, portable downloads, presentation,
+  direct content routes, touch behavior and 320 px responsive behavior.
 - `scripts/smoke-production.mjs` verifies the live public routes and central
   security headers.
 - GitHub Actions runs `npm run verify` on Node.js 22.12.

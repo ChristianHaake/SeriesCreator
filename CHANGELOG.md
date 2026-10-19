@@ -2,27 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
-## [2.0.0] - In preparation
+## [2.0.0] - 2026-10-19
 
 ### Added
 
-- The bundled German and English climate and Weimar examples now demonstrate
-  ordered text and image content blocks. The same content is embedded in the
-  downloadable `.seriescreator` example files, so it is available after an
-  import as well as in the in-app gallery.
-
-### Fixed
-
-- The episode-reorder browser regression test now creates and targets a
-  deterministically named episode and checks the actual live announcement,
-  instead of depending on an obsolete default title.
-
-## [1.5.0] - 2026-08-30
-
-### Added
-
-- Full-size episode editor in a native dialog with a live preview card, so
-  writing an episode is no longer confined to the narrow sidebar column.
 - Optional academic deepening for every episode: up to 5,000 characters for
   key ideas, guiding questions, terms, examples and evidence. It is preserved
   in project files and shown in the preview, presentation, HTML export and
@@ -34,6 +17,30 @@ All notable changes to this project will be documented in this file.
   in the standalone HTML export preserve episode grouping and order.
 - HTML episode details return to their originating season and restore keyboard
   focus to the episode card, so navigating a multi-season series keeps context.
+- The bundled German and English climate and Weimar examples now demonstrate
+  ordered text and image content blocks. The same content is embedded in the
+  downloadable `.seriescreator` example files, so it is available after an
+  import as well as in the in-app gallery.
+
+### Fixed
+
+- The episode-reorder browser regression test now creates and targets a
+  deterministically named episode and checks the actual live announcement,
+  instead of depending on an obsolete default title.
+
+### Security
+
+- Updated Vitest and compatible transitive dependencies to patched releases,
+  resolving the dependency audit findings in `@vitest/mocker`,
+  `baseline-browser-mapping`, `brace-expansion`, `browserslist`,
+  `source-map-js` and `undici`.
+
+## [1.5.0] - 2026-08-30
+
+### Added
+
+- Full-size episode editor in a native dialog with a live preview card, so
+  writing an episode is no longer confined to the narrow sidebar column.
 - Compact episode rows in the sidebar with reorder and delete controls.
 - Overflow menu for secondary header actions built on the native Popover API.
   Save stays outside the menu and is always reachable.

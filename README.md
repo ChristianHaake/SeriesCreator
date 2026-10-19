@@ -22,11 +22,11 @@ Bewertungshinweise beschreibt
 | Projektplanung | Titel, Urheber:in, Beschreibung, Anbieter, Kategorie, Alters-/Klassenstufe, Genre, Mitwirkende und automatisch berechneter Projektstatus |
 | Medien | Lokaler Upload von PNG, JPEG oder WebP; Cover und Episodenbilder werden im Browser geprüft und verkleinert; Alternativtexte für Episodenbilder |
 | Struktur | 1–20 Staffeln, bis zu 100 Episoden je Staffel, Umbenennen, Löschen leerer Staffeln und barrierearme Hoch-/Runter-Steuerung für Episoden |
-| Inhalt | Episodentitel, Kurzbeschreibungen und fachliche Vertiefungen je Episode, Projektverlauf/Reflexion, Quellen und eine frei benennbare Konzeptsektion |
+| Inhalt | Episodentitel, Kurzbeschreibungen, fachliche Vertiefungen sowie geordnete Text- und Bildinhaltsblöcke je Episode, Projektverlauf/Reflexion, Quellen und eine frei benennbare Konzeptsektion |
 | Vorschau | Sofort aktualisierte Streaming-Ansicht; mobil expliziter Wechsel zwischen Editor und Vorschau |
-| Präsentation | In-App-Präsentation mit Vollbild-Fallback, Tastatursteuerung, Episoden, Reflexion, Quellen und Credits |
-| Dateien | Versionierte `.seriescreator`-Projektdatei, eigenständige Offline-HTML-Präsentation und Browser-Druck/PDF |
-| Beispiele | Zwei vollständige Schulprojekte zu Klima und Weimar, jeweils auf Deutsch und Englisch sowie mit eingebetteten Bildern |
+| Präsentation | In-App-Präsentation mit Vollbild-Fallback, Tastatursteuerung, Staffelübersichten, Episoden- und Inhaltsblockfolien, Reflexion, Quellen und Credits |
+| Dateien | Versionierte `.seriescreator`-Projektdatei, eigenständige Offline-HTML-Präsentation mit Staffelansichten und Browser-Druck/PDF |
+| Beispiele | Zwei vollständige Schulprojekte zu Klima und Weimar, jeweils auf Deutsch und Englisch, mit eingebetteten Bildern sowie Text- und Bildinhaltsblöcken |
 | Sprache | Deutsche und englische Oberfläche, Startinhalte und Inhaltsseiten |
 | Speicherung | Automatische lokale Sicherung in `localStorage`; kein Konto und keine serverseitige Speicherung von Projektinhalten |
 
@@ -64,7 +64,7 @@ Voraussetzungen:
 
 ```bash
 npm ci
-npx playwright install chromium webkit
+npx playwright install chromium firefox webkit
 npm run dev
 ```
 
@@ -79,7 +79,7 @@ npm run dev
 | `npm test` | Vitest-Tests ausführen |
 | `npm run build` | Produktions-Build nach `dist/` erstellen |
 | `npm run test:e2e:chromium` | Schnelle Browserprüfung in Chromium |
-| `npm run test:e2e` | Release-Flows in Chromium und WebKit prüfen |
+| `npm run test:e2e` | Release-Flows in Chromium, Firefox, WebKit und Mobile Chrome prüfen |
 | `npm run verify` | Lint, Typprüfung, Beispiele, Unit-Tests, Build und Browser-E2E |
 | `npm audit --audit-level=low` | Abhängigkeiten gegen bekannte Schwachstellen prüfen |
 | `npm run smoke:production` | Live-Routen und zentrale Security-Header prüfen |
