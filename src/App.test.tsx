@@ -5,6 +5,7 @@ import App from './App';
 import { getExampleProjects } from './domain/exampleProjects';
 import { calculateProjectCompletion, displayCompletion } from './domain/completion';
 import { parseProjectJson, serializeProject } from './domain/projectCodec';
+import { initialProjectData } from './types';
 import { LocaleProvider } from './i18n';
 
 // Episode fields live in a dialog opened from the list row.
@@ -74,10 +75,13 @@ describe('App', () => {
     renderApp();
 
     await user.click(screen.getByRole('button', { name: 'Present' }));
-    expect(screen.getByRole('button', { name: 'Close Presentation' })).toBeInTheDocument();
+    const close = screen.getByRole('button', { name: 'Close Presentation' });
+    expect(screen.getByRole('dialog', { name: 'Presentation mode' })).toHaveAttribute('aria-modal', 'true');
+    expect(close).toHaveFocus();
 
     await user.keyboard('{Escape}');
     expect(screen.queryByRole('button', { name: 'Close Presentation' })).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Present' })).toHaveFocus());
   });
 
   it('uses path routing for the educator link', async () => {
@@ -116,6 +120,51 @@ describe('App', () => {
     expect(screen.getByLabelText('Series Title')).toHaveValue('Keep this draft');
   });
 
+  it('validates an import before asking whether it may replace the current draft', async () => {
+    const user = userEvent.setup();
+    renderApp();
+    await user.clear(screen.getByLabelText('Series Title'));
+    await user.type(screen.getByLabelText('Series Title'), 'Keep this draft');
+
+    const imported = serializeProject({ ...initialProjectData, title: 'Imported project' });
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]');
+    expect(input).not.toBeNull();
+    await user.upload(input!, new File([imported], 'import.seriescreator', {
+      type: 'application/json',
+    }));
+
+    expect(await screen.findByText('Load this project file? This will replace your current draft.')).toBeInTheDocument();
+    expect(screen.getByLabelText('Series Title')).toHaveValue('Keep this draft');
+
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(screen.getByLabelText('Series Title')).toHaveValue('Keep this draft');
+
+    await user.upload(input!, new File([imported], 'import.seriescreator', {
+      type: 'application/json',
+    }));
+    await user.click(await screen.findByRole('button', { name: 'Load project file' }));
+    expect(screen.getByLabelText('Series Title')).toHaveValue('Imported project');
+  });
+
+  it('confirms episode deletion and announces an episode reorder', async () => {
+    const user = userEvent.setup();
+    renderApp();
+    await user.click(screen.getByRole('button', { name: '2. Episodes' }));
+    await user.click(screen.getByRole('button', { name: 'Add Episode' }));
+    await user.click(screen.getByRole('button', { name: 'Add Episode' }));
+
+    const deleteButtons = screen.getAllByRole('button', { name: /^Delete episode:/ });
+    const rowsBeforeDelete = screen.getAllByRole('button', { name: /^Episode \d+:/ }).length;
+    await user.click(deleteButtons[0]);
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(screen.getAllByRole('button', { name: /^Episode \d+:/ })).toHaveLength(rowsBeforeDelete);
+
+    const moveDown = screen.getAllByRole('button', { name: /^Move episode down:/ })[0];
+    await user.click(moveDown);
+    expect(screen.getByText(/is now at position 2\./)).toBeInTheDocument();
+  });
+
   it('does not render the dead list action', () => {
     renderApp();
 
@@ -135,6 +184,7 @@ describe('App', () => {
     renderApp('/definitely-not-a-page');
 
     expect(await screen.findByRole('heading', { name: 'Page not found' })).toBeInTheDocument();
+    expect(document.title).toBe('Page not found · SeriesCreator');
     expect(document.querySelector('.editor-sidebar')).toBeNull();
   });
 

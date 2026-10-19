@@ -15,7 +15,7 @@ describe('ErrorBoundary', () => {
 
   const copy = {
     title: 'Something went wrong',
-    body: 'Your project is saved on this device and has not been lost.',
+    body: 'Changes made since the last successful save may be unavailable.',
     reloadLabel: 'Reload the page',
   };
 
@@ -31,8 +31,7 @@ describe('ErrorBoundary', () => {
 
     const alert = screen.getByRole('alert');
     expect(alert).toHaveTextContent('Something went wrong');
-    // The reassurance is the point: the work is not gone.
-    expect(alert).toHaveTextContent('saved on this device');
+    expect(alert).toHaveTextContent('last successful save may be unavailable');
     expect(screen.getByRole('button', { name: 'Reload the page' })).toBeInTheDocument();
   });
 });

@@ -1,4 +1,4 @@
-import { useRef, useState, useMemo, type ChangeEvent } from 'react';
+import { useEffect, useRef, useState, useMemo, type ChangeEvent } from 'react';
 import { Plus, Edit2, Image as ImageIcon, Trash2, X } from 'lucide-react';
 import { EpisodeRow } from './EpisodeRow';
 import { EpisodeDialog } from './EpisodeDialog';
@@ -47,6 +47,9 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
   const [seasonDialog, setSeasonDialog] = useState<'rename' | 'delete' | null>(null);
   // Which episode is open in the editor dialog, if any.
   const [openEpisodeId, setOpenEpisodeId] = useState<string | null>(null);
+  const [episodePendingDelete, setEpisodePendingDelete] = useState<string | null>(null);
+  const [episodeAnnouncement, setEpisodeAnnouncement] = useState('');
+  const focusAfterEpisodeDeleteRef = useRef<string | 'add' | null>(null);
   const coverInputRef = useRef<HTMLInputElement | null>(null);
   const { t, locale } = useTranslation();
 
@@ -56,6 +59,32 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
   const seasonLimitReached = data.seasons.length >= resourceLimits.maxSeasons;
   const episodeLimitReached =
     (activeSeason?.episodes.length ?? 0) >= resourceLimits.maxEpisodesPerSeason;
+
+  useEffect(() => {
+    const episodeId = focusAfterEpisodeDeleteRef.current;
+    if (!episodeId) return;
+    focusAfterEpisodeDeleteRef.current = null;
+    document.getElementById(episodeId === 'add' ? 'add-episode' : `episode-open-${episodeId}`)?.focus();
+  }, [data]);
+
+  const handleEpisodeMove = (seasonId: string, episodeId: string, direction: 'up' | 'down') => {
+    const season = data.seasons.find((item) => item.id === seasonId);
+    const index = season?.episodes.findIndex((episode) => episode.id === episodeId) ?? -1;
+    if (!season || index < 0 || (direction === 'up' && index === 0) || (direction === 'down' && index === season.episodes.length - 1)) return;
+    moveEpisode(seasonId, episodeId, direction);
+    const episode = season.episodes[index];
+    const position = direction === 'up' ? index : index + 2;
+    setEpisodeAnnouncement(t.episodeMoved.replace('{title}', episode.title || t.lblUntitled).replace('{position}', String(position)));
+  };
+
+  const handleEpisodeDeleteConfirm = () => {
+    if (!activeSeason || !episodePendingDelete) return;
+    const index = activeSeason.episodes.findIndex((item) => item.id === episodePendingDelete);
+    const remaining = activeSeason.episodes.filter((item) => item.id !== episodePendingDelete);
+    focusAfterEpisodeDeleteRef.current = remaining[Math.min(index, remaining.length - 1)]?.id ?? 'add';
+    removeEpisode(activeSeason.id, episodePendingDelete);
+    setEpisodePendingDelete(null);
+  };
 
   const handleCoverUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -552,10 +581,24 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
             index={index}
             total={activeSeason.episodes.length}
             onOpen={setOpenEpisodeId}
-            onRemove={removeEpisode}
-            onMove={moveEpisode}
+            onRemove={(_, episodeId) => setEpisodePendingDelete(episodeId)}
+            onMove={handleEpisodeMove}
           />
         ))}
+        <p className="visually-hidden" role="status" aria-live="polite">{episodeAnnouncement}</p>
+        {activeSeason && episodePendingDelete && (() => {
+          const episode = activeSeason.episodes.find((item) => item.id === episodePendingDelete);
+          if (!episode) return null;
+          return (
+            <ConfirmDialog
+              message={t.confirmDeleteEpisode.replace('{title}', episode.title || t.lblUntitled)}
+              confirmLabel={t.btnDelete}
+              destructive
+              onConfirm={handleEpisodeDeleteConfirm}
+              onCancel={() => setEpisodePendingDelete(null)}
+            />
+          );
+        })()}
 
         {/* One dialog for whichever episode is open, rather than one per row. */}
         {activeSeason && openEpisodeId && (() => {
@@ -573,6 +616,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
         })()}
 
         <button
+          id="add-episode"
           type="button"
           onClick={() => activeSeason && addEpisode(activeSeason.id)}
           disabled={!activeSeason || episodeLimitReached}

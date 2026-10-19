@@ -1,8 +1,14 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { initialProjectData } from '../types';
 import { resourceLimits } from '../domain/constraints';
-import { loadStoredProject, saveStoredProject, useProjectStore, UNREADABLE_BACKUP_KEY } from './useProjectStore';
+import {
+  loadStoredProject,
+  saveStoredProject,
+  STORAGE_KEY,
+  UNREADABLE_BACKUP_KEY,
+  useProjectStore,
+} from './useProjectStore';
 import { LocaleProvider } from '../i18n';
 
 class MemoryStorage implements Storage {
@@ -57,7 +63,51 @@ describe('project storage', () => {
     const loaded = loadStoredProject(storage);
 
     expect(loaded.unreadable).toBe(true);
+    expect(loaded.backupPreserved).toBe(true);
     expect(storage.getItem(UNREADABLE_BACKUP_KEY)).toBe(originalBytes);
+  });
+
+  it('keeps autosave locked when the unreadable-data backup cannot be created', () => {
+    class BackupFailingStorage extends MemoryStorage {
+      override setItem(key: string, value: string) {
+        if (key === UNREADABLE_BACKUP_KEY) throw new Error('quota exceeded');
+        super.setItem(key, value);
+      }
+    }
+
+    const storage = new BackupFailingStorage();
+    const originalBytes = '{"title":"Only copy","seasons":[';
+    storage.setItem(STORAGE_KEY, originalBytes);
+    const originalLocalStorage = window.localStorage;
+    Object.defineProperty(window, 'localStorage', { configurable: true, value: storage });
+    vi.useFakeTimers();
+
+    try {
+      const { result, unmount } = renderHook(() => useProjectStore(), {
+        wrapper: LocaleProvider,
+      });
+
+      expect(result.current.persistenceBlocked).toBe(true);
+      act(() => {
+        result.current.updateData({ title: 'Do not overwrite the only copy' });
+      });
+      act(() => {
+        vi.advanceTimersByTime(501);
+      });
+      expect(storage.getItem(STORAGE_KEY)).toBe(originalBytes);
+
+      act(() => result.current.resetData());
+      expect(result.current.persistenceBlocked).toBe(false);
+      expect(loadStoredProject(storage).unreadable).toBe(false);
+      expect(loadStoredProject(storage).data.title).toBe(result.current.data.title);
+      unmount();
+    } finally {
+      vi.useRealTimers();
+      Object.defineProperty(window, 'localStorage', {
+        configurable: true,
+        value: originalLocalStorage,
+      });
+    }
   });
 
   it('keeps data that parses but fails validation', () => {
