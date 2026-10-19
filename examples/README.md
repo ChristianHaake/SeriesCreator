@@ -11,7 +11,8 @@ be opened through the app's **Load** action.
 - `en-The-Weimar-File.seriescreator`
 
 Each file contains embedded JPEG data URLs for one cover image and six episode
-thumbnails. No external image files are required after import.
+thumbnails. The first episode also demonstrates ordered text and image content
+blocks. No external image files are required after import.
 
 ## Image Assets
 

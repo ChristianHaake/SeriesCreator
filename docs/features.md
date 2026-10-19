@@ -1,6 +1,6 @@
 # Funktionsspezifikation
 
-Stand: 2026-07-29
+Stand: 2026-10-19
 
 Dieses Dokument ist die verbindliche Definition des aktuellen
 SeriesCreator-Funktionsumfangs. Roadmap-Ideen sind keine Release-Funktionen.
@@ -125,7 +125,8 @@ Akzeptiert, wenn:
 - die HTML-Datei ohne externe Assets funktioniert, mit einer Staffelübersicht
   startet und Tastaturnavigation, responsive Layouts sowie reduzierte Bewegung
   unterstützt;
-- die Druckansicht Titel, Episoden und vorhandene fachliche Vertiefungen enthält;
+- die Druckansicht Titel, Episoden, vorhandene fachliche Vertiefungen und
+  Inhaltsblöcke enthält;
 - die UI PDF korrekt als Browser-Druckpfad bezeichnet, nicht als eigenen
   PDF-Generator.
 
@@ -137,6 +138,8 @@ Akzeptiert, wenn:
 
 - jedes Beispiel zwei Staffeln, sechs Episoden, Reflexion und Quellen enthält;
 - jedes Beispiel die fachliche Vertiefung je Episode demonstriert;
+- jedes Beispiel mindestens einen Text- und einen Bildinhaltsblock
+  demonstriert;
 - Cover und Episodenbilder eingebettet werden;
 - Galerie und `.seriescreator`-Datei denselben normalen Projektpfad verwenden;
 - das Laden nur nach Bestätigung vorhandene Arbeit ersetzt.
@@ -168,6 +171,10 @@ Akzeptiert, wenn:
 | Episodentitel | 100 Zeichen |
 | Episodenbeschreibung | 1.000 Zeichen |
 | Fachliche Vertiefung je Episode | 5.000 Zeichen |
+| Inhaltsblöcke je Episode | 0–20 |
+| Titel eines Inhaltsblocks | 100 Zeichen |
+| Text eines Inhaltsblocks | 5.000 Zeichen |
+| Bildunterschrift eines Inhaltsblocks | 250 Zeichen |
 | Alternativtext | 125 Zeichen |
 | Reflexion / Quellen | jeweils 5.000 Zeichen |
 

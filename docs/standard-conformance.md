@@ -5,7 +5,7 @@ https://github.com/ChristianHaake/haak3-webapp-standard
 
 Standard version: `1.0.0-draft`
 
-Last reviewed: `2026-07-29`
+Last reviewed: `2026-10-19`
 
 ## Exceptions
 
@@ -33,6 +33,6 @@ Resolved: 2026-07-16
 - Cloudflare Web Analytics is the hosting-provider analytics allowed by the
   standard. It is cookieless, documented in the privacy pages and restricted by
   the production CSP; project content is not sent to it.
-- Browser E2E runs against the built production preview in Chromium and WebKit.
-  WebKit is treated as an automated Safari-engine proxy, not as manual
-  Safari.app or iPad proof.
+- Browser E2E runs against the built production preview in Chromium, Firefox,
+  WebKit and Mobile Chrome. WebKit is treated as an automated Safari-engine
+  proxy, not as manual Safari.app or iPad proof.

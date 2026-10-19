@@ -6,6 +6,17 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- Optional academic deepening for every episode: up to 5,000 characters for
+  key ideas, guiding questions, terms, examples and evidence. It is preserved
+  in project files and shown in the preview, presentation, HTML export and
+  print output.
+- Ordered text and image content blocks within each episode, including optional
+  titles, image captions and alternative text. They are preserved in project
+  files and appear in the preview, presentation, HTML export and print output.
+- Season overview slides in presentation mode and a Netflix-style opening view
+  in the standalone HTML export preserve episode grouping and order.
+- HTML episode details return to their originating season and restore keyboard
+  focus to the episode card, so navigating a multi-season series keeps context.
 - The bundled German and English climate and Weimar examples now demonstrate
   ordered text and image content blocks. The same content is embedded in the
   downloadable `.seriescreator` example files, so it is available after an
@@ -30,17 +41,6 @@ All notable changes to this project will be documented in this file.
 
 - Full-size episode editor in a native dialog with a live preview card, so
   writing an episode is no longer confined to the narrow sidebar column.
-- Optional academic deepening for every episode: up to 5,000 characters for
-  key ideas, guiding questions, terms, examples and evidence. It is preserved
-  in project files and shown in the preview, presentation, HTML export and
-  print output.
-- Ordered text and image content blocks within each episode, including optional
-  titles, image captions and alternative text. They are preserved in project
-  files and appear in the preview, presentation, HTML export and print output.
-- Season overview slides in presentation mode and a Netflix-style opening view
-  in the standalone HTML export preserve episode grouping and order.
-- HTML episode details return to their originating season and restore keyboard
-  focus to the episode card, so navigating a multi-season series keeps context.
 - Compact episode rows in the sidebar with reorder and delete controls.
 - Overflow menu for secondary header actions built on the native Popover API.
   Save stays outside the menu and is always reachable.
