@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import type { ProjectData } from '../types';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from '../i18n';
@@ -13,6 +13,8 @@ export function PresentationMode({ data, onClose }: Props) {
   // Collect all episodes across seasons
   const allEpisodes = useMemo(() => data.seasons.flatMap(s => s.episodes), [data.seasons]);
   const [currentIndex, setCurrentIndex] = useState(-1); // -1 is the title screen
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   const maxIndex = allEpisodes.length + 2;
   // Title + episodes + reflection + sources + credits, counted from 1.
@@ -41,6 +43,25 @@ export function PresentationMode({ data, onClose }: Props) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [maxIndex, onClose]);
 
+  useEffect(() => {
+    closeButtonRef.current?.focus();
+  }, []);
+
+  const handleDialogKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== 'Tab') return;
+    const controls = [...(dialogRef.current?.querySelectorAll<HTMLButtonElement>('button:not(:disabled)') ?? [])];
+    if (controls.length === 0) return;
+    const first = controls[0];
+    const last = controls.at(-1)!;
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
+
   // Request fullscreen on mount
   useEffect(() => {
     let enteredFullscreen = false;
@@ -65,9 +86,10 @@ export function PresentationMode({ data, onClose }: Props) {
   }, [onClose]);
 
   return (
-    <div className="presentation-mode">
+    <div ref={dialogRef} className="presentation-mode" role="dialog" aria-modal="true" aria-label={t.presentationDialogLabel} onKeyDown={handleDialogKeyDown}>
       <button 
         type="button"
+        ref={closeButtonRef}
         onClick={onClose}
         aria-label={t.ariaClosePresentation}
         className="presentation-close"

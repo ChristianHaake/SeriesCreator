@@ -13,7 +13,7 @@ export default function ContentPage({ pathname }: { pathname: ContentPath }) {
   const page = contentPages[locale][pathname];
 
   return (
-    <main className="content-page">
+    <main id="main-content" tabIndex={-1} className="content-page">
       <a href="/" className="content-page__back">{t.backToApp}</a>
       <div className="markdown-content">
         <h1>{page.title}</h1>

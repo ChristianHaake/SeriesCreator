@@ -10,6 +10,14 @@ import { initialProjectData } from '../types';
 import { calculateProjectCompletion, displayCompletion } from './completion';
 import { fieldLimits } from './constraints';
 
+function pngDataUrl(width: number, height: number) {
+  const bytes = new Uint8Array(24);
+  bytes.set([137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82]);
+  bytes.set([(width >>> 24) & 255, (width >>> 16) & 255, (width >>> 8) & 255, width & 255], 16);
+  bytes.set([(height >>> 24) & 255, (height >>> 16) & 255, (height >>> 8) & 255, height & 255], 20);
+  return `data:image/png;base64,${btoa(String.fromCharCode(...bytes))}`;
+}
+
 describe('projectCodec', () => {
   it('normalizes legacy project JSON without replacing it blindly', () => {
     const result = parseProjectJson(
@@ -55,6 +63,26 @@ describe('projectCodec', () => {
     );
 
     expect(result.ok).toBe(false);
+  });
+
+  it('rejects duplicate season and episode IDs before they reach editor state', () => {
+    const duplicateSeason = parseProjectJson(JSON.stringify({
+      ...initialProjectData,
+      seasons: [
+        { id: 'same-season', title: 'One', episodes: [] },
+        { id: 'same-season', title: 'Two', episodes: [] },
+      ],
+    }));
+    const duplicateEpisodeAcrossSeasons = parseProjectJson(JSON.stringify({
+      ...initialProjectData,
+      seasons: [
+        { id: 'one', title: 'One', episodes: [{ id: 'same-episode', title: 'One', summary: '' }] },
+        { id: 'two', title: 'Two', episodes: [{ id: 'same-episode', title: 'Two', summary: '' }] },
+      ],
+    }));
+
+    expect(duplicateSeason).toEqual({ ok: false, code: 'invalidSeasonContent' });
+    expect(duplicateEpisodeAcrossSeasons).toEqual({ ok: false, code: 'invalidSeasonContent' });
   });
 
   it('serializes with the current schema version', () => {
@@ -123,6 +151,20 @@ describe('projectCodec', () => {
         coverUrl: `data:image/jpeg;base64,${'A'.repeat(25_000_000)}`,
       }),
     ).toBe(false);
+  });
+
+  it('keeps only embedded images at or below the 60 MP input limit', () => {
+    const atLimit = parseProjectJson(JSON.stringify({
+      ...initialProjectData,
+      coverUrl: pngDataUrl(10_000, 6_000),
+    }));
+    const aboveLimit = parseProjectJson(JSON.stringify({
+      ...initialProjectData,
+      coverUrl: pngDataUrl(10_000, 6_001),
+    }));
+
+    expect(atLimit.ok && atLimit.data.coverUrl).toBeDefined();
+    expect(aboveLimit.ok && aboveLimit.data.coverUrl).toBeUndefined();
   });
 
   it('calculates project completion and respects custom completion override', () => {

@@ -14,8 +14,8 @@ interface State {
 
 /**
  * Without this, an uncaught render error leaves a blank page. The project is
- * autosaved to localStorage and survives a reload, but a student looking at
- * nothing has no way to know that — so say it, and offer the reload.
+ * autosave may not have completed before the failure. Explain the recovery
+ * limit honestly and offer a reload.
  */
 export class ErrorBoundary extends Component<Props, State> {
   state: State = { failed: false };

@@ -29,6 +29,7 @@ export const EpisodeRow = memo(function EpisodeRow({
         type="button"
         className="episode-row__open"
         onClick={() => onOpen(episode.id)}
+        id={`episode-open-${episode.id}`}
         aria-label={`${t.lblEpisodeN}${index + 1}: ${title}`}
       >
         <span className="episode-row__number">{index + 1}</span>
@@ -51,8 +52,8 @@ export const EpisodeRow = memo(function EpisodeRow({
           onClick={() => onMove(seasonId, episode.id, 'up')}
           disabled={index === 0}
           className="ui-icon-button"
-          aria-label={t.episodeMoveUp}
-          title={t.episodeMoveUp}
+          aria-label={`${t.episodeMoveUp}: ${title}`}
+          title={`${t.episodeMoveUp}: ${title}`}
         >
           <ArrowUp size={16} />
         </button>
@@ -61,8 +62,8 @@ export const EpisodeRow = memo(function EpisodeRow({
           onClick={() => onMove(seasonId, episode.id, 'down')}
           disabled={index === total - 1}
           className="ui-icon-button"
-          aria-label={t.episodeMoveDown}
-          title={t.episodeMoveDown}
+          aria-label={`${t.episodeMoveDown}: ${title}`}
+          title={`${t.episodeMoveDown}: ${title}`}
         >
           <ArrowDown size={16} />
         </button>
@@ -70,8 +71,8 @@ export const EpisodeRow = memo(function EpisodeRow({
           type="button"
           onClick={() => onRemove(seasonId, episode.id)}
           className="ui-icon-button ui-icon-button--danger"
-          aria-label={t.episodeDelete}
-          title={t.episodeDelete}
+          aria-label={`${t.episodeDelete}: ${title}`}
+          title={`${t.episodeDelete}: ${title}`}
         >
           <Trash2 size={16} />
         </button>

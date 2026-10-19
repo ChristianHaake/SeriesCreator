@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, lazy, Suspense, type KeyboardEvent } from 'react';
+import { useState, useEffect, useMemo, useRef, lazy, Suspense, type KeyboardEvent } from 'react';
 import { useProjectStore } from './store/useProjectStore';
 import { Presentation } from 'lucide-react';
 import { EditorSidebar } from './components/EditorSidebar';
@@ -7,6 +7,7 @@ import { PresentationMode } from './components/PresentationMode';
 import { PrintLayout } from './components/PrintLayout';
 
 import { AppHeader } from './components/AppHeader';
+import type { ProjectImportFailure } from './components/AppHeader';
 import { AppFooter } from './components/AppFooter';
 import { ExampleGallery } from './components/ExampleGallery';
 import { ConfirmDialog } from './components/ConfirmDialog';
@@ -32,25 +33,28 @@ type PreviewTab = 'EPISODEN' | 'DETAILS' | 'QUELLEN';
 type MobilePanel = 'editor' | 'preview';
 type StatusTone = 'success' | 'error' | 'info';
 type AppStatus = { message: string; tone: StatusTone } | null;
+type PendingAction =
+  | { type: 'callback'; message: string; confirmLabel: string; run: () => void }
+  | { type: 'import'; data: import('./types').ProjectData };
 const previewTabOrder: PreviewTab[] = ['EPISODEN', 'DETAILS', 'QUELLEN'];
 
 function App() {
   const { t, locale } = useTranslation();
   const [status, setStatus] = useState<AppStatus>(null);
+  const [importStatus, setImportStatus] = useState<'importing' | ProjectImportFailure | null>(null);
   const store = useProjectStore(() =>
     setStatus({ message: t.msgSaveFailed, tone: 'error' }),
   );
-  const { data, replaceData, resetData, restoreFailed } = store;
+  const { data, replaceData, resetData, restoreFailed, persistenceBlocked } = store;
   const [activeSeasonId, setActiveSeasonId] = useState(data.seasons[0]?.id || '');
   const [activeTab, setActiveTab] = useState<PreviewTab>('EPISODEN');
   const [showPresentation, setShowPresentation] = useState(false);
+  const presentationLauncherRef = useRef<HTMLButtonElement>(null);
   const [showExamples, setShowExamples] = useState(false);
   const [currentPath, setCurrentPath] = useState(window.location.pathname.replace(/\/+$/, "") || "/");
   const [mobilePanel, setMobilePanel] = useState<MobilePanel>('editor');
   // Pending destructive action awaiting confirmation in the dialog.
-  const [pendingAction, setPendingAction] = useState<
-    { message: string; confirmLabel: string; run: () => void } | null
-  >(null);
+  const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
   const examples = useMemo(() => getExampleProjects(locale), [locale]);
 
   useEffect(() => {
@@ -64,23 +68,46 @@ function App() {
   // served HTML and never run this.
   useEffect(() => {
     const page = isContentPath(currentPath) ? contentPages[locale][currentPath] : null;
-    document.title = page ? `${page.title} · SeriesCreator` : 'SeriesCreator';
+    document.title = page
+      ? `${page.title} · SeriesCreator`
+      : currentPath === '/' ? 'SeriesCreator' : `${t.notFoundTitle} · SeriesCreator`;
     document
       .querySelector('meta[name="description"]')
       ?.setAttribute('content', t.metaDescription);
-  }, [currentPath, locale, t.metaDescription]);
+  }, [currentPath, locale, t.metaDescription, t.notFoundTitle]);
 
 
   // A saved project that could not be restored is kept under a backup key; say
   // so, because the editor otherwise looks like it simply started empty. Derived
   // rather than set in an effect, and superseded by the next real status.
+  const importMessage = importStatus && ({
+    importing: t.msgImporting,
+    notAnObject: t.importErrorNotAnObject,
+    unsupportedSchema: t.importErrorUnsupportedSchema,
+    invalidSeasons: t.importErrorInvalidSeasons,
+    seasonCount: t.importErrorSeasonCount,
+    invalidSeasonContent: t.importErrorInvalidSeasonContent,
+    workerTimeout: t.importErrorWorkerTimeout,
+    tooLarge: t.importErrorTooLarge,
+    invalidJson: t.importErrorInvalidJson,
+    readFailed: t.msgImportReadFailed,
+  }[importStatus]);
   const visibleStatus: AppStatus = status
-    ?? (restoreFailed ? { message: t.msgProjectUnreadable, tone: 'error' } : null);
+    ?? (importMessage ? { message: importMessage, tone: importStatus === 'importing' ? 'info' : 'error' } : null)
+    ?? (restoreFailed
+      ? {
+          message: persistenceBlocked
+            ? t.msgProjectUnreadableBackupFailed
+            : t.msgProjectUnreadable,
+          tone: 'error',
+        }
+      : null);
 
   const activeSeason = data.seasons.find(s => s.id === activeSeasonId) || data.seasons[0];
   const completion = displayCompletion(data);
 
   const showStatus = (message: string, tone: StatusTone = 'success') => {
+    setImportStatus(null);
     setStatus({ message, tone });
   };
 
@@ -145,7 +172,7 @@ function App() {
     const loadExample = async () => {
       try {
         const exampleProject = await attachExampleImages(example.project, example.id);
-        replaceData(exampleProject);
+        replaceData(exampleProject, true);
         setActiveSeasonId(exampleProject.seasons[0]?.id || '');
         setActiveTab('EPISODEN');
         setMobilePanel('preview');
@@ -157,22 +184,29 @@ function App() {
     };
 
     setPendingAction({
+      type: 'callback',
       message: t.confirmLoadExample,
       confirmLabel: t.btnLoadExample,
       run: () => { void loadExample(); },
     });
   };
 
+  const closePresentation = () => {
+    setShowPresentation(false);
+    requestAnimationFrame(() => presentationLauncherRef.current?.focus());
+  };
+
   if (showPresentation) {
-    return <PresentationMode data={data} onClose={() => setShowPresentation(false)} />;
+    return <PresentationMode data={data} onClose={closePresentation} />;
   }
 
   // Anything that is neither the editor nor a content route is a dead link.
   if (currentPath !== '/' && !isContentPath(currentPath)) {
     return (
       <div className="app-shell app-shell--content-route">
+        <a className="skip-link" href="#main-content">{t.skipToContent}</a>
         <AppHeader />
-        <main className="content-page">
+        <main id="main-content" tabIndex={-1} className="content-page">
           <div className="markdown-content">
             <h1>{t.notFoundTitle}</h1>
             <p>{t.notFoundBody}</p>
@@ -187,10 +221,11 @@ function App() {
   if (isContentPath(currentPath)) {
     return (
       <div className="app-shell app-shell--content-route">
+        <a className="skip-link" href="#main-content">{t.skipToContent}</a>
         <AppHeader />
         {/* The shell is already painted, so the fallback only fills the article
             area for the moment the chunk takes to arrive. */}
-        <Suspense fallback={<main className="content-page" aria-busy="true" />}>
+        <Suspense fallback={<main id="main-content" tabIndex={-1} className="content-page" aria-busy="true" />}>
           <ContentPage pathname={currentPath} />
         </Suspense>
         <AppFooter />
@@ -219,15 +254,15 @@ function App() {
         }}
         onHtmlExport={handleHtmlExport}
         onPrint={handleExport}
-        onImport={(importedData) => {
-          replaceData(importedData);
-          setActiveSeasonId(importedData.seasons[0]?.id || '');
-          showStatus(t.msgImportSuccess, 'success');
+        onImportValidated={(importedData) => {
+          setImportStatus(null);
+          setPendingAction({ type: 'import', data: importedData });
         }}
-        onImportStart={() => showStatus(t.msgImporting, 'info')}
-        onImportError={(message) => showStatus(message, 'error')}
+        onImportStart={() => { setStatus(null); setImportStatus('importing'); }}
+        onImportFailure={(failure) => { setStatus(null); setImportStatus(failure); }}
         onShowExamples={() => setShowExamples(true)}
         onReset={() => setPendingAction({
+          type: 'callback',
           message: t.confirmReset,
           confirmLabel: t.btnDelete,
           run: resetData,
@@ -235,10 +270,19 @@ function App() {
       />
       {pendingAction && (
         <ConfirmDialog
-          message={pendingAction.message}
-          confirmLabel={pendingAction.confirmLabel}
+          message={pendingAction.type === 'import' ? t.confirmImport : pendingAction.message}
+          confirmLabel={pendingAction.type === 'import' ? t.btnLoadImport : pendingAction.confirmLabel}
           destructive
-          onConfirm={() => { pendingAction.run(); setPendingAction(null); }}
+          onConfirm={() => {
+            if (pendingAction.type === 'import') {
+              replaceData(pendingAction.data, true);
+              setActiveSeasonId(pendingAction.data.seasons[0]?.id || '');
+              showStatus(t.msgImportSuccess, 'success');
+            } else {
+              pendingAction.run();
+            }
+            setPendingAction(null);
+          }}
           onCancel={() => setPendingAction(null)}
         />
       )}
@@ -329,7 +373,7 @@ function App() {
             </p>
 
             <div className="streaming-actions">
-              <button type="button" className="btn-play" onClick={() => setShowPresentation(true)}>
+              <button ref={presentationLauncherRef} type="button" className="btn-play" onClick={() => setShowPresentation(true)}>
                 <Presentation aria-hidden="true" size={24} strokeWidth={2.5} /> {t.btnPlay}
               </button>
             </div>

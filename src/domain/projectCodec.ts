@@ -1,6 +1,7 @@
 import { fieldLimits, resourceLimits } from './constraints';
 import type { Episode, ProjectData, Season } from '../types';
 import { initialProjectData } from '../types';
+import { isImageWithinPixelLimit, parseImageDataUrlDimensions } from './imageDimensions';
 
 export const PROJECT_SCHEMA_VERSION = 2;
 export const PROJECT_FILE_EXTENSION = 'seriescreator';
@@ -17,6 +18,7 @@ export type ProjectParseError =
   | 'invalidSeasons'
   | 'seasonCount'
   | 'invalidSeasonContent'
+  | 'workerTimeout'
   | 'tooLarge'
   | 'invalidJson';
 
@@ -44,7 +46,10 @@ function asOptionalImageUrl(value: unknown) {
   if (!/^data:image\/(png|jpeg|jpg|webp);base64,[A-Za-z0-9+/]+={0,2}$/i.test(value)) {
     return undefined;
   }
-  return value;
+  const dimensions = parseImageDataUrlDimensions(value);
+  return dimensions && isImageWithinPixelLimit(dimensions, resourceLimits.maxImageInputPixels)
+    ? value
+    : undefined;
 }
 
 function asOptionalPercentage(value: unknown) {
@@ -117,6 +122,15 @@ export function normalizeProject(value: unknown, seasonFallback = 'Season'): Pro
   if (seasons.some((season) => season === null)) {
     return { ok: false, code: 'invalidSeasonContent' };
   }
+  const normalizedSeasons = seasons as Season[];
+  const seasonIds = new Set(normalizedSeasons.map((season) => season.id));
+  const episodeIds = new Set(normalizedSeasons.flatMap((season) => season.episodes.map((episode) => episode.id)));
+  if (
+    seasonIds.size !== normalizedSeasons.length
+    || episodeIds.size !== normalizedSeasons.reduce((count, season) => count + season.episodes.length, 0)
+  ) {
+    return { ok: false, code: 'invalidSeasonContent' };
+  }
 
   // Schema 1 projects did not contain learningDepth. Normalizing the optional
   // value below is the explicit forward migration to schema 2.
@@ -146,7 +160,7 @@ export function normalizeProject(value: unknown, seasonFallback = 'Season'): Pro
     ageRating: limitText(value.ageRating, fieldLimits.ageRating, initialProjectData.ageRating),
     genre: limitText(value.genre, fieldLimits.genre, initialProjectData.genre),
     cast: limitText(value.cast, fieldLimits.cast, initialProjectData.cast),
-    seasons: seasons as Season[],
+    seasons: normalizedSeasons,
     reflection: limitText(value.reflection, fieldLimits.reflection) || undefined,
     sources: limitText(value.sources, fieldLimits.sources) || undefined,
     customConceptTitle:

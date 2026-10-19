@@ -120,6 +120,8 @@ test('imports a project through the background validator', async ({ page }) => {
     })),
   });
 
+  await expect(page.getByRole('dialog')).toContainText('Load this project file?');
+  await page.getByRole('dialog').getByRole('button', { name: 'Load project file' }).click();
   await expect(page.getByText('Project file loaded.')).toBeVisible();
   await expect(page.locator('.streaming-title')).toHaveText('Imported Series');
 });
@@ -316,14 +318,15 @@ test('keeps a project that cannot be restored, instead of overwriting it', async
   await page.goto('/');
   await expect(page.locator('.app-status')).toContainText('could not be opened');
 
-  // The autosave must not have replaced the only copy while the student read that.
+  // The unreadable source is preserved before the fallback project can autosave.
   await page.waitForTimeout(1200);
   const storage = await page.evaluate(() => ({
     backup: window.localStorage.getItem('series_creator_data.unreadable'),
     main: window.localStorage.getItem('series_creator_data'),
   }));
   expect(storage.backup).toBe(original);
-  expect(storage.main).toBe(original);
+  expect(storage.main).not.toBe(original);
+  expect(JSON.parse(storage.main!)).toMatchObject({ title: 'My New Series' });
 });
 
 test('still autosaves normally after a clean load', async ({ page }) => {
@@ -453,6 +456,7 @@ test('reloads a project it saved itself', async ({ page }) => {
   await page.reload();
   await page.locator('input[type="file"][aria-label="Load"]').setInputFiles(saved);
 
+  await page.getByRole('dialog').getByRole('button', { name: 'Load project file' }).click();
   await expect(page.getByText('Project file loaded.')).toBeVisible();
   await expect(page.locator('.streaming-title')).toHaveText('The School Climate Code');
   await expect(page.locator('.completion-score')).toHaveText('Project status 100%');

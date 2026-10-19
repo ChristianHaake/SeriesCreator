@@ -8,12 +8,14 @@ import type { ProjectParseError } from '../domain/projectCodec';
 import { parseProjectTextInWorker } from '../domain/projectImport';
 import { BrandLogo } from './BrandLogo';
 
+export type ProjectImportFailure = ProjectParseError | 'readFailed';
+
 interface Props {
   onExport?: () => void;
   onHtmlExport?: () => void;
-  onImport?: (data: ProjectData) => void;
+  onImportValidated?: (data: ProjectData) => void;
   onImportStart?: () => void;
-  onImportError?: (message: string) => void;
+  onImportFailure?: (failure: ProjectImportFailure) => void;
   onShowExamples?: () => void;
   onReset?: () => void;
   onPrint?: () => void;
@@ -22,9 +24,9 @@ interface Props {
 export function AppHeader({
   onExport,
   onHtmlExport,
-  onImport,
+  onImportValidated,
   onImportStart,
-  onImportError,
+  onImportFailure,
   onShowExamples,
   onReset,
   onPrint,
@@ -37,18 +39,8 @@ export function AppHeader({
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const importErrorMessage = (code: ProjectParseError) => ({
-      notAnObject: t.importErrorNotAnObject,
-      unsupportedSchema: t.importErrorUnsupportedSchema,
-      invalidSeasons: t.importErrorInvalidSeasons,
-      seasonCount: t.importErrorSeasonCount,
-      invalidSeasonContent: t.importErrorInvalidSeasonContent,
-      tooLarge: t.importErrorTooLarge,
-      invalidJson: t.importErrorInvalidJson,
-    }[code]);
-
     if (file.size > resourceLimits.projectFileBytes) {
-      onImportError?.(t.msgProjectTooLarge);
+      onImportFailure?.('tooLarge');
       input.value = '';
       return;
     }
@@ -59,12 +51,12 @@ export function AppHeader({
       const content = await file.text();
       const parsed = await parseProjectTextInWorker(content, t.seasonFallbackLabel);
       if (parsed.ok) {
-        onImport?.(parsed.data);
+        onImportValidated?.(parsed.data);
       } else {
-        onImportError?.(importErrorMessage(parsed.code));
+        onImportFailure?.(parsed.code);
       }
     } catch {
-      onImportError?.(t.msgImportReadFailed);
+      onImportFailure?.('readFailed');
     } finally {
       input.value = '';
       setIsImporting(false);
@@ -135,7 +127,7 @@ export function AppHeader({
               }
             }}
           >
-            {onImport && (
+            {onImportValidated && (
               <>
                 <button
                   type="button"
