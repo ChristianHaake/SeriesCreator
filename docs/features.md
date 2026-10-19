@@ -52,7 +52,8 @@ Akzeptiert, wenn:
 
 Ein Projekt enthält 1–20 Staffeln und höchstens 100 Episoden pro Staffel.
 Episoden enthalten Titel, Kurzbeschreibung, optionale fachliche Vertiefung,
-optionales Bild und Alternativtext.
+optionales Bild und Alternativtext sowie bis zu 20 sortierbare Text- oder
+Bildinhaltsblöcke.
 
 Akzeptiert, wenn:
 
@@ -62,6 +63,8 @@ Akzeptiert, wenn:
 - Hoch-/Runter-Schaltflächen die Reihenfolge ohne Drag-and-drop ändern.
 - die fachliche Vertiefung fachliche Kernaussagen, Leitfragen, Begriffe,
   Beispiele oder Belege aufnehmen kann, ohne den Projektstatus zu verändern.
+- Text- und Bildinhaltsblöcke in ihrer festgelegten Reihenfolge in Vorschau,
+  Präsentation, HTML-Ausgabe, Druck und Projektdatei erhalten bleiben.
 
 ### F-04 Konzept, Reflexion und Quellen
 
@@ -74,7 +77,7 @@ erhalten bleiben.
 ### F-05 Live-Vorschau und responsive Bedienung
 
 Die Vorschau zeigt Serien-Hero, Metadaten, Staffeln, Episoden, Konzept und
-Quellen. Fachliche Vertiefungen sind je Episode einklappbar.
+Quellen. Fachliche Vertiefungen und Inhaltsblöcke sind je Episode einklappbar.
 
 Akzeptiert, wenn:
 
@@ -86,12 +89,14 @@ Akzeptiert, wenn:
 
 ### F-06 Präsentation
 
-Die In-App-Präsentation zeigt Titel, alle Episoden einschließlich optionaler
-fachlicher Vertiefungen, Reflexion, Quellen und Credits.
+Die In-App-Präsentation zeigt Titel, eine Übersicht vor jeder Staffel, alle
+Episoden einschließlich optionaler fachlicher Vertiefungen, Reflexion, Quellen
+und Credits.
 
 Akzeptiert, wenn:
 
 - Pfeile und Leertaste navigieren;
+- jede Staffel vor ihren Episoden als Übersicht mit deren Reihenfolge erscheint;
 - Escape beendet;
 - Ablehnung oder Fehlen der Fullscreen-API die Präsentation nicht blockiert;
 - Bilder ihre Alternativtexte verwenden.
@@ -117,8 +122,9 @@ SeriesCreator bietet Projektdatei, HTML-Präsentation und Browser-Druck/PDF.
 Akzeptiert, wenn:
 
 - Dateinamen aus dem Projekttitel erzeugt und sicher bereinigt werden;
-- die HTML-Datei ohne externe Assets funktioniert und Tastaturnavigation,
-  responsive Layouts und reduzierte Bewegung unterstützt;
+- die HTML-Datei ohne externe Assets funktioniert, mit einer Staffelübersicht
+  startet und Tastaturnavigation, responsive Layouts sowie reduzierte Bewegung
+  unterstützt;
 - die Druckansicht Titel, Episoden und vorhandene fachliche Vertiefungen enthält;
 - die UI PDF korrekt als Browser-Druckpfad bezeichnet, nicht als eigenen
   PDF-Generator.

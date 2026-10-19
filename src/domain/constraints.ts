@@ -10,6 +10,9 @@ export const fieldLimits = {
   episodeTitle: 100,
   episodeSummary: 1000,
   episodeLearningDepth: 5000,
+  contentBlockTitle: 100,
+  contentBlockBody: 5000,
+  contentBlockCaption: 250,
   altText: 125,
   reflection: 5000,
   sources: 5000,
@@ -27,4 +30,5 @@ export const resourceLimits = {
   minSeasons: 1,
   maxSeasons: 20,
   maxEpisodesPerSeason: 100,
+  maxContentBlocksPerEpisode: 20,
 } as const;

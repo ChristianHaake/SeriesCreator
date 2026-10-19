@@ -80,9 +80,21 @@ describe('projectCodec', () => {
         { id: 'two', title: 'Two', episodes: [{ id: 'same-episode', title: 'Two', summary: '' }] },
       ],
     }));
+    const duplicateEpisodeWithinSeason = parseProjectJson(JSON.stringify({
+      ...initialProjectData,
+      seasons: [{
+        id: 'one',
+        title: 'One',
+        episodes: [
+          { id: 'same-episode', title: 'One', summary: '' },
+          { id: 'same-episode', title: 'Two', summary: '' },
+        ],
+      }],
+    }));
 
     expect(duplicateSeason).toEqual({ ok: false, code: 'invalidSeasonContent' });
     expect(duplicateEpisodeAcrossSeasons).toEqual({ ok: false, code: 'invalidSeasonContent' });
+    expect(duplicateEpisodeWithinSeason).toEqual({ ok: false, code: 'invalidSeasonContent' });
   });
 
   it('serializes with the current schema version', () => {
@@ -116,6 +128,47 @@ describe('projectCodec', () => {
       expect(roundTrip.ok && roundTrip.data.schemaVersion).toBe(PROJECT_SCHEMA_VERSION);
       expect(roundTrip.ok && roundTrip.data.seasons[0].episodes[0].learningDepth).toBe('Kernaussage\nBeleg');
     }
+  });
+
+  it('normalizes ordered content blocks while keeping schema-2 episodes compatible', () => {
+    const withBlocks = parseProjectJson(JSON.stringify({
+      ...initialProjectData,
+      seasons: [{
+        id: 's1', title: 'Season 1', episodes: [{
+          id: 'ep1', title: 'Evidence', summary: 'Short',
+          contentBlocks: [
+            { id: 'text-1', type: 'text', title: 'Claim', body: 'Measurements support it.' },
+            { id: 'image-1', type: 'image', imageUrl: pngDataUrl(3, 2), altText: 'A chart', caption: 'Results' },
+          ],
+        }],
+      }],
+    }));
+    const schema2 = parseProjectJson(JSON.stringify({
+      ...initialProjectData,
+      schemaVersion: 2,
+      seasons: [{ id: 's1', title: 'Season 1', episodes: [{ id: 'ep1', title: 'Evidence', summary: 'Short' }] }],
+    }));
+
+    expect(withBlocks.ok && withBlocks.data.seasons[0].episodes[0].contentBlocks).toEqual([
+      { id: 'text-1', type: 'text', title: 'Claim', body: 'Measurements support it.' },
+      { id: 'image-1', type: 'image', imageUrl: pngDataUrl(3, 2), altText: 'A chart', caption: 'Results' },
+    ]);
+    expect(schema2.ok && schema2.data.seasons[0].episodes[0].contentBlocks).toBeUndefined();
+  });
+
+  it('rejects malformed, duplicate, and excessive content blocks', () => {
+    const invalid = parseProjectJson(JSON.stringify({
+      ...initialProjectData,
+      seasons: [{ id: 's1', title: 'Season 1', episodes: [{
+        id: 'ep1', title: 'Evidence', summary: 'Short',
+        contentBlocks: [
+          { id: 'same', type: 'text', body: 'One' },
+          { id: 'same', type: 'text', body: 'Two' },
+        ],
+      }]}],
+    }));
+
+    expect(invalid).toEqual({ ok: false, code: 'invalidSeasonContent' });
   });
 
   it('rejects invalid schema versions and keeps the initial schema current', () => {

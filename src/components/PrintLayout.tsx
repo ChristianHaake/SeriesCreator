@@ -104,6 +104,17 @@ export const PrintLayout = React.memo(function PrintLayout({
                   <p style={{ fontSize: '18px', color: '#d4d4d4', margin: 0, lineHeight: '1.4', whiteSpace: 'pre-wrap' }}>{ep.learningDepth}</p>
                 </section>
               )}
+              {ep.contentBlocks?.map((block) => block.type === 'text' ? (
+                <section key={block.id} style={{ marginTop: '16px' }}>
+                  {block.title && <h4 style={{ fontSize: '18px', margin: '0 0 6px', color: '#fb923c' }}>{block.title}</h4>}
+                  <p style={{ fontSize: '18px', color: '#d4d4d4', margin: 0, lineHeight: '1.4', whiteSpace: 'pre-wrap' }}>{block.body}</p>
+                </section>
+              ) : (
+                <figure key={block.id} style={{ margin: '16px 0 0' }}>
+                  <img src={block.imageUrl} alt={block.altText} style={{ borderRadius: '4px', display: 'block', maxWidth: '100%' }} />
+                  {block.caption && <figcaption style={{ color: '#d4d4d4', fontSize: '16px', marginTop: '6px' }}>{block.caption}</figcaption>}
+                </figure>
+              ))}
             </div>
           </div>
         ))}

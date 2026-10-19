@@ -1,9 +1,9 @@
 import { fieldLimits, resourceLimits } from './constraints';
-import type { Episode, ProjectData, Season } from '../types';
+import type { Episode, EpisodeContentBlock, ProjectData, Season } from '../types';
 import { initialProjectData } from '../types';
 import { isImageWithinPixelLimit, parseImageDataUrlDimensions } from './imageDimensions';
 
-export const PROJECT_SCHEMA_VERSION = 2;
+export const PROJECT_SCHEMA_VERSION = 3;
 export const PROJECT_FILE_EXTENSION = 'seriescreator';
 export const PROJECT_FILE_MIME_TYPE = 'application/json';
 
@@ -41,11 +41,6 @@ function limitText(value: unknown, limit: number, fallback = '') {
 function asOptionalImageUrl(value: unknown) {
   if (typeof value !== 'string' || value.length === 0) return undefined;
   if (value.length > resourceLimits.dataUrlLength) return undefined;
-  // Validate the full payload: prefix AND a clean base64 body. Checking only the
-  // prefix would let stray characters (e.g. `")`) survive into inline style url(...).
-  if (!/^data:image\/(png|jpeg|jpg|webp);base64,[A-Za-z0-9+/]+={0,2}$/i.test(value)) {
-    return undefined;
-  }
   const dimensions = parseImageDataUrlDimensions(value);
   return dimensions && isImageWithinPixelLimit(dimensions, resourceLimits.maxImageInputPixels)
     ? value
@@ -57,12 +52,50 @@ function asOptionalPercentage(value: unknown) {
   return Math.max(0, Math.min(100, Math.round(value)));
 }
 
+function normalizeContentBlocks(value: unknown, episodeIndex: number): EpisodeContentBlock[] | null | undefined {
+  if (value === undefined) return undefined;
+  if (!Array.isArray(value) || value.length > resourceLimits.maxContentBlocksPerEpisode) return null;
+
+  const blocks = value.map((block, blockIndex): EpisodeContentBlock | null => {
+    if (!isRecord(block) || typeof block.type !== 'string') return null;
+    const id = limitText(block.id, 80) || `block_${episodeIndex + 1}_${blockIndex + 1}`;
+    if (block.type === 'text') {
+      if (typeof block.body !== 'string') return null;
+      return {
+        id,
+        type: 'text',
+        title: limitText(block.title, fieldLimits.contentBlockTitle) || undefined,
+        body: limitText(block.body, fieldLimits.contentBlockBody),
+      };
+    }
+    if (block.type === 'image') {
+      const imageUrl = asOptionalImageUrl(block.imageUrl);
+      if (!imageUrl || typeof block.altText !== 'string') return null;
+      return {
+        id,
+        type: 'image',
+        imageUrl,
+        altText: limitText(block.altText, fieldLimits.altText),
+        caption: limitText(block.caption, fieldLimits.contentBlockCaption) || undefined,
+      };
+    }
+    return null;
+  });
+  if (blocks.some((block) => block === null)) return null;
+  const normalizedBlocks = blocks as EpisodeContentBlock[];
+  return new Set(normalizedBlocks.map((block) => block.id)).size === normalizedBlocks.length
+    ? normalizedBlocks
+    : null;
+}
+
 function normalizeEpisode(value: unknown, index: number): Episode | null {
   if (!isRecord(value)) return null;
   if (typeof value.title !== 'string' || typeof value.summary !== 'string') {
     return null;
   }
 
+  const contentBlocks = normalizeContentBlocks(value.contentBlocks, index);
+  if (contentBlocks === null) return null;
   return {
     id: limitText(value.id, 80) || `ep_${index + 1}`,
     title: limitText(value.title, fieldLimits.episodeTitle) || 'Neue Episode',
@@ -70,6 +103,7 @@ function normalizeEpisode(value: unknown, index: number): Episode | null {
     learningDepth: limitText(value.learningDepth, fieldLimits.episodeLearningDepth) || undefined,
     thumbnailUrl: asOptionalImageUrl(value.thumbnailUrl),
     altText: limitText(value.altText, fieldLimits.altText) || undefined,
+    contentBlocks,
   };
 }
 

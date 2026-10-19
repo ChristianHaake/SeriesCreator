@@ -31,6 +31,8 @@ test('completes the primary workflow and downloads both portable formats', async
   await episode
     .getByLabel('Academic deepening', { exact: true })
     .fill('The class distinguishes an observation from evidence and records a supporting source.');
+  await episode.getByRole('button', { name: 'Add text block' }).click();
+  await episode.getByLabel('Content', { exact: true }).fill('The evidence sequence continues here.');
   await page.keyboard.press('Escape');
   await expect(episode).toHaveCount(0);
 
@@ -54,13 +56,19 @@ test('completes the primary workflow and downloads both portable formats', async
   await page.getByRole('button', { name: 'Present' }).click();
   const presentation = page.locator('.presentation-mode');
   await expect(presentation).toBeVisible();
+  await expect(presentation.getByRole('button', { name: 'Close Presentation' })).toBeFocused();
+  await page.keyboard.press('ArrowRight');
+  await expect(presentation.getByRole('heading', { name: 'Season 1', exact: true })).toBeVisible();
   await page.keyboard.press('ArrowRight');
   await expect(
     presentation.getByRole('heading', { name: 'Episode 1', exact: true }),
   ).toBeVisible();
   await expect(presentation.getByText('The class distinguishes an observation from evidence and records a supporting source.')).toBeVisible();
+  await page.keyboard.press('ArrowRight');
+  await expect(presentation.getByText('The evidence sequence continues here.')).toBeVisible();
   await presentation.getByRole('button', { name: 'Close Presentation' }).click();
   await expect(presentation).toBeHidden();
+  await expect(page.getByRole('button', { name: 'Present' })).toBeFocused();
 });
 
 test('supports direct content routes and narrow responsive editing', async ({ page }) => {
@@ -108,8 +116,9 @@ test('loads a complete current example through the gallery', async ({ page }) =>
 
 test('imports a project through the background validator', async ({ page }) => {
   await page.goto('/');
+  await page.getByLabel('Series Title').fill('Keep this draft');
 
-  await page.locator('input[type="file"][aria-label="Load"]').setInputFiles({
+  const importFile = {
     name: 'import.seriescreator',
     mimeType: 'application/json',
     buffer: Buffer.from(JSON.stringify({
@@ -118,8 +127,15 @@ test('imports a project through the background validator', async ({ page }) => {
       description: 'Validated away from the main UI thread.',
       seasons: [{ id: 's1', title: 'Season 1', episodes: [] }],
     })),
-  });
+  };
+  const importInput = page.locator('input[type="file"][aria-label="Load"]');
+  await importInput.setInputFiles(importFile);
 
+  await expect(page.getByRole('dialog')).toContainText('Load this project file?');
+  await page.getByRole('dialog').getByRole('button', { name: 'Cancel' }).click();
+  await expect(page.getByLabel('Series Title')).toHaveValue('Keep this draft');
+
+  await importInput.setInputFiles(importFile);
   await expect(page.getByRole('dialog')).toContainText('Load this project file?');
   await page.getByRole('dialog').getByRole('button', { name: 'Load project file' }).click();
   await expect(page.getByText('Project file loaded.')).toBeVisible();
@@ -165,23 +181,24 @@ test('advances presentation slides once per keypress and tracks position', async
   await page.getByRole('button', { name: 'Present' }).click();
   const counter = page.locator('.presentation-navigation__counter');
 
-  // Title + 2 episodes + reflection + sources + credits.
-  await expect(counter).toContainText('1 / 6');
+  // Title + season overview + 2 episodes + reflection + sources + credits.
+  await expect(counter).toContainText('1 / 7');
 
   // Clicking the arrow leaves focus on it; space must then advance exactly once,
   // not twice (the window handler plus the button's own activation).
   await page.getByRole('button', { name: 'Next Slide' }).click();
-  await expect(counter).toContainText('2 / 6');
+  await expect(counter).toContainText('2 / 7');
+  await expect(page.getByRole('heading', { name: 'Season 1' })).toBeVisible();
   await page.keyboard.press('Space');
-  await expect(counter).toContainText('3 / 6');
+  await expect(counter).toContainText('3 / 7');
 
   // Space away from a button still advances, and must not scroll the panel.
   await page.locator('.presentation-content').click();
   await page.keyboard.press('Space');
-  await expect(counter).toContainText('4 / 6');
+  await expect(counter).toContainText('4 / 7');
 
   await page.keyboard.press('ArrowLeft');
-  await expect(counter).toContainText('3 / 6');
+  await expect(counter).toContainText('3 / 7');
 });
 
 test('gives every content page one h1, a matching tab title and a localized description', async ({ page }) => {
@@ -210,6 +227,16 @@ test('labels the season icon buttons for assistive tech', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Delete Season' })).toBeVisible();
 });
 
+test('announces an episode reorder with its title and new position', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: '2. Episodes' }).click();
+  await page.getByRole('button', { name: 'Add Episode' }).click();
+  await page.getByRole('button', { name: 'Add Episode' }).click();
+
+  await page.getByRole('button', { name: 'Move episode down: Untitled episode' }).first().click();
+  await expect(page.getByRole('status')).toHaveText('Untitled episode is now at position 2.');
+});
+
 test('reports image upload problems inline instead of in a blocking dialog', async ({ page }) => {
   const nativeDialogs: string[] = [];
   page.on('dialog', (dialog) => { nativeDialogs.push(dialog.message()); void dialog.dismiss(); });
@@ -221,7 +248,7 @@ test('reports image upload problems inline instead of in a blocking dialog', asy
   // The thumbnail control moved into the episode dialog.
   await openEpisode(page);
   const dialog = page.locator('dialog.episode-dialog');
-  await dialog.locator('input[type="file"]').setInputFiles({
+  await dialog.getByLabel('Choose thumbnail').setInputFiles({
     name: 'notes.txt',
     mimeType: 'text/plain',
     buffer: Buffer.from('not an image'),
@@ -251,6 +278,8 @@ test('confirms destructive actions in an in-app dialog', async ({ page }) => {
   await clickHeaderAction(page, 'New / Clear');
   await dialog.getByRole('button', { name: 'Delete', exact: true }).click();
   await expect(page.getByLabel('Series Title')).not.toHaveValue('Keep this draft');
+  await page.reload();
+  await expect(page.getByLabel('Series Title')).toHaveValue('My New Series');
 
   expect(nativeDialogs).toEqual([]);
 });
@@ -290,8 +319,21 @@ test('shows a not-found page for unknown routes', async ({ page }) => {
 
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Page not found');
   await expect(page.getByRole('link', { name: /Back to App/i })).toHaveAttribute('href', '/');
+  await expect(page).toHaveTitle('Page not found · SeriesCreator');
+  await page.getByRole('button', { name: 'DE', exact: true }).click();
+  await expect(page).toHaveTitle('Seite nicht gefunden · SeriesCreator');
   // The editor must not be what a dead link renders.
   await expect(page.locator('.editor-sidebar')).toHaveCount(0);
+});
+
+test('offers a content skip link on content and not-found routes', async ({ page }) => {
+  for (const path of ['/hilfe', '/definitely-not-a-page']) {
+    await page.goto(path);
+    const skipLink = page.getByRole('link', { name: 'Skip to content' });
+    await skipLink.focus();
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#main-content')).toBeFocused();
+  }
 });
 
 test('serves content routes from a lazily loaded chunk', async ({ page }) => {
@@ -392,11 +434,17 @@ test('edits an episode in a dialog that previews the real card', async ({ page }
   await dialog.getByLabel('Title', { exact: true }).fill('Typed In The Dialog');
   await expect(dialog.locator('.episode-card h3')).toHaveText('1. Typed In The Dialog');
 
+  await dialog.getByRole('button', { name: 'Add text block' }).click();
+  await dialog.getByLabel('Content', { exact: true }).fill('First observation');
+  await expect(dialog.locator('.episode-card__content-blocks')).toContainText('First observation');
+
   // No Save or Cancel: closing keeps the edit, because everything autosaves.
   await page.keyboard.press('Escape');
   await expect(dialog).toHaveCount(0);
   await expect(page.locator('.episode-row__title')).toHaveText('Typed In The Dialog');
   await expect(page.getByRole('main').getByRole('heading', { name: '1. Typed In The Dialog' })).toBeVisible();
+  await page.getByRole('main').locator('.episode-card__content-blocks summary').click();
+  await expect(page.getByRole('main').getByText('First observation')).toBeVisible();
 });
 
 test('sizes the header menu to its content, not to the viewport', async ({ page }) => {

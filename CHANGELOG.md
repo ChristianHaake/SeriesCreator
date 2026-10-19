@@ -8,6 +8,17 @@ All notable changes to this project will be documented in this file.
 
 - Full-size episode editor in a native dialog with a live preview card, so
   writing an episode is no longer confined to the narrow sidebar column.
+- Optional academic deepening for every episode: up to 5,000 characters for
+  key ideas, guiding questions, terms, examples and evidence. It is preserved
+  in project files and shown in the preview, presentation, HTML export and
+  print output.
+- Ordered text and image content blocks within each episode, including optional
+  titles, image captions and alternative text. They are preserved in project
+  files and appear in the preview, presentation, HTML export and print output.
+- Season overview slides in presentation mode and a Netflix-style opening view
+  in the standalone HTML export preserve episode grouping and order.
+- HTML episode details return to their originating season and restore keyboard
+  focus to the episode card, so navigating a multi-season series keeps context.
 - Compact episode rows in the sidebar with reorder and delete controls.
 - Overflow menu for secondary header actions built on the native Popover API.
   Save stays outside the menu and is always reachable.
@@ -44,6 +55,20 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Import confirmation and success messages now use the currently selected
+  interface language when validation finishes after a language switch.
+- Loading a project file now asks for confirmation before replacing the current
+  draft.
+- Imports now reject duplicate season or episode IDs and embedded images above
+  the documented 60-megapixel input limit.
+- If an unreadable local project cannot be copied to the recovery key, autosave
+  remains locked until the user explicitly replaces or resets the project.
+- Deleting an episode is confirmed; keyboard focus moves to the next logical
+  episode control and reorder actions announce the new position.
+- Cancelling episode deletion now returns focus to the delete control that
+  opened the confirmation dialog.
+- Presentation mode contains keyboard focus and returns it to its launch
+  control when closed.
 - Printing produced white text on blank paper whenever background graphics
   were off, which is the default state of the browser print dialog.
   `print-color-adjust: exact` keeps the dark layout intact.

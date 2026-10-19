@@ -29,6 +29,27 @@ function renderApp(path = '/') {
   );
 }
 
+class DeferredImportWorker {
+  static latest: DeferredImportWorker | undefined;
+  readonly listeners = new Map<string, EventListener>();
+
+  constructor() {
+    DeferredImportWorker.latest = this;
+  }
+
+  addEventListener(type: string, listener: EventListener) {
+    this.listeners.set(type, listener);
+  }
+
+  postMessage() {}
+
+  terminate() {}
+
+  respond(data: unknown) {
+    this.listeners.get('message')?.({ data } as unknown as Event);
+  }
+}
+
 describe('App', () => {
   beforeEach(() => {
     window.localStorage.clear();
@@ -52,6 +73,7 @@ describe('App', () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
+    DeferredImportWorker.latest = undefined;
   });
 
   it('renders keyboard-operable preview tabs', async () => {
@@ -146,6 +168,26 @@ describe('App', () => {
     expect(screen.getByLabelText('Series Title')).toHaveValue('Imported project');
   });
 
+  it('uses the current locale when a delayed import finishes', async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal('Worker', DeferredImportWorker);
+    renderApp();
+
+    const input = document.querySelector<HTMLInputElement>('input[type="file"]');
+    expect(input).not.toBeNull();
+    await user.upload(input!, new File([serializeProject(initialProjectData)], 'import.seriescreator', {
+      type: 'application/json',
+    }));
+    await waitFor(() => expect(DeferredImportWorker.latest).toBeDefined());
+
+    await user.click(screen.getByRole('button', { name: 'DE' }));
+    DeferredImportWorker.latest?.respond({ ok: true, data: initialProjectData });
+
+    await screen.findByText('Möchtest du diese Projektdatei laden? Dein aktueller Entwurf wird dadurch ersetzt.');
+    await user.click(screen.getByRole('button', { name: 'Projektdatei laden' }));
+    expect(screen.getByText('Projektdatei wurde geladen.')).toBeInTheDocument();
+  });
+
   it('confirms episode deletion and announces an episode reorder', async () => {
     const user = userEvent.setup();
     renderApp();
@@ -159,6 +201,7 @@ describe('App', () => {
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: 'Cancel' }));
     expect(screen.getAllByRole('button', { name: /^Episode \d+:/ })).toHaveLength(rowsBeforeDelete);
+    await waitFor(() => expect(deleteButtons[0]).toHaveFocus());
 
     const moveDown = screen.getAllByRole('button', { name: /^Move episode down:/ })[0];
     await user.click(moveDown);

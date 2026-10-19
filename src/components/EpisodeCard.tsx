@@ -42,6 +42,22 @@ export function EpisodeCard({ episode, index }: Props) {
             <p>{episode.learningDepth}</p>
           </details>
         )}
+        {episode.contentBlocks?.length ? (
+          <details className="episode-card__content-blocks">
+            <summary>{t.episodeContentBlocks}</summary>
+            {episode.contentBlocks.map((block) => block.type === 'text' ? (
+              <section key={block.id}>
+                {block.title && <h4>{block.title}</h4>}
+                <p>{block.body}</p>
+              </section>
+            ) : (
+              <figure key={block.id}>
+                <img src={block.imageUrl} alt={block.altText} />
+                {block.caption && <figcaption>{block.caption}</figcaption>}
+              </figure>
+            ))}
+          </details>
+        ) : null}
       </div>
     </div>
   );
