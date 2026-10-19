@@ -108,6 +108,11 @@ test('loads a complete current example through the gallery', async ({ page }) =>
   await expect(page.locator('.completion-score')).toHaveText('Project status 100%');
   await expect(page.locator('.streaming-facts')).toContainText('Created by: Class 8b');
   await expect(page.locator('.episode-card__image')).toHaveCount(3);
+  const firstEpisode = page.locator('.episode-card').first();
+  await firstEpisode.getByText('Content blocks', { exact: true }).click();
+  await expect(firstEpisode.getByRole('heading', { name: 'The standby clue' })).toBeVisible();
+  await expect(firstEpisode.getByText('Measurements reveal hidden energy drains.', { exact: true })).toBeVisible();
+  await expect(firstEpisode.getByRole('img', { name: 'Learners measure the electricity use of classroom devices.' })).toBeVisible();
 
   await page.getByLabel('Select season').selectOption('climate-season-action');
   await expect(page.locator('.episode-card__image')).toHaveCount(3);

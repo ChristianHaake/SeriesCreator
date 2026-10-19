@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.0.0] - In preparation
+
+### Added
+
+- The bundled German and English climate and Weimar examples now demonstrate
+  ordered text and image content blocks. The same content is embedded in the
+  downloadable `.seriescreator` example files, so it is available after an
+  import as well as in the in-app gallery.
+
+### Fixed
+
+- The episode-reorder browser regression test now creates and targets a
+  deterministically named episode and checks the actual live announcement,
+  instead of depending on an obsolete default title.
+
 ## [1.5.0] - 2026-08-30
 
 ### Added

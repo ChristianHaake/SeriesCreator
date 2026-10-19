@@ -5,9 +5,9 @@ https://github.com/ChristianHaake/haak3-webapp-standard/blob/main/docs/review-ch
 
 ## Release
 
-- Version: `1.5.0`
-- Review date: `2026-08-30`
-- Reviewer: `Claude Opus 5` (automatisiert), Freigabe: `Christian Haake`
+- Version: `2.0.0` (in Vorbereitung)
+- Review date: offen
+- Reviewer: offen
 
 ## Product
 
@@ -74,5 +74,5 @@ Die automatisierten Gates sind die technische Freigabe. Die Veröffentlichung
 bleibt blockiert, bis die offenen manuellen Punkte abgeschlossen oder durch den
 Betreiber ausdrücklich als akzeptierte Einschränkung dokumentiert sind.
 
-Offene manuelle Punkte und akzeptierte Einschränkungen stehen in
-`release-record-1.5.0.md`.
+Offene manuelle Punkte, Prüfergebnisse und akzeptierte Einschränkungen stehen
+in `release-record-2.0.0.md`.

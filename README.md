@@ -47,7 +47,7 @@ anonyme, cookielose Reichweitenstatistik. Details stehen in der
 
 ## Projektdateien und Exporte
 
-- `.seriescreator`: versioniertes JSON-Schema 2, maximal 25 MB
+- `.seriescreator`: versioniertes JSON-Schema 3, maximal 25 MB
 - Bilder: PNG/JPEG/WebP, maximal 60 Megapixel Eingangsgröße
 - HTML: eigenständige Präsentationsdatei für lokale/offline Wiedergabe
 - PDF: über den nativen Druckdialog des Browsers

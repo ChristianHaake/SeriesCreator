@@ -45,6 +45,11 @@ async function addExampleImages(project: ProjectData, slug: string) {
 
   for (const [index, episode] of episodes.entries()) {
     episode.thumbnailUrl = await imageDataUrl(slug, \`episode-\${index + 1}\`);
+    if (episode.contentBlocks) {
+      episode.contentBlocks = episode.contentBlocks.map((block) => (
+        block.type === 'image' ? { ...block, imageUrl: episode.thumbnailUrl } : block
+      ));
+    }
   }
 
   return projectWithImages;

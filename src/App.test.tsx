@@ -357,7 +357,7 @@ describe('App', () => {
     expect(screen.getAllByRole('heading', { name: 'The School Climate Code' }).length).toBeGreaterThan(0);
     expect(screen.getAllByRole('heading', { name: /1\. The Electricity Detective/ }).length).toBeGreaterThan(0);
     expect(screen.getAllByRole('heading', { name: /2\. Heat on the Run/ }).length).toBeGreaterThan(0);
-    expect(document.querySelectorAll('.episode-card img[src^="data:image/jpeg;base64,"]').length).toBe(3);
+    expect(document.querySelectorAll('.episode-card img[src^="data:image/jpeg;base64,"]').length).toBe(4);
 
     await user.click(screen.getByRole('tab', { name: 'Concept' }));
     const conceptPanel = within(screen.getByRole('tabpanel'));
@@ -384,7 +384,7 @@ describe('App', () => {
     expect(screen.getAllByRole('heading', { name: 'The Weimar File' }).length).toBeGreaterThan(0);
     expect(screen.getAllByRole('heading', { name: /1\. A New Start/ }).length).toBeGreaterThan(0);
     expect(screen.getAllByRole('heading', { name: /2\. Inflation in the Street/ }).length).toBeGreaterThan(0);
-    expect(document.querySelectorAll('.episode-card img[src^="data:image/jpeg;base64,"]').length).toBe(3);
+    expect(document.querySelectorAll('.episode-card img[src^="data:image/jpeg;base64,"]').length).toBe(4);
 
     await user.click(screen.getByRole('tab', { name: 'Concept' }));
     const weimarConceptPanel = within(screen.getByRole('tabpanel'));
@@ -411,6 +411,11 @@ describe('example projects', () => {
           expect(parsed.data.reflection).toBeTruthy();
           expect(parsed.data.sources).toBeTruthy();
           expect(parsed.data.customConceptText).toContain('16:9');
+          const contentBlocks = parsed.data.seasons.flatMap((season) =>
+            season.episodes.flatMap((episode) => episode.contentBlocks ?? []),
+          );
+          expect(contentBlocks.some((block) => block.type === 'text')).toBe(true);
+          expect(contentBlocks.some((block) => block.type === 'image')).toBe(true);
           expect(parsed.data.completionOverride).toBeUndefined();
           expect(availableAgeRatings).toContain(parsed.data.ageRating);
           expect(calculateProjectCompletion(parsed.data)).toBe(100);

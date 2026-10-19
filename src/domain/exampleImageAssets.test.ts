@@ -43,4 +43,19 @@ describe('attachExampleImages', () => {
     expect(episodes.slice(0, 6).every((episode) => episode.thumbnailUrl)).toBe(true);
     expect(episodes.slice(6).every((episode) => episode.thumbnailUrl === undefined)).toBe(true);
   });
+
+  it('reuses an episode thumbnail for its image content blocks', async () => {
+    const project = projectWithEpisodes(1);
+    project.seasons[0].episodes[0].contentBlocks = [{
+      id: 'image-block',
+      type: 'image',
+      imageUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLq7wAAAABJRU5ErkJggg==',
+      altText: 'Example image',
+    }];
+
+    const result = await attachExampleImages(project, 'school-climate-code');
+    const imageBlock = result.seasons[0].episodes[0].contentBlocks?.[0];
+
+    expect(imageBlock).toMatchObject({ type: 'image', imageUrl: expect.stringMatching(/^data:image\/jpeg;base64,/) });
+  });
 });

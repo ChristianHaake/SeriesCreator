@@ -36,6 +36,11 @@ export async function attachExampleImages(project: ProjectData, exampleId: Examp
     const imageName = imageNames[index + 1];
     if (!imageName) break;
     episode.thumbnailUrl = await toDataUrl(imagePath(exampleId, imageName));
+    if (episode.contentBlocks) {
+      episode.contentBlocks = episode.contentBlocks.map((block) => (
+        block.type === 'image' ? { ...block, imageUrl: episode.thumbnailUrl! } : block
+      ));
+    }
   }
 
   return projectWithImages;
