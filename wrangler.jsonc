@@ -4,5 +4,12 @@
   "assets": {
     "directory": "./dist",
     "not_found_handling": "single-page-application"
+  },
+  "env": {
+    "stage": {
+      "routes": [
+        { "pattern": "stage.seriescreator.haak3.de", "custom_domain": true }
+      ]
+    }
   }
 }
