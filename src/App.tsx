@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef, lazy, Suspense, type KeyboardEvent } from 'react';
+import { flushSync } from 'react-dom';
 import { useProjectStore } from './store/useProjectStore';
 import { Presentation } from 'lucide-react';
 import { EditorSidebar } from './components/EditorSidebar';
@@ -50,7 +51,29 @@ function App() {
   const store = useProjectStore(() =>
     setStatus({ message: t.msgSaveFailed, tone: 'error' }),
   );
-  const { data, replaceData, resetData, restoreFailed, persistenceBlocked } = store;
+  const { data, replaceData, resetData, restoreFailed, persistenceBlocked, projectRevision, storageConflict } = store;
+  const exampleLoadRevision = useRef(0);
+  const [isPrinting, setIsPrinting] = useState(false);
+  const missingImageAlt = useMemo(() => data.seasons.some((season) => season.episodes.some((episode) =>
+    episode.contentBlocks?.some((block) => block.type === 'image' && !block.altText.trim()),
+  )), [data.seasons]);
+
+  useEffect(() => () => { exampleLoadRevision.current += 1; }, []);
+
+  useEffect(() => {
+    const beforePrint = () => flushSync(() => setIsPrinting(true));
+    const afterPrint = () => setIsPrinting(false);
+    const media = window.matchMedia?.('print');
+    const mediaChanged = (event: MediaQueryListEvent) => flushSync(() => setIsPrinting(event.matches));
+    window.addEventListener('beforeprint', beforePrint);
+    window.addEventListener('afterprint', afterPrint);
+    media?.addEventListener('change', mediaChanged);
+    return () => {
+      window.removeEventListener('beforeprint', beforePrint);
+      window.removeEventListener('afterprint', afterPrint);
+      media?.removeEventListener('change', mediaChanged);
+    };
+  }, []);
   const [activeSeasonId, setActiveSeasonId] = useState(data.seasons[0]?.id || '');
   const [activeTab, setActiveTab] = useState<PreviewTab>('EPISODEN');
   const [showPresentation, setShowPresentation] = useState(false);
@@ -97,7 +120,7 @@ function App() {
     invalidJson: t.importErrorInvalidJson,
     readFailed: t.msgImportReadFailed,
   }[importStatus]);
-  const visibleStatus: AppStatus = status
+  const visibleStatus: AppStatus = (storageConflict ? { message: t.msgStorageConflict, tone: 'error' } : null) ?? status
     ?? (importMessage ? { message: importMessage, tone: importStatus === 'importing' ? 'info' : 'error' } : null)
     ?? (restoreFailed
       ? {
@@ -150,15 +173,19 @@ function App() {
   };
 
   const handleExport = () => {
+    if (missingImageAlt) { showStatus(t.msgMissingImageAlt, 'error'); return; }
     try {
+      flushSync(() => setIsPrinting(true));
       window.print();
       showStatus(t.msgPrintStarted, 'info');
     } catch {
+      setIsPrinting(false);
       showStatus(t.msgExportFailed, 'error');
     }
   };
 
   const handleHtmlExport = () => {
+    if (missingImageAlt) { showStatus(t.msgMissingImageAlt, 'error'); return; }
     try {
       const htmlContent = exportProjectToHtml(data, t, locale);
       const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
@@ -175,16 +202,18 @@ function App() {
     if (!example) return;
 
     const loadExample = async () => {
+      const revision = ++exampleLoadRevision.current;
       try {
         const exampleProject = await attachExampleImages(example.project, example.id);
-        replaceData(exampleProject, true);
+        if (revision !== exampleLoadRevision.current) return;
+        const saved = replaceData(exampleProject, true);
         setActiveSeasonId(exampleProject.seasons[0]?.id || '');
         setActiveTab('EPISODEN');
         setMobilePanel('preview');
         setShowExamples(false);
-        showStatus(t.msgExampleLoaded, 'success');
+        if (saved) showStatus(latestTranslationRef.current.msgExampleLoaded, 'success');
       } catch {
-        showStatus(t.msgExampleLoadFailed, 'error');
+        if (revision === exampleLoadRevision.current) showStatus(latestTranslationRef.current.msgExampleLoadFailed, 'error');
       }
     };
 
@@ -265,9 +294,10 @@ function App() {
             message: importTranslation.confirmImport,
             confirmLabel: importTranslation.btnLoadImport,
             run: () => {
-              replaceData(importedData, true);
+              exampleLoadRevision.current += 1;
+              const saved = replaceData(importedData, true);
               setActiveSeasonId(importedData.seasons[0]?.id || '');
-              showStatus(latestTranslationRef.current.msgImportSuccess, 'success');
+              if (saved) showStatus(latestTranslationRef.current.msgImportSuccess, 'success');
             },
           });
         }}
@@ -277,7 +307,7 @@ function App() {
         onReset={() => setPendingAction({
           message: t.confirmReset,
           confirmLabel: t.btnDelete,
-          run: resetData,
+          run: () => { exampleLoadRevision.current += 1; resetData(); },
         })}
       />
       {pendingAction && (
@@ -296,7 +326,7 @@ function App() {
         <ExampleGallery
           examples={examples}
           onChoose={handleExampleChoose}
-          onClose={() => setShowExamples(false)}
+          onClose={() => { exampleLoadRevision.current += 1; setShowExamples(false); }}
         />
       )}
       <div
@@ -325,8 +355,7 @@ function App() {
         </button>
       </div>
       <div className="app-main-content">
-        {/* Hidden layout purely used for the high-res PDF snapshot */}
-        <PrintLayout
+        {isPrinting && (missingImageAlt ? <div id="print-layout-container">{t.msgMissingImageAlt}</div> : <PrintLayout
           data={data}
           completionLabel={t.completionMeta}
           castLabel={t.castPrefix}
@@ -341,10 +370,11 @@ function App() {
           customSectionLabel={t.lblCustomSection}
           sourcesLabel={t.lblSources}
           noSourcesLabel={t.noSources}
-        />
+        />)}
 
       {/* Sidebar Editor */}
-      <EditorSidebar 
+      <EditorSidebar
+        key={projectRevision}
         activeSeasonId={activeSeasonId} 
         setActiveSeasonId={setActiveSeasonId} 
         store={store}
@@ -379,7 +409,10 @@ function App() {
             </p>
 
             <div className="streaming-actions">
-              <button ref={presentationLauncherRef} type="button" className="btn-play" onClick={() => setShowPresentation(true)}>
+              <button ref={presentationLauncherRef} type="button" className="btn-play" onClick={() => {
+                if (missingImageAlt) showStatus(t.msgMissingImageAlt, 'error');
+                else setShowPresentation(true);
+              }}>
                 <Presentation aria-hidden="true" size={24} strokeWidth={2.5} /> {t.btnPlay}
               </button>
             </div>

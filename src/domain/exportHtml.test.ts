@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { getExampleProjects } from './exampleProjects';
 import { exportProjectToHtml } from './exportHtml';
 
@@ -108,5 +108,51 @@ describe('exportProjectToHtml', () => {
     expect(html).toContain("(ep.contentBlocks || []).forEach");
     expect(html).toContain('Timeline');
     expect(html).toContain('Measured values');
+  });
+
+  it.each(['<!--<script>', '</script><script>window.injected = true</script><p>payload'])(
+    'renders hostile project text after parsing the complete document: %s', (description) => {
+      const project = getExampleProjects('en')[0].project;
+      project.description = description;
+      const parsed = new DOMParser().parseFromString(exportProjectToHtml(project, translations, 'en'), 'text/html');
+      expect(parsed.querySelectorAll('script')).toHaveLength(1);
+      const previousMarkup = document.body.innerHTML;
+      const listenerSpy = vi.spyOn(window, 'addEventListener');
+      try {
+        document.body.innerHTML = parsed.body.innerHTML;
+        new Function('document', 'window', parsed.querySelector('script')!.textContent!)(document, window);
+        expect((window as unknown as { injected?: boolean }).injected).toBeUndefined();
+        expect(document.querySelector('.series-overview__hero p')?.textContent).toBe(description);
+      } finally {
+        for (const [type, listener] of listenerSpy.mock.calls) window.removeEventListener(type, listener);
+        listenerSpy.mockRestore();
+        document.body.innerHTML = previousMarkup;
+      }
+    },
+  );
+
+  it('prevents Space scrolling and advances only once when a navigation button has focus', () => {
+    const project = getExampleProjects('en')[0].project;
+    const parsed = new DOMParser().parseFromString(exportProjectToHtml(project, translations, 'en'), 'text/html');
+    const previousMarkup = document.body.innerHTML;
+    const listenerSpy = vi.spyOn(window, 'addEventListener');
+    try {
+      document.body.innerHTML = parsed.body.innerHTML;
+      new Function('document', 'window', parsed.querySelector('script')!.textContent!)(document, window);
+      const bodySpace = new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true });
+      document.body.dispatchEvent(bodySpace);
+      expect(bodySpace.defaultPrevented).toBe(true);
+      expect(document.querySelector('.series-overview')).toBeNull();
+      const buttonSpace = new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true });
+      document.querySelector<HTMLButtonElement>('#nextBtn')!.dispatchEvent(buttonSpace);
+      expect(buttonSpace.defaultPrevented).toBe(false);
+      expect(document.querySelector('.center-container')).not.toBeNull();
+      document.querySelector<HTMLButtonElement>('#nextBtn')!.click();
+      expect(document.querySelector('.episode-title')?.textContent).toBe(project.seasons[0].episodes[0].title);
+    } finally {
+      for (const [type, listener] of listenerSpy.mock.calls) window.removeEventListener(type, listener);
+      listenerSpy.mockRestore();
+      document.body.innerHTML = previousMarkup;
+    }
   });
 });

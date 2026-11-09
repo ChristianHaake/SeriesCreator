@@ -1,4 +1,4 @@
-Stand: 9. Juli 2026
+Stand: 9. November 2026
 
 ## 1. Verantwortlicher
 
@@ -24,8 +24,12 @@ werden nur auf dem Gerät erstellt oder gelesen und nicht an den Betreiber
 
 Die Anwendung verwendet `localStorage`, um die gewählte Sprache und den aktuellen
 Entwurf auf dem Gerät zu speichern. Diese Daten werden nicht durch die Anwendung
-an den Betreiber übertragen. Sie können über die Browserfunktionen oder über
-**Neu / Löschen** entfernt werden.
+an den Betreiber übertragen. **Neu / Löschen** entfernt den aktiven Entwurf und
+eine gegebenenfalls vorhandene Wiederherstellungskopie; die Sprachwahl bleibt
+erhalten. Anschließend wird ein frisches Projekt angelegt. Über die
+Browserfunktionen kannst du sämtliche Website-Daten einschließlich der
+Sprachwahl entfernen. Wenn der Browser den Zugriff auf den Speicher sperrt,
+kann die App dort gespeicherte Daten nicht löschen und meldet den Fehler.
 
 ## 4. Bereitstellung über Cloudflare
 

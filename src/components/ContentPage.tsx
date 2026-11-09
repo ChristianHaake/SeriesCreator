@@ -5,7 +5,7 @@ import { useTranslation } from '../i18n';
 
 /**
  * Default-exported and loaded on demand: react-markdown and its remark/micromark
- * dependencies are only needed on the seven content routes, never in the editor
+ * dependencies are only needed on the content routes, never in the editor
  * where students spend their time.
  */
 export default function ContentPage({ pathname }: { pathname: ContentPath }) {

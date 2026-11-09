@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Fixed
+
+- Bound and validate all image uploads before decoding and keep encoded output
+  within the import limit, preserving cover/episode/content images on round trips.
+- Preserve block edits during image uploads and cancel stale image/example
+  completions after closing the editor/gallery or replacing the project.
+- Flush pending autosaves on page exit/hidden state, handle fully blocked storage,
+  remove recovery data on reset, and retain storage failure messages after imports.
+- Warn and pause autosave when another tab changes the stored draft.
+- Escape HTML tokenizer control sequences in exported JSON and prevent double
+  navigation on Space in standalone HTML presentations.
+- Require descriptions for image content blocks before presentation/HTML/print;
+  incomplete projects remain available as editable backups.
+- Build the print DOM only when printing, including native browser print.
+
+### Added
+
+- Localized support page and translation completeness/placeholder checks.
+- Unit and browser regressions for the audit's data-loss and export cases.
+
+### Security
+
+- Align the Node.js minimum with ESLint/jsdom (22.13) and CI with tested Node 22.23.3.
+- Upgrade Vite and Zod; override vulnerable transitive minimatch releases with
+  the patched 11.x line. The override is limited to development tooling.
+
 ## [2.0.0] - 2026-10-19
 
 ### Added

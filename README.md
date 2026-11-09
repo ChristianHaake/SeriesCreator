@@ -39,6 +39,10 @@ Projektinhalte und hochgeladene Bilder werden im Browser verarbeitet. Der
 aktuelle Entwurf wird unter `series_creator_data`, die Sprache unter
 `series-creator-locale` in `localStorage` gespeichert. Eine
 `.seriescreator`-Datei ist das dauerhafte, nutzerkontrollierte Backup.
+Ausstehende Änderungen werden beim Verlassen oder Ausblenden der Seite gesichert,
+sofern der Browser Speicherzugriff erlaubt. Bei Änderungen in einem anderen Tab
+pausiert Autosave mit einer Warnung; sichere deinen Stand als Datei und lade neu.
+Die App bietet keine gemeinsame Bearbeitung und keine atomare Mehrtab-Speicherung.
 
 SeriesCreator hat keine Accounts, keine Inhaltsdatenbank und keinen
 Upload-Endpunkt. Cloudflare verarbeitet technische Verbindungsdaten und
@@ -48,7 +52,8 @@ anonyme, cookielose Reichweitenstatistik. Details stehen in der
 ## Projektdateien und Exporte
 
 - `.seriescreator`: versioniertes JSON-Schema 3, maximal 25 MB
-- Bilder: PNG/JPEG/WebP, maximal 60 Megapixel Eingangsgröße
+- Bilder: PNG/JPEG/WebP, maximal 25 MB und 60 Megapixel Eingangsgröße;
+  automatische Verkleinerung auf höchstens 1.500.000 Zeichen je Bild-Data-URL
 - HTML: eigenständige Präsentationsdatei für lokale/offline Wiedergabe
 - PDF: über den nativen Druckdialog des Browsers
 
@@ -59,7 +64,7 @@ Das vollständige Format ist in
 
 Voraussetzungen:
 
-- Node.js `>=22.12.0 <23`
+- Node.js `>=22.13.0 <23`
 - npm 10
 
 ```bash

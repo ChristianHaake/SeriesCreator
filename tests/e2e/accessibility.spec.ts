@@ -5,6 +5,7 @@ import { clickHeaderAction } from './helpers';
 // Every content route, plus the app itself. These are the surfaces the release
 // suite already exercises, so a violation here is a real regression.
 const CONTENT_ROUTES = [
+  '/unterstuetzung',
   '/hilfe',
   '/ueber',
   '/lehrkraefte',

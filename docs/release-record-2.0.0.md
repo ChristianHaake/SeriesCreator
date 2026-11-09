@@ -31,6 +31,14 @@ Firefox could not start in the local macOS sandbox: the operating system denied
 compositor. Run the Firefox project in CI or on an unrestricted local machine
 before release; this result does not establish browser compatibility.
 
+On 2026-11-09, audit corrections passed lint, typecheck, example generation,
+84 unit/component tests and the production build on Node 22.23.3. Chromium
+passed 41 browser tests, WebKit passed 39 (two CDP-only PDF tests skipped), and
+Mobile Chrome passed four. A fresh isolated npm ci and full dependency audit
+passed with zero known vulnerabilities. Firefox still fails before application
+startup in the local macOS environment; no Firefox pass is claimed. See
+`audit-fixes-2026-11-09.md` for the changes, evidence and remaining limits.
+
 ## Manual checks
 
 Use `docs/manual-release-checks.md` to record target devices, assistive
