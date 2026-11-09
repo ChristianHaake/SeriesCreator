@@ -7,6 +7,7 @@ import { useProjectStore } from '../store/useProjectStore';
 import { fieldLimits, resourceLimits } from '../domain/constraints';
 import { useTranslation } from '../i18n';
 import { calculateProjectCompletion } from '../domain/completion';
+import { processImageUpload } from '../domain/imageUpload';
 
 interface Props {
   activeSeasonId: string;
@@ -52,6 +53,8 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
   const focusAfterEpisodeDeleteRef = useRef<string | 'add' | null>(null);
   const episodeDeleteLauncherRef = useRef<string | null>(null);
   const coverInputRef = useRef<HTMLInputElement | null>(null);
+  const coverUploadRevision = useRef(0);
+  useEffect(() => () => { coverUploadRevision.current += 1; }, []);
   const { t, locale } = useTranslation();
 
   const activeSeason = data.seasons.find(s => s.id === activeSeasonId) || data.seasons[0];
@@ -96,71 +99,17 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
     }
   };
 
-  const handleCoverUpload = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const handleCoverUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    const input = event.currentTarget;
+    const file = input.files?.[0];
     if (!file) return;
+    const revision = ++coverUploadRevision.current;
     setCoverError('');
-
-    const resetInput = () => {
-      event.target.value = '';
-    };
-
-    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
-      setCoverError(t.imageErrorUnsupported);
-      resetInput();
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      if (typeof reader.result !== 'string') {
-        setCoverError(t.imageErrorRead);
-        resetInput();
-        return;
-      }
-
-      const image = new Image();
-      image.onload = () => {
-        if (image.width * image.height > resourceLimits.maxImageInputPixels) {
-          setCoverError(t.imageErrorTooLarge);
-          resetInput();
-          return;
-        }
-
-        const canvas = document.createElement('canvas');
-        let width = image.width;
-        let height = image.height;
-
-        if (width > resourceLimits.coverOutputWidth) {
-          height = Math.round((height * resourceLimits.coverOutputWidth) / width);
-          width = resourceLimits.coverOutputWidth;
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const context = canvas.getContext('2d');
-        if (!context) {
-          setCoverError(t.imageErrorProcess);
-          resetInput();
-          return;
-        }
-
-        context.drawImage(image, 0, 0, width, height);
-        updateData({ coverUrl: canvas.toDataURL('image/jpeg', 0.78) });
-        setCoverError('');
-        resetInput();
-      };
-      image.onerror = () => {
-        setCoverError(t.imageErrorProcess);
-        resetInput();
-      };
-      image.src = reader.result;
-    };
-    reader.onerror = () => {
-      setCoverError(t.imageErrorRead);
-      resetInput();
-    };
-    reader.readAsDataURL(file);
+    const result = await processImageUpload(file, resourceLimits.coverOutputWidth, 0.78);
+    if (revision !== coverUploadRevision.current) return;
+    if (result.ok) updateData({ coverUrl: result.url });
+    else setCoverError(t[result.error]);
+    input.value = '';
   };
 
   const openCoverDialog = () => {
@@ -267,6 +216,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
                   type="button"
                   className="ui-button ui-button--danger"
                   onClick={() => {
+                    coverUploadRevision.current += 1;
                     setCoverError('');
                     updateData({ coverUrl: undefined });
                   }}

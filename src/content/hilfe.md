@@ -23,8 +23,18 @@ denselben Editor- und Exportpfad wie eigene Projekte.
 
 ## Unterstützte Bilder
 
-Akzeptiert werden PNG, JPG/JPEG und WebP. Große Bilder werden automatisch
-verkleinert (Cover bis 1920 Pixel, Episodenbilder bis 800 Pixel Breite) und lokal als JPEG-Daten gespeichert.
+Akzeptiert werden PNG, JPG/JPEG und WebP bis 25 MB und 60 Megapixel. Große
+Bilder werden mit erhaltenem Seitenverhältnis in 1920 × 1920 Pixel für Cover
+oder 800 × 800 Pixel für Episoden eingepasst und bei Bedarf weiter verkleinert.
+Die JPEG-Daten bleiben innerhalb der Bildgrenze des Projektformats.
+
+Ergänze für Bildinhaltsblöcke eine Beschreibung im Feld „Alternativtext“. Ohne
+diese Beschreibung sind Präsentation, HTML und Druck gesperrt. Das bearbeitbare
+Projekt kannst du trotzdem jederzeit als Datei sichern.
+
+Wenn die App eine Änderung in einem anderen Tab meldet, wird Autosave pausiert.
+Sichere deinen Stand als Projektdatei und lade die Seite neu. Bearbeite dasselbe
+Projekt möglichst nur in einem Tab.
 
 ## Präsentieren und Exportieren
 

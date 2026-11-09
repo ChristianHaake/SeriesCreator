@@ -48,7 +48,14 @@ Embedded images must be base64 data URLs with one of these media types:
 - `image/webp`
 
 Each data URL is limited to 1,500,000 characters. Invalid image values are
-discarded during normalization.
+discarded during normalization for optional covers/thumbnails; an invalid image
+content block rejects the complete import. Uploads are capped at 25 MB and
+60 megapixels before decode, preserve aspect ratio, and reduce their JPEG output
+until it fits the same data-URL limit. Cover dimensions are at most 1920 × 1920,
+episode images at most 800 × 800.
+
+Image content blocks with blank alternative text can be preserved in an editable
+backup, but descriptions must be completed before presentation, HTML or print.
 
 ## Compatibility
 

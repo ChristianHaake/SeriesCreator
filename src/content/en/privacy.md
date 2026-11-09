@@ -1,4 +1,4 @@
-Last updated: July 9, 2026
+Last updated: November 9, 2026
 
 ## 1. Controller
 
@@ -22,7 +22,10 @@ are created or read only on the device and are not sent to the operator.
 
 The application uses `localStorage` to store the selected language and current
 draft on the device. The application does not send these values to the operator.
-They can be removed through browser controls or through **New / Clear**.
+**New / Clear** removes the active draft and any recovery copy while keeping
+your language preference, then creates a fresh project. Browser controls can
+remove all site data, including the language preference. If the browser blocks
+access to storage, the app cannot delete data held there and reports the error.
 
 ## 4. Delivery through Cloudflare
 

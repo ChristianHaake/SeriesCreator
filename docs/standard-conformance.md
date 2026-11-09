@@ -5,7 +5,7 @@ https://github.com/ChristianHaake/haak3-webapp-standard
 
 Standard version: `1.0.0-draft`
 
-Last reviewed: `2026-10-19`
+Last reviewed: `2026-11-09`
 
 ## Exceptions
 
@@ -36,3 +36,10 @@ Resolved: 2026-07-16
 - Browser E2E runs against the built production preview in Chromium, Firefox,
   WebKit and Mobile Chrome. WebKit is treated as an automated Safari-engine
   proxy, not as manual Safari.app or iPad proof.
+
+- Development tooling temporarily overrides minimatch to `^11.0.1` because the
+  ESLint/TypeScript-ESLint dependency ranges still select vulnerable 10.x.
+  Lint, typecheck and tests validate the used API. Remove the override when
+  those upstream ranges select a patched release themselves.
+- Localized support information is served at `/unterstuetzung`; translation
+  keys, nonempty values and placeholders are checked by the regular test gate.

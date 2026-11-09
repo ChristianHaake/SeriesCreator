@@ -4,13 +4,14 @@ import { ArrowDown, ArrowUp, Image as ImageIcon, Plus, Trash2, X } from 'lucide-
 import { fieldLimits, resourceLimits } from '../domain/constraints';
 import { useTranslation } from '../i18n';
 import { EpisodeCard } from './EpisodeCard';
+import { processImageUpload } from '../domain/imageUpload';
 
 interface Props {
   episode: Episode;
   seasonId: string;
   /** Zero-based position in the season. */
   index: number;
-  onUpdate: (seasonId: string, episodeId: string, updates: Partial<Episode>) => void;
+  onUpdate: (seasonId: string, episodeId: string, updates: Partial<Episode> | ((episode: Episode) => Partial<Episode>)) => boolean | void;
   onClose: () => void;
 }
 
@@ -28,6 +29,9 @@ export function EpisodeDialog({ episode, seasonId, index, onUpdate, onClose }: P
   const dialogRef = useRef<HTMLDialogElement>(null);
   const contentImageInputRef = useRef<HTMLInputElement>(null);
   const [imageError, setImageError] = useState('');
+  const uploadLifecycle = useRef(0);
+  const thumbnailRevision = useRef(0);
+  useEffect(() => () => { uploadLifecycle.current += 1; }, []);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -66,106 +70,38 @@ export function EpisodeDialog({ episode, seasonId, index, onUpdate, onClose }: P
     updateContentBlocks(nextBlocks);
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const input = event.currentTarget;
+    const file = input.files?.[0];
     if (!file) return;
+    const lifecycle = uploadLifecycle.current;
+    const revision = ++thumbnailRevision.current;
     setImageError('');
-
-    const fail = (message: string) => {
-      setImageError(message);
-      event.target.value = '';
-    };
-
-    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
-      fail(t.imageErrorUnsupported);
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      if (typeof reader.result !== 'string') {
-        fail(t.imageErrorRead);
-        return;
-      }
-
-      const image = new Image();
-      image.onload = () => {
-        if (image.width * image.height > resourceLimits.maxImageInputPixels) {
-          fail(t.imageErrorTooLarge);
-          return;
-        }
-
-        const canvas = document.createElement('canvas');
-        let width = image.width;
-        let height = image.height;
-
-        if (width > resourceLimits.episodeOutputWidth) {
-          height = Math.round((height * resourceLimits.episodeOutputWidth) / width);
-          width = resourceLimits.episodeOutputWidth;
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const context = canvas.getContext('2d');
-        if (!context) {
-          fail(t.imageErrorProcess);
-          return;
-        }
-
-        context.drawImage(image, 0, 0, width, height);
-        change({ thumbnailUrl: canvas.toDataURL('image/jpeg', 0.7) });
-        setImageError('');
-        event.target.value = '';
-      };
-      image.onerror = () => fail(t.imageErrorFormat);
-      image.src = reader.result;
-    };
-    reader.onerror = () => fail(t.imageErrorRead);
-    reader.readAsDataURL(file);
+    const result = await processImageUpload(file, resourceLimits.episodeOutputWidth, 0.7);
+    if (lifecycle !== uploadLifecycle.current || revision !== thumbnailRevision.current) return;
+    if (result.ok) change({ thumbnailUrl: result.url });
+    else setImageError(t[result.error]);
+    input.value = '';
   };
 
-  const handleContentImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const handleContentImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const input = event.currentTarget;
+    const file = input.files?.[0];
     if (!file) return;
+    const lifecycle = uploadLifecycle.current;
     setImageError('');
-    const fail = (message: string) => {
-      setImageError(message);
-      event.target.value = '';
-    };
-    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
-      fail(t.imageErrorUnsupported);
-      return;
-    }
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      if (typeof reader.result !== 'string') return fail(t.imageErrorRead);
-      const image = new Image();
-      image.onload = () => {
-        if (image.width * image.height > resourceLimits.maxImageInputPixels) return fail(t.imageErrorTooLarge);
-        const canvas = document.createElement('canvas');
-        let width = image.width;
-        let height = image.height;
-        if (width > resourceLimits.episodeOutputWidth) {
-          height = Math.round((height * resourceLimits.episodeOutputWidth) / width);
-          width = resourceLimits.episodeOutputWidth;
-        }
-        canvas.width = width;
-        canvas.height = height;
-        const context = canvas.getContext('2d');
-        if (!context) return fail(t.imageErrorProcess);
-        context.drawImage(image, 0, 0, width, height);
-        if (contentBlocks.length >= resourceLimits.maxContentBlocksPerEpisode) return fail(t.contentBlocksLimit.replace('{count}', String(resourceLimits.maxContentBlocksPerEpisode)));
-        updateContentBlocks([...contentBlocks, {
-          id: `block_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-          type: 'image', imageUrl: canvas.toDataURL('image/jpeg', 0.7), altText: '',
-        }]);
-        event.target.value = '';
-      };
-      image.onerror = () => fail(t.imageErrorFormat);
-      image.src = reader.result;
-    };
-    reader.onerror = () => fail(t.imageErrorRead);
-    reader.readAsDataURL(file);
+    const result = await processImageUpload(file, resourceLimits.episodeOutputWidth, 0.7);
+    if (lifecycle !== uploadLifecycle.current) return;
+    if (result.ok) {
+      const id = `block_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+      const applied = onUpdate(seasonId, episode.id, (current) => {
+        const blocks = current.contentBlocks ?? [];
+        if (blocks.length >= resourceLimits.maxContentBlocksPerEpisode) return {};
+        return { contentBlocks: [...blocks, { id, type: 'image', imageUrl: result.url, altText: '' }] };
+      });
+      if (applied === false) setImageError(t.contentBlocksLimit.replace('{count}', String(resourceLimits.maxContentBlocksPerEpisode)));
+    } else setImageError(t[result.error]);
+    input.value = '';
   };
 
   return (
@@ -261,8 +197,9 @@ export function EpisodeDialog({ episode, seasonId, index, onUpdate, onClose }: P
                   ) : (
                     <>
                       <img src={block.imageUrl} alt={block.altText} />
-                      <label htmlFor={`block-alt-${block.id}`}>{t.lblAltText}</label>
-                      <input id={`block-alt-${block.id}`} value={block.altText} maxLength={fieldLimits.altText} onChange={(event) => updateContentBlock(block.id, { altText: event.target.value })} required />
+                      <label htmlFor={`block-alt-${block.id}`}>{t.lblAltText} ({t.requiredField})</label>
+                      <input id={`block-alt-${block.id}`} value={block.altText} maxLength={fieldLimits.altText} onChange={(event) => updateContentBlock(block.id, { altText: event.target.value })} required aria-invalid={!block.altText.trim()} aria-describedby={!block.altText.trim() ? `block-alt-error-${block.id}` : undefined} />
+                      {!block.altText.trim() && <p id={`block-alt-error-${block.id}`} className="field-error">{t.imageAltRequired}</p>}
                       <label htmlFor={`block-caption-${block.id}`}>{t.contentBlockCaption}</label>
                       <input id={`block-caption-${block.id}`} value={block.caption || ''} maxLength={fieldLimits.contentBlockCaption} onChange={(event) => updateContentBlock(block.id, { caption: event.target.value || undefined })} />
                     </>

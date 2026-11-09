@@ -22,8 +22,7 @@ export function exportProjectToHtml(
   t: Record<string, string>,
   locale: string
 ): string {
-  // Replace </ to prevent XSS via </script> injection
-  const jsonData = JSON.stringify(data).replace(/<\//g, '<\\/');
+  const jsonData = JSON.stringify(data).replace(/</g, '\\u003c');
   const cspNonce = createCspNonce();
   return `<!DOCTYPE html>
 <html lang="${locale}">
@@ -258,6 +257,10 @@ export function exportProjectToHtml(
   nextBtn.onclick = () => { currentIndex = Math.min(currentIndex + 1, maxIndex); render(); };
 
   window.addEventListener('keydown', (e) => {
+    if (e.key === ' ') {
+      if (e.target instanceof HTMLButtonElement) return;
+      e.preventDefault();
+    }
     if (e.key === 'ArrowRight' || e.key === ' ') { currentIndex = Math.min(currentIndex + 1, maxIndex); render(); }
     if (e.key === 'ArrowLeft') { currentIndex = Math.max(currentIndex - 1, -2); render(); }
   });

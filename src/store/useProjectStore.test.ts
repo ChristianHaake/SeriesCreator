@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { initialProjectData } from '../types';
+import { createInitialProjectData, initialProjectData } from '../types';
 import { resourceLimits } from '../domain/constraints';
 import {
   loadStoredProject,
@@ -140,6 +140,98 @@ describe('project storage', () => {
 
     expect(saveStoredProject(blockedStorage, initialProjectData)).toBe(false);
   });
+
+  it('falls back when the localStorage getter throws and reports save failures', () => {
+    const descriptor = Object.getOwnPropertyDescriptor(window, 'localStorage');
+    Object.defineProperty(window, 'localStorage', {
+      configurable: true,
+      get() { throw new Error('blocked'); },
+    });
+    const onSaveError = vi.fn();
+    try {
+      const { result, unmount } = renderHook(() => useProjectStore(onSaveError), {
+        wrapper: LocaleProvider,
+      });
+      expect(result.current.data.title).toBe(createInitialProjectData('en').title);
+      act(() => result.current.updateData({ title: 'Unsaved in memory' }));
+      act(() => window.dispatchEvent(new Event('pagehide')));
+      expect(result.current.data.title).toBe('Unsaved in memory');
+      expect(onSaveError).toHaveBeenCalled();
+      unmount();
+    } finally {
+      if (descriptor) Object.defineProperty(window, 'localStorage', descriptor);
+    }
+  });
+
+  it('flushes the latest dirty project on pagehide', () => {
+    const storage = new MemoryStorage();
+    const descriptor = Object.getOwnPropertyDescriptor(window, 'localStorage');
+    Object.defineProperty(window, 'localStorage', { configurable: true, value: storage });
+    vi.useFakeTimers();
+    try {
+      const { result, unmount } = renderHook(() => useProjectStore(), { wrapper: LocaleProvider });
+      act(() => {
+        result.current.updateData({ title: 'First edit' });
+        result.current.updateData({ title: 'Latest edit' });
+      });
+      act(() => window.dispatchEvent(new Event('pagehide')));
+      expect(JSON.parse(storage.getItem(STORAGE_KEY)!).title).toBe('Latest edit');
+      unmount();
+    } finally {
+      vi.useRealTimers();
+      if (descriptor) Object.defineProperty(window, 'localStorage', descriptor);
+    }
+  });
+
+  it('flushes dirty project data when the document becomes hidden', () => {
+    const storage = new MemoryStorage();
+    const storageDescriptor = Object.getOwnPropertyDescriptor(window, 'localStorage');
+    const visibilityDescriptor = Object.getOwnPropertyDescriptor(document, 'visibilityState');
+    Object.defineProperty(window, 'localStorage', { configurable: true, value: storage });
+    Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'hidden' });
+    vi.useFakeTimers();
+    try {
+      const { result, unmount } = renderHook(() => useProjectStore(), { wrapper: LocaleProvider });
+      act(() => result.current.updateData({ title: 'Hidden-tab edit' }));
+      act(() => document.dispatchEvent(new Event('visibilitychange')));
+      expect(JSON.parse(storage.getItem(STORAGE_KEY)!).title).toBe('Hidden-tab edit');
+      unmount();
+    } finally {
+      vi.useRealTimers();
+      if (storageDescriptor) Object.defineProperty(window, 'localStorage', storageDescriptor);
+      if (visibilityDescriptor) Object.defineProperty(document, 'visibilityState', visibilityDescriptor);
+    }
+  });
+
+  it('keeps a newer other-tab snapshot and exposes a storage conflict', () => {
+    const storage = new MemoryStorage();
+    const descriptor = Object.getOwnPropertyDescriptor(window, 'localStorage');
+    Object.defineProperty(window, 'localStorage', { configurable: true, value: storage });
+    vi.useFakeTimers();
+    try {
+      saveStoredProject(storage, { ...initialProjectData, title: 'Initial saved' });
+      const { result, unmount } = renderHook(() => useProjectStore(), { wrapper: LocaleProvider });
+      act(() => result.current.updateData({ title: 'This tab edit' }));
+      const newerSnapshot = { ...initialProjectData, title: 'Other tab edit' };
+      const newerBytes = JSON.stringify(newerSnapshot);
+      storage.setItem(STORAGE_KEY, newerBytes);
+      const event = new Event('storage') as StorageEvent;
+      Object.defineProperties(event, {
+        key: { value: STORAGE_KEY },
+        newValue: { value: newerBytes },
+        storageArea: { value: storage },
+      });
+      act(() => window.dispatchEvent(event));
+      act(() => vi.advanceTimersByTime(501));
+      expect(result.current.storageConflict).toBe(true);
+      expect(storage.getItem(STORAGE_KEY)).toBe(newerBytes);
+      expect(result.current.data.title).toBe('This tab edit');
+      unmount();
+    } finally {
+      vi.useRealTimers();
+      if (descriptor) Object.defineProperty(window, 'localStorage', descriptor);
+    }
+  });
 });
 
 describe('useProjectStore hook mutations', () => {
@@ -201,5 +293,68 @@ describe('useProjectStore hook mutations', () => {
     expect(result.current.data.seasons[0].episodes).toHaveLength(
       resourceLimits.maxEpisodesPerSeason,
     );
+  });
+
+  it('removes unreadable backups during confirmed reset and reports cleanup failure', () => {
+    class BackupRemovalFailingStorage extends MemoryStorage {
+      override removeItem(key: string) {
+        if (key === UNREADABLE_BACKUP_KEY) throw new Error('blocked');
+        super.removeItem(key);
+      }
+    }
+    const storage = new BackupRemovalFailingStorage();
+    storage.setItem(UNREADABLE_BACKUP_KEY, 'preserved bytes');
+    const descriptor = Object.getOwnPropertyDescriptor(window, 'localStorage');
+    Object.defineProperty(window, 'localStorage', { configurable: true, value: storage });
+    const onSaveError = vi.fn();
+    try {
+      const { result, unmount } = renderHook(() => useProjectStore(onSaveError), {
+        wrapper: LocaleProvider,
+      });
+      act(() => result.current.resetData());
+      expect(storage.getItem(UNREADABLE_BACKUP_KEY)).toBe('preserved bytes');
+      expect(onSaveError).toHaveBeenCalled();
+      unmount();
+    } finally {
+      if (descriptor) Object.defineProperty(window, 'localStorage', descriptor);
+    }
+  });
+
+  it('returns persistence outcome from replacement while retaining in-memory data', () => {
+    const descriptor = Object.getOwnPropertyDescriptor(window, 'localStorage');
+    Object.defineProperty(window, 'localStorage', {
+      configurable: true,
+      get() { throw new Error('blocked'); },
+    });
+    try {
+      const { result, unmount } = renderHook(() => useProjectStore(), { wrapper: LocaleProvider });
+      let persisted = true;
+      act(() => { persisted = result.current.replaceData({ ...result.current.data, title: 'Replacement' }); });
+      expect(persisted).toBe(false);
+      expect(result.current.data.title).toBe('Replacement');
+      unmount();
+    } finally {
+      if (descriptor) Object.defineProperty(window, 'localStorage', descriptor);
+    }
+  });
+
+  it('applies episode update functions to the latest episode state', () => {
+    const { result } = renderHook(() => useProjectStore(), { wrapper: LocaleProvider });
+    const seasonId = 'functional-season';
+    const episodeId = 'functional-episode';
+    act(() => result.current.replaceData({ ...initialProjectData, seasons: [{
+      id: seasonId, title: 'Season', episodes: [{ id: episodeId, title: 'Before', summary: '' }],
+    }] }));
+    act(() => {
+      result.current.updateEpisode(seasonId, episodeId, { title: 'Latest title' });
+      result.current.updateEpisode(seasonId, episodeId, episode => ({ summary: `${episode.title} summary` }));
+    });
+    expect(result.current.data.seasons[0].episodes[0]).toMatchObject({
+      title: 'Latest title',
+      summary: 'Latest title summary',
+    });
+    let applied = true;
+    act(() => { applied = result.current.updateEpisode(seasonId, episodeId, () => ({})); });
+    expect(applied).toBe(false);
   });
 });

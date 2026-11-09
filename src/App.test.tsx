@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
@@ -53,7 +53,7 @@ class DeferredImportWorker {
 describe('App', () => {
   beforeEach(() => {
     window.localStorage.clear();
-    vi.spyOn(window, 'print').mockImplementation(() => undefined);
+    vi.spyOn(window, 'print').mockImplementation(() => undefined).mockClear();
     Object.defineProperty(URL, 'createObjectURL', {
       configurable: true,
       value: vi.fn(() => 'blob:test-download'),
@@ -391,6 +391,76 @@ describe('App', () => {
     expect(weimarConceptPanel.getByText('Image prompts and social media kit')).toBeInTheDocument();
     expect(weimarConceptPanel.getByText(/Weimar Republic into a source-based investigation/)).toBeInTheDocument();
   });
+  it('keeps a persistence error visible after confirming an import', async () => {
+    const user = userEvent.setup();
+    renderApp();
+    const writes = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('quota'); });
+    try {
+      const input = screen.getByLabelText('Load', { selector: 'input' });
+      await user.upload(input, new File([serializeProject({ ...initialProjectData, title: 'Unsaved import' })], 'import.seriescreator', { type: 'application/json' }));
+      await user.click(await screen.findByRole('button', { name: 'Load project file' }));
+      expect(screen.getByLabelText('Series Title')).toHaveValue('Unsaved import');
+      expect(document.querySelector('.app-status')).toHaveTextContent('Local save failed');
+      expect(screen.queryByText('Project file loaded.')).not.toBeInTheDocument();
+    } finally { writes.mockRestore(); }
+  });
+
+  it('does not keep a print tree during editing and prints the latest state on demand', async () => {
+    const user = userEvent.setup();
+    const { container } = renderApp();
+    expect(container.querySelector('#print-layout-container')).toBeNull();
+    await user.clear(screen.getByLabelText('Series Title'));
+    await user.type(screen.getByLabelText('Series Title'), 'Latest print title');
+    fireEvent(window, new Event('beforeprint'));
+    expect(container.querySelector('#print-layout-container')).toHaveTextContent('Latest print title');
+    fireEvent(window, new Event('afterprint'));
+    expect(container.querySelector('#print-layout-container')).toBeNull();
+  });
+
+  it('cancels an example load when its gallery is closed before a confirmed reset', async () => {
+    let finish!: (response: Response) => void;
+    const pending = new Promise<Response>((resolve) => { finish = resolve; });
+    const imageResponse = () => new Response(new Uint8Array([255, 216, 255, 217]));
+    vi.mocked(fetch).mockImplementationOnce(() => pending);
+    const user = userEvent.setup();
+    renderApp();
+    await openHeaderMenu(user);
+    await user.click(screen.getByRole('button', { name: 'Examples' }));
+    await user.click(screen.getAllByRole('button', { name: 'Use example' })[0]);
+    await user.click(screen.getByRole('button', { name: 'Load example' }));
+    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
+    await user.click(screen.getByRole('button', { name: 'Close examples' }));
+    await openHeaderMenu(user);
+    await user.click(screen.getByRole('button', { name: 'New / Clear' }));
+    await user.click(screen.getByRole('button', { name: 'Delete' }));
+    await act(async () => { finish(imageResponse()); });
+    expect(screen.getByLabelText('Series Title')).toHaveValue('My New Series');
+    expect(screen.queryByText('Example project loaded.')).not.toBeInTheDocument();
+  });
+
+  it('keeps project backups available but blocks output of image blocks without alternative text', async () => {
+    const project = getExampleProjects('en')[0].project;
+    const bytes = new Uint8Array(24);
+    bytes.set([137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82]);
+    new DataView(bytes.buffer).setUint32(16, 1);
+    new DataView(bytes.buffer).setUint32(20, 1);
+    project.seasons[0].episodes[0].contentBlocks = [{ id: 'missing-alt', type: 'image', imageUrl: `data:image/png;base64,${btoa(String.fromCharCode(...bytes))}`, altText: '  ' }];
+    window.localStorage.setItem('series_creator_data', serializeProject(project));
+    const user = userEvent.setup();
+    renderApp();
+    await user.click(screen.getByRole('button', { name: 'Present' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(document.querySelector('.app-status')).toHaveTextContent('First add alternative text');
+    await openHeaderMenu(user);
+    await user.click(screen.getByRole('button', { name: 'Download as HTML' }));
+    expect(URL.createObjectURL).not.toHaveBeenCalled();
+    await openHeaderMenu(user);
+    await user.click(screen.getByRole('button', { name: 'Print / Save as PDF' }));
+    expect(window.print).not.toHaveBeenCalled();
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    expect(URL.createObjectURL).toHaveBeenCalledOnce();
+  });
+
 });
 
 describe('example projects', () => {
@@ -426,4 +496,5 @@ describe('example projects', () => {
       }
     }
   });
+
 });

@@ -28,7 +28,14 @@ fallback configured in `wrangler.jsonc`.
 
 The active project is owned by `useProjectStore`. It autosaves to
 `localStorage` under `series_creator_data`; the locale is stored under
-`series-creator-locale`.
+`series-creator-locale`. Debounced writes flush on `pagehide` and when the document
+becomes hidden. Storage access is optional, including a throwing getter. Reset
+removes the recovery copy under `series_creator_data.unreadable`.
+
+A changed stored snapshot or storage event pauses automatic writes in a stale
+tab and exposes a conflict warning; it never replaces that tab's unsaved state.
+Confirmed reset/import explicitly replaces the stored draft. This is conflict
+detection, not collaborative editing: localStorage has no atomic compare-and-set.
 
 Persisted project schema version: `3`. Schema-1 and schema-2 projects and
 legacy JSON without `schemaVersion` are normalized forward, including missing
@@ -44,8 +51,8 @@ Editable backups use:
 - media type: `application/json`
 - schema version: `3`
 - import limit: 25 MB
-- image upload limit: PNG, JPG/JPEG or WebP with at most 60 megapixels
-- image output width: cover up to 1920 px; episode images up to 800 px
+- image upload limit: PNG, JPG/JPEG or WebP, at most 25 MB and 60 megapixels
+- image output bounds: cover up to 1920 × 1920 px; episode images up to 800 × 800 px, preserving aspect ratio and reducing further to fit the 1,500,000-character data-URL limit
 - structure limits: 1 to 20 seasons, up to 100 episodes per season
 
 Imports are treated as untrusted input. A project replaces state only after full
@@ -86,7 +93,20 @@ Cloudflare-hosted app origin and Cloudflare Web Analytics endpoints declared in
 - Output directory: `dist`
 - SPA fallback: `not_found_handling: "single-page-application"`
 - Security headers: `public/_headers`
-- Cache policy: HTML revalidates; fingerprinted and example assets are immutable
+- Cache policy: HTML and example assets revalidate; fingerprinted build assets are immutable
+
+## Output safety
+
+Image content blocks without nonblank alternative text remain editable and can
+be saved in project backups, but presentation, HTML export and print require
+those descriptions. Native print shows a recovery instruction instead of
+incomplete content. The print tree is mounted synchronously for print media or
+`beforeprint` and removed after printing, keeping it out of the editing DOM.
+
+Pending image uploads are ignored after editor unmount/project replacement.
+Image blocks append through the latest store state rather than captured arrays.
+Closing the example gallery or confirming a later reset/import invalidates a
+pending example load.
 
 ## Verification
 
@@ -97,7 +117,7 @@ Cloudflare-hosted app origin and Cloudflare Web Analytics endpoints declared in
   direct content routes, touch behavior and 320 px responsive behavior.
 - `scripts/smoke-production.mjs` verifies the live public routes and central
   security headers.
-- GitHub Actions runs `npm run verify` on Node.js 22.12.
+- GitHub Actions runs `npm run verify` on Node.js 22.23.3 (the supported minimum is 22.13 for ESLint/jsdom).
 
 ## Decisions and exceptions
 

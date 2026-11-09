@@ -42,9 +42,10 @@ Cover und Episodenbilder werden ausschließlich im Browser verarbeitet.
 Akzeptiert, wenn:
 
 - PNG, JPEG und WebP angenommen werden;
-- Eingaben über 60 Megapixel abgewiesen werden;
-- Cover auf höchstens 1920 px, Episodenbilder auf höchstens 800 px Breite
-  reduziert werden;
+- Dateien über 25 MB und Eingaben über 60 Megapixel vor dem Bild-Decode abgewiesen werden;
+- erzeugte Bild-Data-URLs die Importgrenze von 1.500.000 Zeichen einhalten;
+- Cover in 1920 × 1920 px, Episodenbilder in 800 × 800 px eingepasst und
+  bei Bedarf weiter verkleinert werden, jeweils mit erhaltenem Seitenverhältnis;
 - Episodenbilder einen bearbeitbaren Alternativtext besitzen;
 - fehlerhafte Bilder das Projekt nicht ersetzen oder beschädigen.
 
@@ -99,7 +100,9 @@ Akzeptiert, wenn:
 - jede Staffel vor ihren Episoden als Übersicht mit deren Reihenfolge erscheint;
 - Escape beendet;
 - Ablehnung oder Fehlen der Fullscreen-API die Präsentation nicht blockiert;
-- Bilder ihre Alternativtexte verwenden.
+- Bilder ihre Alternativtexte verwenden;
+- Bildinhaltsblöcke ohne Beschreibung vor Präsentation, HTML und Druck zur
+  Ergänzung auffordern, während bearbeitbare Projektbackups weiter möglich sind.
 
 ### F-07 Autosave, Import und Projektdatei
 
@@ -111,6 +114,10 @@ Akzeptiert, wenn:
 - blockierter oder beschädigter Local Storage auf ein frisches Projekt
   zurückfällt;
 - Speicherfehler sichtbar gemeldet werden;
+- ausstehende Änderungen beim Verlassen oder Ausblenden der Seite gesichert werden;
+- erkannte Änderungen in einem anderen Tab Autosave pausieren und zu Backup
+  und Neuladen auffordern; eine atomare Mehrtab-Bearbeitung wird nicht angeboten;
+- Reset auch die lokale Wiederherstellungskopie entfernt;
 - ungültige, zu große oder neuere Projektdateien den aktuellen Entwurf nicht
   ersetzen;
 - Reset, Import und Beispielauswahl vor Datenverlust warnen.
@@ -153,7 +160,7 @@ Akzeptiert, wenn:
 
 - Sprachwahl lokal gespeichert wird und `document.lang` aktualisiert;
 - Hilfe, Über, Lehrkräfte, verantwortungsvoller Einsatz,
-  Nutzungsbedingungen, Datenschutz und Impressum direkt aufrufbar sind;
+  Nutzungsbedingungen, Unterstützung, Datenschutz und Impressum direkt aufrufbar sind;
 - Markdown kein Raw HTML ausführt.
 
 ## Technische Grenzen
@@ -161,7 +168,7 @@ Akzeptiert, wenn:
 | Ressource | Grenze |
 | --- | --- |
 | Projektdatei | 25.000.000 Byte |
-| Bild-Eingabe | 60.000.000 Pixel |
+| Bild-Eingabe | 25.000.000 Byte, 60.000.000 Pixel |
 | Eingebettete Bild-Data-URL | 1.500.000 Zeichen |
 | Staffeln | 1–20 |
 | Episoden | 0–100 je Staffel |

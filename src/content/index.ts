@@ -1,3 +1,5 @@
+import support from "./unterstuetzung.md?raw";
+import supportEn from "./en/support.md?raw";
 import datenschutz from "./datenschutz.md?raw";
 import hilfe from "./hilfe.md?raw";
 import impressum from "./impressum.md?raw";
@@ -15,6 +17,7 @@ import termsEn from "./en/terms.md?raw";
 
 export const contentPages = {
   de: {
+    "/unterstuetzung": { title: "Unterstützung", content: support },
     "/hilfe": { title: "Hilfe", content: hilfe },
     "/ueber": { title: "Über das Projekt", content: ueber },
     "/lehrkraefte": {
@@ -33,6 +36,7 @@ export const contentPages = {
     "/impressum": { title: "Impressum", content: impressum },
   },
   en: {
+    "/unterstuetzung": { title: "Support", content: supportEn },
     "/hilfe": { title: "Help", content: helpEn },
     "/ueber": { title: "About the project", content: aboutEn },
     "/lehrkraefte": {

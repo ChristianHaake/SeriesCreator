@@ -6,8 +6,8 @@ https://github.com/ChristianHaake/haak3-webapp-standard/blob/main/docs/review-ch
 ## Release
 
 - Version: `2.0.0` (in Vorbereitung)
-- Review date: offen
-- Reviewer: offen
+- Review date: `2026-11-09` (automatisierte Nachprüfung)
+- Reviewer: Codex (automatisierte Prüfung; manuelle Freigaben weiter offen)
 
 ## Product
 
@@ -48,7 +48,8 @@ https://github.com/ChristianHaake/haak3-webapp-standard/blob/main/docs/review-ch
 ## Content and legal
 
 - [x] Hilfe, Datenschutz und Impressum unterstützen direkte Navigation.
-- [x] Footer verlinkt Pflichtseiten und Repository.
+- [x] Footer verlinkt Pflichtseiten einschließlich Unterstützung und Repository.
+- [x] Unterstützung hat eine eigene Route, einen lokalisierten Anbieterlink und einen Datenschutzhinweis.
 - [x] Markdown rendert kein unsicheres Raw HTML.
 - [x] Deutsche und englische Pflichtseiten sind vorhanden.
 - [ ] Rechtstexte wurden durch den Betreiber final geprüft.
@@ -59,6 +60,7 @@ https://github.com/ChristianHaake/haak3-webapp-standard/blob/main/docs/review-ch
 - [x] `npm run verify` umfasst Lint, Typprüfung, Beispiele, Unit-Tests, Build und Browser-E2E.
 - [x] Chromium, Firefox, WebKit und Mobile Chrome prüfen den Produktions-Build.
 - [x] GitHub Actions führt das Release-Gate aus.
+- [x] Übersetzungsschlüssel, leere Werte und Platzhalter werden im Test-Gate geprüft.
 - [x] Production-Smoke prüft öffentliche Routen, zentrale Security-Header und die ausgelieferte Version.
 - [x] HTML revalidiert; gebaute Assets und Beispielbilder werden immutable gecacht.
 - [x] README, Paketmetadaten und Lizenz nennen GPL-3.0-only.

@@ -7,6 +7,7 @@ export function AppFooter() {
       <span className="app-footer__privacy">{t.footerPrivacy}</span>
       <div className="app-footer__right" style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
         <nav className="app-footer__nav" aria-label="Footer Navigation">
+          <a href="/unterstuetzung">{t.footerSupport}</a>
           <a href="/hilfe">{t.footerHelp}</a>
           <a href="/ueber">{t.footerAbout}</a>
           <a href="/lehrkraefte">{t.footerTeachers}</a>
