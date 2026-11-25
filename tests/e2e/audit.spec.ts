@@ -161,7 +161,17 @@ test('serves localized support pages with the outbound contribution link', async
     await expect(coffee).toBeInViewport({ ratio: 1 });
     expect((await coffee.boundingBox())?.height).toBeGreaterThanOrEqual(44);
     await expect(page.locator('a[href="mailto:apps@haak3.de?subject=SeriesCreator%20Feedback"]')).toBeVisible();
-    await expect(page.locator('a[href="https://www.buymeacoffee.com/privacy-policy"]')).toBeVisible();
+    for (const href of [
+      'https://haak3.atlassian.net/jira/software/form/69a50efc-0474-445e-8f01-66eb6b747cc1',
+      'https://haak3.atlassian.net/jira/software/form/50d4fc51-bff4-4e21-b46e-8fd987b90d24',
+      'https://www.buymeacoffee.com/privacy-policy',
+      'https://github.com/ChristianHaake/SeriesCreator/issues',
+    ]) {
+      const link = page.locator(`.support-content a[href="${href}"]`);
+      await expect(link).toBeVisible();
+      await expect(link).toHaveAttribute('target', '_blank');
+      await expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+    }
     expect(new URL(page.url()).pathname).toBe('/unterstuetzung');
   }
 });

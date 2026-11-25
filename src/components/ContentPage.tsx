@@ -21,9 +21,20 @@ export default function ContentPage({ pathname }: { pathname: ContentPath }) {
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           components={isSupportPage ? {
-            a: ({ href, title, children }) => href === 'https://buymeacoffee.com/haake'
-              ? <a href={href} title={title} className="support-coffee" target="_blank" rel="noopener noreferrer">{children}</a>
-              : <a href={href} title={title}>{children}</a>,
+            a: ({ href, title, children }) => {
+              const external = href !== undefined && /^https?:\/\//i.test(href);
+              return (
+                <a
+                  href={href}
+                  title={title}
+                  className={href === 'https://buymeacoffee.com/haake' ? 'support-coffee' : undefined}
+                  target={external ? '_blank' : undefined}
+                  rel={external ? 'noopener noreferrer' : undefined}
+                >
+                  {children}
+                </a>
+              );
+            },
           } : undefined}
         >
           {page.content}
