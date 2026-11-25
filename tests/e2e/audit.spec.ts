@@ -145,12 +145,13 @@ test('serves localized support pages with the outbound contribution link', async
   await page.setViewportSize({ width: 320, height: 800 });
   await page.goto('/');
   await expect(page.locator('footer .app-footer__coffee')).toHaveAttribute('href', '/unterstuetzung');
-  for (const [locale, title] of [
-    ['en', 'Support SeriesCreator in the classroom'],
-    ['de', 'SeriesCreator im Unterricht unterstützen'],
+  for (const [locale, title, footerLabel] of [
+    ['en', 'Support SeriesCreator in the classroom', 'Support'],
+    ['de', 'SeriesCreator im Unterricht unterstützen', 'Unterstützung'],
   ] as const) {
     await page.evaluate((value) => window.localStorage.setItem('series-creator-locale', value), locale);
     await page.goto('/');
+    await expect(page.locator('footer .app-footer__coffee')).toHaveText(footerLabel);
     await page.goto('/unterstuetzung');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(title);
     const coffee = page.locator('.markdown-content').getByRole('link', { name: /Buy Me a Coffee/i });

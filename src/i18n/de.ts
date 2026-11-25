@@ -96,7 +96,6 @@ export const de = {
   footerTeachers: "Lehrkräfte",
   footerPrivacyPolicy: "Datenschutz",
   footerImprint: "Impressum",
-  coffee: "Buy me a coffee",
   backToApp: "← Zurück zur App",
   allSeasons: "Alle Staffeln",
   home: "Startseite",
