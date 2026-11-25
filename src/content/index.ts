@@ -17,7 +17,7 @@ import termsEn from "./en/terms.md?raw";
 
 export const contentPages = {
   de: {
-    "/unterstuetzung": { title: "Unterstützung", content: support },
+    "/unterstuetzung": { title: "SeriesCreator im Unterricht unterstützen", content: support },
     "/hilfe": { title: "Hilfe", content: hilfe },
     "/ueber": { title: "Über das Projekt", content: ueber },
     "/lehrkraefte": {
@@ -36,7 +36,7 @@ export const contentPages = {
     "/impressum": { title: "Impressum", content: impressum },
   },
   en: {
-    "/unterstuetzung": { title: "Support", content: supportEn },
+    "/unterstuetzung": { title: "Support SeriesCreator in the classroom", content: supportEn },
     "/hilfe": { title: "Help", content: helpEn },
     "/ueber": { title: "About the project", content: aboutEn },
     "/lehrkraefte": {

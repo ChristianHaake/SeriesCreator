@@ -907,6 +907,37 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
   text-decoration: none;
 }
 
+.support-content h1 {
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.markdown-content a.support-coffee {
+  display: inline-flex;
+  align-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  max-width: 100%;
+  padding: 8px 16px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: #b84a00;
+  color: white;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+  text-decoration: none;
+}
+
+.markdown-content a.support-coffee:hover {
+  background: #943900;
+}
+
+.markdown-content a.support-coffee:focus-visible {
+  outline: 2px solid var(--link-on-surface);
+  outline-offset: 3px;
+}
+
 .markdown-content strong {
   font-weight: 700;
 }

@@ -142,19 +142,25 @@ test('opens an exported HTML file and advances once per Space press', async ({ p
 });
 
 test('serves localized support pages with the outbound contribution link', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 800 });
   await page.goto('/');
+  await expect(page.locator('footer .app-footer__coffee')).toHaveAttribute('href', '/unterstuetzung');
   for (const [locale, title] of [
-    ['en', 'Support'],
-    ['de', 'Unterstützung'],
+    ['en', 'Support SeriesCreator in the classroom'],
+    ['de', 'SeriesCreator im Unterricht unterstützen'],
   ] as const) {
     await page.evaluate((value) => window.localStorage.setItem('series-creator-locale', value), locale);
     await page.goto('/');
     await page.goto('/unterstuetzung');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(title);
-    await expect(page.locator('.markdown-content').getByRole('link', { name: /Buy Me a Coffee/i })).toHaveAttribute(
-      'href',
-      'https://buymeacoffee.com/haake',
-    );
+    const coffee = page.locator('.markdown-content').getByRole('link', { name: /Buy Me a Coffee/i });
+    await expect(coffee).toHaveAttribute('href', 'https://buymeacoffee.com/haake');
+    await expect(coffee).toHaveAttribute('target', '_blank');
+    await expect(coffee).toHaveAttribute('rel', 'noopener noreferrer');
+    await expect(coffee).toBeInViewport({ ratio: 1 });
+    expect((await coffee.boundingBox())?.height).toBeGreaterThanOrEqual(44);
+    await expect(page.locator('a[href="mailto:apps@haak3.de?subject=SeriesCreator%20Feedback"]')).toBeVisible();
+    await expect(page.locator('a[href="https://www.buymeacoffee.com/privacy-policy"]')).toBeVisible();
     expect(new URL(page.url()).pathname).toBe('/unterstuetzung');
   }
 });
