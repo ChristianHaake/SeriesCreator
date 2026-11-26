@@ -113,6 +113,10 @@ Stage-Konfiguration verwendet `seriescreator-stage` und die Domain
 `stage.seriescreator.haak3.de`; die Produktionsroute wird dabei nicht geändert.
 `npm run test:e2e:stage` prüft anschließend die Browser-Flows. Commit,
 Worker-Version und Testergebnis gehören in das Release-Protokoll.
+Wenn danach nur die Dokumentation committet wird, lässt sich der bereits
+bereitgestellte Build mit `npm run smoke:production --
+https://stage.seriescreator.haak3.de/ <bereitgestellte-commit-id>` erneut
+gegen seine ursprüngliche Commit-ID prüfen.
 
 Das automatisierte Release-Gate läuft in GitHub Actions. Manuelle
 Zielbrowser-, Screenreader-, Rechts- und Endgeräteprüfungen bleiben getrennt in

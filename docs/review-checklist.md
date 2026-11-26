@@ -65,7 +65,8 @@ https://git.2p4.org/Christian/Agent-Memory/src/branch/main/25_Development/standa
 - [x] GitHub Actions führt das Release-Gate aus.
 - [x] Übersetzungsschlüssel, leere Werte und Platzhalter werden im Test-Gate geprüft.
 - [x] Bereits sichtbare Status- und Fehlermeldungen wechseln mit der Oberflächensprache.
-- [ ] Stage-Deploy, Commit-Smoke und fünfsprachige Stage-Flows abgeschlossen.
+- [x] Stage-Deploy, Commit-Smoke und automatisierte fünfsprachige Stage-Flows abgeschlossen.
+- [ ] Manuelle fünfsprachige Stage-Abnahme auf Zielgeräten abgeschlossen.
 - [ ] Production-Smoke für den Redesign-Release auf der endgültigen URL bestanden.
 - [x] HTML revalidiert; gebaute Assets und Beispielbilder werden immutable gecacht.
 - [x] README, Paketmetadaten und Lizenz nennen GPL-3.0-only.

@@ -5,9 +5,10 @@ assistive-technology, legal or final production review.
 
 ## Stage candidate
 
-- [ ] Reviewed commit deployed to `https://stage.seriescreator.haak3.de/`
-- [ ] `npm run smoke:stage` passed for that commit; Worker version and URL recorded
-- [ ] Stage browser flows completed before any production deployment
+- [x] Identified commit deployed to `https://stage.seriescreator.haak3.de/`
+- [x] Stage smoke passed for that commit; Worker version and URL recorded
+- [x] Automated Stage browser flows completed in Chromium, WebKit and Mobile Chrome
+- [ ] Direct device and browser walkthrough completed on the Stage domain
 
 ## Target browsers and devices
 

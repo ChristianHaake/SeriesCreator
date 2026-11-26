@@ -58,10 +58,9 @@ Local screenshots at 320, 768 and 1440 pixels were visually reviewed.
 The full `npm run test:e2e` was attempted. Firefox timed out before app
 startup with the local macOS `plugin-container.app` permission error and a
 software-compositor mapping failure, as documented previously; Firefox
-application behavior is therefore unverified here. Run the Firefox project
-in CI or an unrestricted environment before release. The build currently
-reports a size advisory for the 500.45 kB main JS chunk (155.26 kB gzip);
-the build succeeds.
+application behavior is therefore unverified locally. The later CI run below
+verifies Firefox. The build reports a size advisory for the 502.84 kB main
+JS chunk (155.89 kB gzip); the build succeeds.
 
 The follow-up implementation for issues #55–#58 adds the feedback route on
 help/support in every language, renders existing statuses and editor errors in
@@ -70,20 +69,47 @@ also uses the selected language for untitled imported episodes. Local checks
 passed lint, typecheck, example generation, 93 unit tests, build, and dependency
 audit (zero reported vulnerabilities). Playwright passed 106 tests in Chromium,
 WebKit and Mobile Chrome; the two WebKit CDP-only PDF pixel checks remain
-skipped. Wrangler accepted the Stage configuration in a dry run. Stage has not
-yet been deployed or smoke-tested. The reviewed source commit and deployed
-Worker version still need recording here.
+skipped. Wrangler accepted the Stage configuration in a dry run. The Stage
+deployment and smoke results are recorded below.
+
+## Stage candidate and rollback
+
+- **Stage URL:** `https://stage.seriescreator.haak3.de/`
+- **Source commit:** `ce9a3dfe134bc114c4d1a9c7d1b108b427304d1b`
+- **Stage Worker version:** `e15920b7-2adb-4b02-8a99-74b2bc6250f7`
+- **Stage smoke:** all ten direct routes, root security headers, example image
+  and the exact commit marker passed on 2026-11-26.
+- **Stage browser regression:** 108 passed in Chromium, WebKit and Mobile
+  Chrome; two WebKit PDF pixel tests skipped by design. The suite covered all
+  five locales, help, examples, statuses, errors and export artifacts.
+- **CI:** [Verification run 90](https://github.com/ChristianHaake/SeriesCreator/actions/runs/45901885827)
+  passed on Node 22.23.3: 93 unit tests, 159 browser tests including Firefox,
+  four intentional skips, build and dependency audit.
+- **Rollback artifact:** the pre-redesign production Worker version
+  `0c8c949a-e7ac-4071-966a-88f4fa961dd0` was observed at 100% on
+  2026-11-26. The prior source baseline is `1a269d506387567055505be3a199f8bffe368cea`.
+  Both source baselines use project schema 3 and `series_creator_data`; the
+  locale key remains `series-creator-locale`. Reconfirm the production Worker
+  version immediately before a future production deployment.
+
+The newly created Stage domain resolved through public DNS, but the local
+macOS resolver returned `ENOTFOUND` during this run. The smoke assertions ran
+with a process-only DNS override; the browser suite used a temporary local
+HTTPS proxy forwarding unmodified Stage responses. The Stage artifact and
+security headers were checked directly through Cloudflare. A direct browser
+walkthrough on the public Stage URL remains open.
 
 ## Manual checks
 
 Use `docs/manual-release-checks.md` to record target devices, assistive
 technology, exports, legal review and final production smoke results here.
 
-The redesign candidate still needs a documented Stage URL, actual smartphone
-and tablet checks, manual Safari/Firefox print checks, screenreader checks,
-operator review of all legal translations, and a named rollback commit/artifact
-with its compatible project-file and local-storage path. Production deployment
-is not approved by the automated results alone.
+The redesign candidate still needs actual smartphone and tablet checks,
+manual Safari/Firefox print checks, screenreader and zoom checks, a direct
+Stage browser walkthrough, native-language review of all five translations,
+operator review of all legal translations, and PR review. Zero of five
+language versions have completed the manual release review. Production
+deployment is not approved by the automated results alone.
 
 ## Accepted limitations
 
