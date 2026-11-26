@@ -7,6 +7,11 @@ import { calculateProjectCompletion, displayCompletion } from './domain/completi
 import { parseProjectJson, serializeProject } from './domain/projectCodec';
 import { initialProjectData } from './types';
 import { LocaleProvider } from './i18n';
+import { de } from './i18n/de';
+import { en } from './i18n/en';
+import { fr } from './i18n/fr';
+import { es } from './i18n/es';
+import { nl } from './i18n/nl';
 
 // Episode fields live in a dialog opened from the list row.
 async function openEpisode(user: ReturnType<typeof userEvent.setup>, index = 0) {
@@ -121,11 +126,45 @@ describe('App', () => {
     const user = userEvent.setup();
     renderApp();
 
-    await user.click(screen.getByRole('button', { name: 'DE' }));
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Select language' }), 'de');
 
     expect(document.documentElement.lang).toBe('de');
     expect(screen.getByLabelText('Serientitel')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Präsentieren' })).toBeInTheDocument();
+  });
+
+  it('preserves entered content across all five interface languages', async () => {
+    const user = userEvent.setup();
+    renderApp();
+    await user.clear(screen.getByLabelText('Series Title'));
+    await user.type(screen.getByLabelText('Series Title'), 'My unchanged series');
+
+    for (const [locale, dictionary] of Object.entries({ de, en, fr, es, nl })) {
+      await user.selectOptions(document.querySelector<HTMLSelectElement>('.language-switcher')!, locale);
+      expect(document.documentElement.lang).toBe(locale);
+      expect(screen.getByLabelText(dictionary.lblTitle)).toHaveValue('My unchanged series');
+      expect(screen.getByRole('button', { name: dictionary.btnSave })).toBeInTheDocument();
+    }
+  });
+
+  it('opens the local example gallery from its direct route', () => {
+    renderApp('/beispiele');
+    expect(screen.getByRole('dialog', { name: 'Examples in the app' })).toBeInTheDocument();
+    expect(document.title).toBe('Examples in the app · SeriesCreator');
+  });
+
+  it('keeps an unsaved draft while opening help and returning', async () => {
+    const user = userEvent.setup();
+    renderApp();
+    const writes = vi.spyOn(window.localStorage, 'setItem').mockImplementation(() => { throw new Error('quota'); });
+    try {
+      await user.clear(screen.getByLabelText('Series Title'));
+      await user.type(screen.getByLabelText('Series Title'), 'Draft without storage');
+      await user.click(screen.getByRole('link', { name: 'Help' }));
+      expect(await screen.findByRole('heading', { name: 'Help' })).toBeInTheDocument();
+      await user.click(screen.getByRole('link', { name: /Back to App/i }));
+      expect(screen.getByLabelText('Series Title')).toHaveValue('Draft without storage');
+    } finally { writes.mockRestore(); }
   });
 
   it('preserves the draft when reset is cancelled', async () => {
@@ -180,7 +219,7 @@ describe('App', () => {
     }));
     await waitFor(() => expect(DeferredImportWorker.latest).toBeDefined());
 
-    await user.click(screen.getByRole('button', { name: 'DE' }));
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Select language' }), 'de');
     DeferredImportWorker.latest?.respond({ ok: true, data: initialProjectData });
 
     await screen.findByText('Möchtest du diese Projektdatei laden? Dein aktueller Entwurf wird dadurch ersetzt.');
@@ -206,6 +245,8 @@ describe('App', () => {
     const moveDown = screen.getAllByRole('button', { name: /^Move episode down:/ })[0];
     await user.click(moveDown);
     expect(screen.getByText(/is now at position 2\./)).toBeInTheDocument();
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Select language' }), 'nl');
+    expect(screen.getByText(nl.episodeMoved.replace('{title}', en.newEpisode).replace('{position}', '2'))).toBeInTheDocument();
   });
 
   it('does not render the dead list action', () => {
@@ -246,7 +287,7 @@ describe('App', () => {
     const user = userEvent.setup();
     renderApp();
 
-    await user.click(screen.getByRole('button', { name: 'Save' }));
+    await user.click(screen.getByRole('button', { name: 'Save project file' }));
     expect(screen.getByText('The project was successfully downloaded.')).toBeInTheDocument();
 
     await openHeaderMenu(user);
@@ -258,6 +299,18 @@ describe('App', () => {
     await user.click(screen.getByRole('button', { name: 'Print / Save as PDF' }));
     expect(window.print).toHaveBeenCalled();
     expect(screen.getByText('Print dialog opened. Use it to save as PDF if needed.')).toBeInTheDocument();
+  });
+
+  it('translates an existing export status when the language changes', async () => {
+    const user = userEvent.setup();
+    renderApp();
+
+    await user.click(screen.getByRole('button', { name: 'Save project file' }));
+    expect(screen.getByText(en.msgExportSuccess)).toBeInTheDocument();
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Select language' }), 'fr');
+
+    expect(screen.getByText(fr.msgExportSuccess)).toBeInTheDocument();
+    expect(screen.queryByText(en.msgExportSuccess)).not.toBeInTheDocument();
   });
 
   it('exposes accessible cover upload controls and inline file errors', async () => {
@@ -272,6 +325,9 @@ describe('App', () => {
     await user.upload(input!, new File(['not image'], 'notes.txt', { type: 'text/plain' }));
 
     expect(screen.getByRole('alert')).toHaveTextContent('Choose a PNG, JPG, or WebP image.');
+
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Select language' }), 'es');
+    expect(screen.getByRole('alert')).toHaveTextContent(es.imageErrorUnsupported);
   });
 
   it('keeps editor and file controls reachable by accessible name', async () => {
@@ -457,7 +513,7 @@ describe('App', () => {
     await openHeaderMenu(user);
     await user.click(screen.getByRole('button', { name: 'Print / Save as PDF' }));
     expect(window.print).not.toHaveBeenCalled();
-    await user.click(screen.getByRole('button', { name: 'Save' }));
+    await user.click(screen.getByRole('button', { name: 'Save project file' }));
     expect(URL.createObjectURL).toHaveBeenCalledOnce();
   });
 
@@ -465,7 +521,7 @@ describe('App', () => {
 
 describe('example projects', () => {
   it('ship as valid project files', () => {
-    for (const locale of ['de', 'en'] as const) {
+    for (const locale of ['de', 'en', 'fr', 'es', 'nl'] as const) {
       for (const example of getExampleProjects(locale)) {
         const parsed = parseProjectJson(serializeProject(example.project));
         const availableAgeRatings =

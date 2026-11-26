@@ -1,8 +1,16 @@
 {
   "name": "seriescreator",
+  "account_id": "61b8f620d91231592cb7cded73f0dc46",
   "compatibility_date": "2026-06-25",
   "assets": {
     "directory": "./dist",
     "not_found_handling": "single-page-application"
+  },
+  "env": {
+    "stage": {
+      "routes": [
+        { "pattern": "stage.seriescreator.haak3.de", "custom_domain": true }
+      ]
+    }
   }
 }

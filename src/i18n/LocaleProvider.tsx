@@ -1,19 +1,23 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { de } from './de';
 import { en } from './en';
+import { fr } from './fr';
+import { es } from './es';
+import { nl } from './nl';
 import { LocaleContext, type Language, type LocaleContextValue } from './LocaleContext';
 
-const dictionaries = { de, en };
+const dictionaries = { de, en, fr, es, nl };
 const storageKey = 'series-creator-locale';
 
 function detectLocale(): Language {
   try {
     const stored = window.localStorage.getItem(storageKey);
-    if (stored === 'de' || stored === 'en') return stored;
+    if (stored && Object.hasOwn(dictionaries, stored)) return stored as Language;
   } catch {
     // Fall back to browser language when localStorage is blocked.
   }
-  return window.navigator.language.toLowerCase().startsWith('en') ? 'en' : 'de';
+  const browserLocale = window.navigator.language.toLowerCase().split('-')[0];
+  return Object.hasOwn(dictionaries, browserLocale) ? browserLocale as Language : 'de';
 }
 
 export function LocaleProvider({ children }: { children: ReactNode }) {

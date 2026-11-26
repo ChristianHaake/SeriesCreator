@@ -19,7 +19,7 @@ fallback configured in `wrangler.jsonc`.
 - `src/components`: application shell, editor, preview, print, and presentation
   components.
 - `src/domain`: validation, project codec, bundled examples, and shared limits.
-- `src/i18n`: locale context, provider, hook, and dictionaries.
+- `src/i18n`: locale context, provider, hook, and dictionaries for de/en/fr/es/nl.
 - `src/content`: bundled Markdown pages for help, privacy, legal, educator, and
   responsible-use content.
 - `src/store`: local project state and persistence.
@@ -66,7 +66,8 @@ is used in preview metadata and presentation credits. See
 
 ## Bundled examples
 
-The app ships with school-themed climate and history examples. Loading one is a
+The app ships with school-themed climate and history examples in five languages.
+The gallery also opens directly at `/beispiele`. Loading one is a
 state replacement guarded by confirmation, just like reset/import risk paths.
 The examples intentionally exercise seasons, episode ordering, academic
 deepening, text and image content blocks, reflection, sources, presentation,
@@ -89,10 +90,14 @@ Cloudflare-hosted app origin and Cloudflare Web Analytics endpoints declared in
 ## Deployment
 
 - Cloudflare product: Workers Assets
+- Stage Worker: `seriescreator-stage` at `stage.seriescreator.haak3.de`, deployed
+  explicitly with `npm run deploy:stage` from a clean reviewed commit
 - Build command: `npm run build`
 - Output directory: `dist`
 - SPA fallback: `not_found_handling: "single-page-application"`
 - Security headers: `public/_headers`
+- Stage smoke checks the deployed commit marker, direct content routes and
+  security headers with `npm run smoke:stage`
 - Cache policy: HTML and example assets revalidate; fingerprinted build assets are immutable
 
 ## Output safety

@@ -88,7 +88,7 @@ function normalizeContentBlocks(value: unknown, episodeIndex: number): EpisodeCo
     : null;
 }
 
-function normalizeEpisode(value: unknown, index: number): Episode | null {
+function normalizeEpisode(value: unknown, index: number, episodeFallback: string): Episode | null {
   if (!isRecord(value)) return null;
   if (typeof value.title !== 'string' || typeof value.summary !== 'string') {
     return null;
@@ -98,7 +98,7 @@ function normalizeEpisode(value: unknown, index: number): Episode | null {
   if (contentBlocks === null) return null;
   return {
     id: limitText(value.id, 80) || `ep_${index + 1}`,
-    title: limitText(value.title, fieldLimits.episodeTitle) || 'Neue Episode',
+    title: limitText(value.title, fieldLimits.episodeTitle) || episodeFallback,
     summary: limitText(value.summary, fieldLimits.episodeSummary),
     learningDepth: limitText(value.learningDepth, fieldLimits.episodeLearningDepth) || undefined,
     thumbnailUrl: asOptionalImageUrl(value.thumbnailUrl),
@@ -107,13 +107,14 @@ function normalizeEpisode(value: unknown, index: number): Episode | null {
   };
 }
 
-function normalizeSeason(value: unknown, index: number, seasonFallback: string): Season | null {
+function normalizeSeason(value: unknown, index: number, seasonFallback: string, episodeFallback: string): Season | null {
   if (!isRecord(value) || !Array.isArray(value.episodes)) return null;
   if (typeof value.title !== 'string') return null;
   if (!Array.isArray(value.episodes)) return null;
   if (value.episodes.length > resourceLimits.maxEpisodesPerSeason) return null;
 
-  const episodes = value.episodes.map(normalizeEpisode).filter((e): e is Episode => e !== null);
+  const episodes = value.episodes.map((episode, episodeIndex) => normalizeEpisode(episode, episodeIndex, episodeFallback))
+    .filter((episode): episode is Episode => episode !== null);
   if (episodes.length !== value.episodes.length) return null; // Abort if any episode was invalid
 
   return {
@@ -123,7 +124,7 @@ function normalizeSeason(value: unknown, index: number, seasonFallback: string):
   };
 }
 
-export function normalizeProject(value: unknown, seasonFallback = 'Season'): ProjectParseResult {
+export function normalizeProject(value: unknown, seasonFallback = 'Season', episodeFallback = 'New Episode'): ProjectParseResult {
   if (!isRecord(value)) {
     return { ok: false, code: 'notAnObject' };
   }
@@ -152,7 +153,7 @@ export function normalizeProject(value: unknown, seasonFallback = 'Season'): Pro
     return { ok: false, code: 'seasonCount' };
   }
 
-  const seasons = value.seasons.map((season, index) => normalizeSeason(season, index, seasonFallback));
+  const seasons = value.seasons.map((season, index) => normalizeSeason(season, index, seasonFallback, episodeFallback));
   if (seasons.some((season) => season === null)) {
     return { ok: false, code: 'invalidSeasonContent' };
   }
@@ -206,13 +207,13 @@ export function normalizeProject(value: unknown, seasonFallback = 'Season'): Pro
   return { ok: true, data };
 }
 
-export function parseProjectJson(text: string, seasonFallback = 'Season'): ProjectParseResult {
+export function parseProjectJson(text: string, seasonFallback = 'Season', episodeFallback = 'New Episode'): ProjectParseResult {
   if (new Blob([text]).size > resourceLimits.projectFileBytes) {
     return { ok: false, code: 'tooLarge' };
   }
 
   try {
-    return normalizeProject(JSON.parse(text), seasonFallback);
+    return normalizeProject(JSON.parse(text), seasonFallback, episodeFallback);
   } catch {
     return { ok: false, code: 'invalidJson' };
   }
@@ -234,14 +235,16 @@ export function isProjectFileSizeWithinLimit(data: ProjectData) {
 }
 
 // Shared filename base so project (.seriescreator) and HTML exports sanitize
-// titles identically (umlauts kept, whitespace collapsed, capped at 60 chars).
+// titles identically (letters from every supported locale kept, whitespace
+// collapsed, capped at 60 code points).
 export function makeExportBaseName(title: string, fallback: string) {
   return (
-    title
+    Array.from(title
       .trim()
-      .replace(/[^a-z0-9äöüß _-]/gi, '')
-      .replace(/\s+/g, '-')
-      .slice(0, 60) || fallback
+      .replace(/[^\p{L}\p{N}\p{M} _-]/gu, '')
+      .replace(/\s+/g, '-'))
+      .slice(0, 60)
+      .join('') || fallback
   );
 }
 

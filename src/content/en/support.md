@@ -18,3 +18,7 @@ You can [report bugs on GitHub](https://github.com/ChristianHaake/SeriesCreator/
 suggest improvements, or share the project with other educators. Include your
 browser and the steps to reproduce a problem. Do not publish personal data from
 classroom projects in a report.
+
+For bug reports and feature ideas, you can also email
+[apps@haak3.de](mailto:apps@haak3.de?subject=SeriesCreator%20Feedback).
+Do not include project content or personal data.

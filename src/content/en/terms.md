@@ -1,8 +1,8 @@
 ## Educational purpose
 
-SeriesCreator creates fictional digital communication scenarios for
-education, media literacy, and classroom use. It is not a real social-media
-platform.
+SeriesCreator helps plan and present classroom topics as fictional streaming
+series with seasons and episodes. It is not a streaming platform and does not
+publish series.
 
 ## User responsibility
 
@@ -21,13 +21,12 @@ The following is prohibited:
 - publication of private messages or personal data
 - infringement of copyright, trademarks, or personality rights
 - unlawful, commercial, or harmful use
-- removing or concealing the automatic export label
 
 ## Exported content
 
-Exports are visibly labeled as simulations. The label does not remove user
-responsibility. Files must remain within the agreed educational context and
-must not be distributed deceptively.
+Project files and presentations can be exported locally and then shared. Users
+should make clear that they are fictional classroom projects and must not share
+third-party or personal content without permission.
 
 ## Availability and liability
 

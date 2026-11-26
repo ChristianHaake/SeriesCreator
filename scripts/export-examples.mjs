@@ -55,7 +55,7 @@ async function addExampleImages(project: ProjectData, slug: string) {
   return projectWithImages;
 }
 
-for (const locale of ['de', 'en'] as const) {
+for (const locale of ['de', 'en', 'fr', 'es', 'nl'] as const) {
   for (const example of getExampleProjects(locale)) {
     const filename = \`\${locale}-\${makeProjectFilename(example.project.title)}\`;
     const project = await addExampleImages(example.project, example.id);

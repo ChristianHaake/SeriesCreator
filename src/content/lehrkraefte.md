@@ -47,7 +47,7 @@ Gestaltung und Streaming-Optik können das Ergebnis unterstützen, ersetzen aber
 
 Nutzinhalte werden lokal im Browser verarbeitet. Dennoch gilt:
 
-- **Urheberrecht:** Fremde Bilder dürfen nur verwendet werden, wenn die Lizenz (z.B. CC0, Public Domain) dies erlaubt. Für schulische Zwecke gibt es im Klassenraum Ausnahmen, eine Veröffentlichung des Exports erfordert jedoch die strikte Einhaltung des Urheberrechts.
+- **Urheberrecht:** Prüfen Sie vor dem Einfügen und Weitergeben fremder Bilder, ob die jeweiligen Nutzungsrechte dies erlauben. Bei einer Veröffentlichung sind die Rechte erneut für diesen Zweck zu prüfen.
 - **Persönlichkeitsrechte:** Bei der Darstellung realer Personen ist stets auf den Schutz der Persönlichkeitsrechte zu achten.
 
 ## FAQ
@@ -58,7 +58,7 @@ Nein. Texte, Bilder und Konfigurationen werden lokal in Ihrem Browser verarbeite
 
 ### Darf ich Bilder aus dem Internet verwenden?
 
-Nur wenn die Lizenz (z. B. CC0/Pixabay) oder das Zitatrecht die Nutzung erlauben. Für eigene Projekte sollten gemeinfreie oder selbst erstellte Bilder verwendet werden.
+Prüfen Sie die Nutzungsrechte des konkreten Bildes und die Bedingungen für den geplanten Einsatz. Selbst erstellte Bilder vermeiden viele Fragen zu fremden Bildrechten.
 
 ### Können Ergebnisse veröffentlicht werden?
 

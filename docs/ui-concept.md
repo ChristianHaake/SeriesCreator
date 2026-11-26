@@ -8,7 +8,7 @@ Plattform und stellt die schulische Projektarbeit in den Vordergrund.
 
 ## Anwendungsschale
 
-- Header: Marke, Sprachwahl, Hinweis auf lokale Verarbeitung und
+- Header: App-Logo, Sprachmenü mit ausgeschriebenen Namen, Hinweis auf lokale Verarbeitung und
   Projektaktionen
 - Hauptbereich: Editor und Live-Vorschau
 - Footer: Hilfe, Über, Lehrkräfte, Datenschutz, Impressum und Repository
@@ -44,7 +44,7 @@ Die Staffelwahl bestimmt, welche Episoden im Raster sichtbar sind.
 - Mindestbreite: 320 CSS-Pixel ohne horizontales Seitenscrolling
 - Aktionsleisten dürfen umbrechen; bedeutungsvolle Beschriftungen werden nicht
   abgeschnitten
-- Touch-Ziele sind mindestens 40 Pixel hoch, 44 Pixel werden bevorzugt
+- zentrale Touch-Ziele sind mindestens 44 × 44 CSS-Pixel groß
 
 ## Präsentation und Ausgabe
 

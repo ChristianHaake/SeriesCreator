@@ -12,7 +12,7 @@ import type { ProjectImportFailure } from './components/AppHeader';
 import { AppFooter } from './components/AppFooter';
 import { ExampleGallery } from './components/ExampleGallery';
 import { ConfirmDialog } from './components/ConfirmDialog';
-import { useTranslation } from './i18n';
+import { useTranslation, type TranslationKey } from './i18n';
 import { contentPages, isContentPath } from './content';
 import {
   isProjectFileSizeWithinLimit,
@@ -33,24 +33,15 @@ const ContentPage = lazy(() => import('./components/ContentPage'));
 type PreviewTab = 'EPISODEN' | 'DETAILS' | 'QUELLEN';
 type MobilePanel = 'editor' | 'preview';
 type StatusTone = 'success' | 'error' | 'info';
-type AppStatus = { message: string; tone: StatusTone } | null;
-type PendingAction = { message: string; confirmLabel: string; run: () => void };
+type AppStatus = { key: TranslationKey; tone: StatusTone } | null;
+type PendingAction = { messageKey: TranslationKey; confirmLabelKey: TranslationKey; run: () => void };
 const previewTabOrder: PreviewTab[] = ['EPISODEN', 'DETAILS', 'QUELLEN'];
 
 function App() {
   const { t, locale } = useTranslation();
-  // Import validation finishes asynchronously. Read translations at completion
-  // time so a language switch while the worker is running cannot leave the
-  // replacement confirmation or success status in the previous language.
-  const latestTranslationRef = useRef(t);
-  useEffect(() => {
-    latestTranslationRef.current = t;
-  }, [t]);
   const [status, setStatus] = useState<AppStatus>(null);
   const [importStatus, setImportStatus] = useState<'importing' | ProjectImportFailure | null>(null);
-  const store = useProjectStore(() =>
-    setStatus({ message: t.msgSaveFailed, tone: 'error' }),
-  );
+  const store = useProjectStore(() => setStatus({ key: 'msgSaveFailed', tone: 'error' }));
   const { data, replaceData, resetData, restoreFailed, persistenceBlocked, projectRevision, storageConflict } = store;
   const exampleLoadRevision = useRef(0);
   const [isPrinting, setIsPrinting] = useState(false);
@@ -78,18 +69,65 @@ function App() {
   const [activeTab, setActiveTab] = useState<PreviewTab>('EPISODEN');
   const [showPresentation, setShowPresentation] = useState(false);
   const presentationLauncherRef = useRef<HTMLButtonElement>(null);
-  const [showExamples, setShowExamples] = useState(false);
+  const [showExamples, setShowExamples] = useState(window.location.pathname.replace(/\/+$/, '') === '/beispiele');
   const [currentPath, setCurrentPath] = useState(window.location.pathname.replace(/\/+$/, "") || "/");
   const [mobilePanel, setMobilePanel] = useState<MobilePanel>('editor');
   // Pending destructive action awaiting confirmation in the dialog.
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
   const examples = useMemo(() => getExampleProjects(locale), [locale]);
 
+  const openExamples = () => {
+    if (currentPath !== '/beispiele') {
+      window.history.pushState(null, '', '/beispiele');
+      setCurrentPath('/beispiele');
+    }
+    setShowExamples(true);
+  };
+
   useEffect(() => {
-    const handlePopState = () => setCurrentPath(window.location.pathname.replace(/\/+$/, "") || "/");
+    const handlePopState = () => {
+      const path = window.location.pathname.replace(/\/+$/, "") || "/";
+      setCurrentPath(path);
+      if (path === '/beispiele') setShowExamples(true);
+      else {
+        exampleLoadRevision.current += 1;
+        setShowExamples(false);
+      }
+    };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
+
+  useEffect(() => {
+    const handleInternalLink = (event: MouseEvent) => {
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const anchor = target.closest('a[href]');
+      if (!(anchor instanceof HTMLAnchorElement) || anchor.hasAttribute('download') || anchor.target) return;
+      const url = new URL(anchor.href);
+      if (url.origin !== window.location.origin) return;
+      if (url.hash) return;
+      const path = url.pathname.replace(/\/+$/, '') || '/';
+      if (path !== '/' && path !== '/beispiele' && !isContentPath(path)) return;
+      event.preventDefault();
+      window.history.pushState(null, '', url.pathname);
+      setCurrentPath(path);
+      setShowExamples(path === '/beispiele');
+      if (path !== '/beispiele') exampleLoadRevision.current += 1;
+    };
+    document.addEventListener('click', handleInternalLink);
+    return () => document.removeEventListener('click', handleInternalLink);
+  }, []);
+
+  const closeExamples = () => {
+    exampleLoadRevision.current += 1;
+    setShowExamples(false);
+    if (currentPath === '/beispiele') {
+      window.history.replaceState(null, '', '/');
+      setCurrentPath('/');
+    }
+  };
 
   // Keep the tab title on the current page and the description in the current
   // language. The og:/twitter: tags stay static — social scrapers read the
@@ -98,11 +136,12 @@ function App() {
     const page = isContentPath(currentPath) ? contentPages[locale][currentPath] : null;
     document.title = page
       ? `${page.title} · SeriesCreator`
-      : currentPath === '/' ? 'SeriesCreator' : `${t.notFoundTitle} · SeriesCreator`;
+      : currentPath === '/' ? 'SeriesCreator' : currentPath === '/beispiele'
+        ? `${t.exampleGalleryTitle} · SeriesCreator` : `${t.notFoundTitle} · SeriesCreator`;
     document
       .querySelector('meta[name="description"]')
       ?.setAttribute('content', t.metaDescription);
-  }, [currentPath, locale, t.metaDescription, t.notFoundTitle]);
+  }, [currentPath, locale, t.exampleGalleryTitle, t.metaDescription, t.notFoundTitle]);
 
 
   // A saved project that could not be restored is kept under a backup key; say
@@ -120,7 +159,8 @@ function App() {
     invalidJson: t.importErrorInvalidJson,
     readFailed: t.msgImportReadFailed,
   }[importStatus]);
-  const visibleStatus: AppStatus = (storageConflict ? { message: t.msgStorageConflict, tone: 'error' } : null) ?? status
+  const visibleStatus = (storageConflict ? { message: t.msgStorageConflict, tone: 'error' as const } : null)
+    ?? (status ? { message: t[status.key], tone: status.tone } : null)
     ?? (importMessage ? { message: importMessage, tone: importStatus === 'importing' ? 'info' : 'error' } : null)
     ?? (restoreFailed
       ? {
@@ -134,9 +174,9 @@ function App() {
   const activeSeason = data.seasons.find(s => s.id === activeSeasonId) || data.seasons[0];
   const completion = displayCompletion(data);
 
-  const showStatus = (message: string, tone: StatusTone = 'success') => {
+  const showStatus = (key: TranslationKey, tone: StatusTone = 'success') => {
     setImportStatus(null);
-    setStatus({ message, tone });
+    setStatus({ key, tone });
   };
 
   const handlePreviewTabKeyDown = (
@@ -173,27 +213,27 @@ function App() {
   };
 
   const handleExport = () => {
-    if (missingImageAlt) { showStatus(t.msgMissingImageAlt, 'error'); return; }
+    if (missingImageAlt) { showStatus('msgMissingImageAlt', 'error'); return; }
     try {
       flushSync(() => setIsPrinting(true));
       window.print();
-      showStatus(t.msgPrintStarted, 'info');
+      showStatus('msgPrintStarted', 'info');
     } catch {
       setIsPrinting(false);
-      showStatus(t.msgExportFailed, 'error');
+      showStatus('msgExportFailed', 'error');
     }
   };
 
   const handleHtmlExport = () => {
-    if (missingImageAlt) { showStatus(t.msgMissingImageAlt, 'error'); return; }
+    if (missingImageAlt) { showStatus('msgMissingImageAlt', 'error'); return; }
     try {
       const htmlContent = exportProjectToHtml(data, t, locale);
       const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
-      const filename = `${makeExportBaseName(data.title, 'SeriesCreator-Praesentation')}.html`;
+      const filename = `${makeExportBaseName(data.title, `SeriesCreator-${t.exportPresentation}`)}.html`;
       downloadBlob(blob, filename);
-      showStatus(t.msgHtmlExportSuccess, 'success');
+      showStatus('msgHtmlExportSuccess', 'success');
     } catch {
-      showStatus(t.msgExportFailed, 'error');
+      showStatus('msgExportFailed', 'error');
     }
   };
 
@@ -210,16 +250,16 @@ function App() {
         setActiveSeasonId(exampleProject.seasons[0]?.id || '');
         setActiveTab('EPISODEN');
         setMobilePanel('preview');
-        setShowExamples(false);
-        if (saved) showStatus(latestTranslationRef.current.msgExampleLoaded, 'success');
+        closeExamples();
+        if (saved) showStatus('msgExampleLoaded', 'success');
       } catch {
-        if (revision === exampleLoadRevision.current) showStatus(latestTranslationRef.current.msgExampleLoadFailed, 'error');
+        if (revision === exampleLoadRevision.current) showStatus('msgExampleLoadFailed', 'error');
       }
     };
 
     setPendingAction({
-      message: t.confirmLoadExample,
-      confirmLabel: t.btnLoadExample,
+      messageKey: 'confirmLoadExample',
+      confirmLabelKey: 'btnLoadExample',
       run: () => { void loadExample(); },
     });
   };
@@ -234,7 +274,7 @@ function App() {
   }
 
   // Anything that is neither the editor nor a content route is a dead link.
-  if (currentPath !== '/' && !isContentPath(currentPath)) {
+  if (currentPath !== '/' && currentPath !== '/beispiele' && !isContentPath(currentPath)) {
     return (
       <div className="app-shell app-shell--content-route">
         <a className="skip-link" href="#main-content">{t.skipToContent}</a>
@@ -246,7 +286,7 @@ function App() {
             <p><a className="content-page__back" href="/">{t.backToApp}</a></p>
           </div>
         </main>
-        <AppFooter />
+        <AppFooter onShowExamples={openExamples} />
       </div>
     );
   }
@@ -261,7 +301,7 @@ function App() {
         <Suspense fallback={<main id="main-content" tabIndex={-1} className="content-page" aria-busy="true" />}>
           <ContentPage pathname={currentPath} />
         </Suspense>
-        <AppFooter />
+        <AppFooter onShowExamples={openExamples} />
       </div>
     );
   }
@@ -273,47 +313,46 @@ function App() {
         onExport={() => {
           try {
             if (!isProjectFileSizeWithinLimit(data)) {
-              showStatus(t.msgProjectTooLarge, 'error');
+              showStatus('msgProjectTooLarge', 'error');
               return;
             }
             const blob = new Blob([serializeProject(data)], {
               type: PROJECT_FILE_MIME_TYPE,
             });
             downloadBlob(blob, makeProjectFilename(data.title, t.projectFileFallbackName));
-            showStatus(t.msgExportSuccess, 'success');
+            showStatus('msgExportSuccess', 'success');
           } catch {
-            showStatus(t.msgExportFailed, 'error');
+            showStatus('msgExportFailed', 'error');
           }
         }}
         onHtmlExport={handleHtmlExport}
         onPrint={handleExport}
         onImportValidated={(importedData) => {
-          const importTranslation = latestTranslationRef.current;
           setImportStatus(null);
           setPendingAction({
-            message: importTranslation.confirmImport,
-            confirmLabel: importTranslation.btnLoadImport,
+            messageKey: 'confirmImport',
+            confirmLabelKey: 'btnLoadImport',
             run: () => {
               exampleLoadRevision.current += 1;
               const saved = replaceData(importedData, true);
               setActiveSeasonId(importedData.seasons[0]?.id || '');
-              if (saved) showStatus(latestTranslationRef.current.msgImportSuccess, 'success');
+              if (saved) showStatus('msgImportSuccess', 'success');
             },
           });
         }}
         onImportStart={() => { setStatus(null); setImportStatus('importing'); }}
         onImportFailure={(failure) => { setStatus(null); setImportStatus(failure); }}
-        onShowExamples={() => setShowExamples(true)}
+        onShowExamples={openExamples}
         onReset={() => setPendingAction({
-          message: t.confirmReset,
-          confirmLabel: t.btnDelete,
+          messageKey: 'confirmReset',
+          confirmLabelKey: 'btnDelete',
           run: () => { exampleLoadRevision.current += 1; resetData(); },
         })}
       />
       {pendingAction && (
         <ConfirmDialog
-          message={pendingAction.message}
-          confirmLabel={pendingAction.confirmLabel}
+          message={t[pendingAction.messageKey]}
+          confirmLabel={t[pendingAction.confirmLabelKey]}
           destructive
           onConfirm={() => {
             pendingAction.run();
@@ -326,7 +365,7 @@ function App() {
         <ExampleGallery
           examples={examples}
           onChoose={handleExampleChoose}
-          onClose={() => { exampleLoadRevision.current += 1; setShowExamples(false); }}
+          onClose={closeExamples}
         />
       )}
       <div
@@ -400,7 +439,7 @@ function App() {
             <div className="streaming-meta">
               <span className="completion-score">{t.completionMeta} {completion}%</span>
               <span>{new Date().getFullYear()}</span>
-              <span className="age-rating">{data.ageRating || "Klasse"}</span>
+              <span className="age-rating">{data.ageRating || t.lblAge}</span>
               <span>{data.seasons.length} {data.seasons.length === 1 ? t.season : t.seasonPlural}</span>
             </div>
 
@@ -410,7 +449,7 @@ function App() {
 
             <div className="streaming-actions">
               <button ref={presentationLauncherRef} type="button" className="btn-play" onClick={() => {
-                if (missingImageAlt) showStatus(t.msgMissingImageAlt, 'error');
+                if (missingImageAlt) showStatus('msgMissingImageAlt', 'error');
                 else setShowPresentation(true);
               }}>
                 <Presentation aria-hidden="true" size={24} strokeWidth={2.5} /> {t.btnPlay}
@@ -506,7 +545,7 @@ function App() {
         </section>
         </main>
       </div>
-      <AppFooter />
+      <AppFooter onShowExamples={openExamples} />
     </div>
   );
 }

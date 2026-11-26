@@ -49,3 +49,9 @@ target browser before sharing.
 
 Use fictional names, content, and images. Do not use private photos, real
 personal data, or material without permission.
+
+## Report a problem or suggest an idea
+
+Email [apps@haak3.de](mailto:apps@haak3.de?subject=SeriesCreator%20Feedback).
+Include your browser and the steps involved, but no project content or
+personal data.

@@ -2,7 +2,7 @@ import { expect, type Page } from '@playwright/test';
 
 /**
  * Click a header action, opening the overflow menu first when the viewport is
- * below the breakpoint. All seven actions only fit on one line from 1440px, so
+ * below the breakpoint. The full action row is shown from 1700px, so
  * at common laptop widths most of them live behind the menu — exactly as a
  * student would reach them.
  */

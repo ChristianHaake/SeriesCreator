@@ -55,7 +55,7 @@ export interface ProjectData {
   customConceptText?: string;
 }
 
-type InitialLocale = 'de' | 'en';
+type InitialLocale = 'de' | 'en' | 'fr' | 'es' | 'nl';
 
 // Locale-specific text for a fresh project.
 const initialProjectText: Record<InitialLocale, {
@@ -83,6 +83,33 @@ const initialProjectText: Record<InitialLocale, {
     cast: "The class",
     seasonTitle: "Season 1",
     genre: "Documentary",
+    ageRating: "12+",
+  },
+  fr: {
+    title: "Ma nouvelle série",
+    description: "Un voyage passionnant à travers ce sujet…",
+    previewCategory: "Projets de classe",
+    cast: "La classe",
+    seasonTitle: "Saison 1",
+    genre: "Documentaire",
+    ageRating: "12+",
+  },
+  es: {
+    title: "Mi nueva serie",
+    description: "Un viaje apasionante por este tema…",
+    previewCategory: "Proyectos de clase",
+    cast: "La clase",
+    seasonTitle: "Temporada 1",
+    genre: "Documental",
+    ageRating: "12+",
+  },
+  nl: {
+    title: "Mijn nieuwe serie",
+    description: "Een boeiende reis door dit onderwerp…",
+    previewCategory: "Klasprojecten",
+    cast: "De klas",
+    seasonTitle: "Seizoen 1",
+    genre: "Documentaire",
     ageRating: "12+",
   },
 };

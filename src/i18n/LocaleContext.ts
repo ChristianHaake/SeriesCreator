@@ -1,7 +1,7 @@
 import { createContext } from 'react';
 import type { TranslationKey } from './de';
 
-export type Language = 'de' | 'en';
+export type Language = 'de' | 'en' | 'fr' | 'es' | 'nl';
 
 export type LocaleContextValue = {
   locale: Language;

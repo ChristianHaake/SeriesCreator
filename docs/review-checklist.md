@@ -6,7 +6,7 @@ https://git.2p4.org/Christian/Agent-Memory/src/branch/main/25_Development/standa
 ## Release
 
 - Version: `2.0.0` (in Vorbereitung)
-- Review date: `2026-11-09` (automatisierte Nachprüfung)
+- Review date: `2026-11-26` (Redesign-Prüfung in Vorbereitung)
 - Reviewer: Codex (automatisierte Prüfung; manuelle Freigaben weiter offen)
 
 ## Product
@@ -23,7 +23,8 @@ https://git.2p4.org/Christian/Agent-Memory/src/branch/main/25_Development/standa
 - [x] Header, Footer und Inhaltsseiten folgen der gemeinsamen Struktur.
 - [x] Produktions-Browser-E2E deckt den Kernworkflow bei 320 px ab.
 - [x] Editor und Vorschau erzeugen bei 320 px kein horizontales Seitenscrolling.
-- [x] 390 px, Tablet-Porträt und -Querformat, Desktop und 200-%-Zoom geprüft.
+- [x] 320, 360, 390, 768 und 1440 CSS-Pixel automatisiert auf Seitenüberlauf und zentrale Touchziele geprüft.
+- [ ] Redesign auf echtem Tablet im Hoch- und Querformat sowie bei 200-%-Browserzoom geprüft.
 
 ## Accessibility
 
@@ -33,7 +34,8 @@ https://git.2p4.org/Christian/Agent-Memory/src/branch/main/25_Development/standa
 - [x] Statusmeldungen werden in einer Live-Region ausgegeben.
 - [x] Episodenreihenfolge besitzt Hoch-/Runter-Steuerung.
 - [x] `prefers-reduced-motion` wird berücksichtigt.
-- [x] Kontrast und 200-%-Zoom geprüft.
+- [x] Axe-Kontrastprüfung für fünf Sprachen im Editor und auf Inhaltsseiten ohne Befund.
+- [ ] Manueller Kontrastcheck auf Bildhintergründen und 200-%-Browserzoom abgeschlossen.
 - [x] Axe-Prüfung von Editor, Vorschau, Bestätigungsdialog und Beispielgalerie ohne Befund.
 - [ ] Manueller Screenreader-Test abgeschlossen.
 
@@ -50,18 +52,22 @@ https://git.2p4.org/Christian/Agent-Memory/src/branch/main/25_Development/standa
 - [x] Hilfe, Datenschutz und Impressum unterstützen direkte Navigation.
 - [x] Footer verlinkt Pflichtseiten einschließlich Unterstützung und Repository.
 - [x] Unterstützung hat eine eigene Route, einen lokalisierten Anbieterlink und einen Datenschutzhinweis.
+- [x] Hilfe und Unterstützung bieten in allen fünf Sprachen einen sichtbaren Feedbackkontakt per E-Mail.
 - [x] Markdown rendert kein unsicheres Raw HTML.
-- [x] Deutsche und englische Pflichtseiten sind vorhanden.
+- [x] Pflichtseiten sind in Deutsch, Englisch, Französisch, Spanisch und Niederländisch vorhanden; die Rechtstexte warten auf Betreiberprüfung.
 - [ ] Rechtstexte wurden durch den Betreiber final geprüft.
 
 ## Engineering and release
 
 - [x] Node-Version und reproduzierbarer `npm ci`-Pfad sind dokumentiert.
 - [x] `npm run verify` umfasst Lint, Typprüfung, Beispiele, Unit-Tests, Build und Browser-E2E.
-- [x] Chromium, Firefox, WebKit und Mobile Chrome prüfen den Produktions-Build.
+- [x] Die Playwright-Konfiguration prüft Chromium, Firefox, WebKit und Mobile Chrome gegen den Produktions-Build; lokale Firefox-Starts bleiben umgebungsbedingt blockiert.
 - [x] GitHub Actions führt das Release-Gate aus.
 - [x] Übersetzungsschlüssel, leere Werte und Platzhalter werden im Test-Gate geprüft.
-- [x] Production-Smoke prüft öffentliche Routen, zentrale Security-Header und die ausgelieferte Version.
+- [x] Bereits sichtbare Status- und Fehlermeldungen wechseln mit der Oberflächensprache.
+- [x] Stage-Deploy, Commit-Smoke und automatisierte fünfsprachige Stage-Flows abgeschlossen.
+- [ ] Manuelle fünfsprachige Stage-Abnahme auf Zielgeräten abgeschlossen.
+- [ ] Production-Smoke für den Redesign-Release auf der endgültigen URL bestanden.
 - [x] HTML revalidiert; gebaute Assets und Beispielbilder werden immutable gecacht.
 - [x] README, Paketmetadaten und Lizenz nennen GPL-3.0-only.
 - [x] Abhängigkeits-Audit meldet keine bekannte Schwachstelle.

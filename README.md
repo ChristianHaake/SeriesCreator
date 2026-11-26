@@ -26,8 +26,8 @@ Bewertungshinweise beschreibt
 | Vorschau | Sofort aktualisierte Streaming-Ansicht; mobil expliziter Wechsel zwischen Editor und Vorschau |
 | Präsentation | In-App-Präsentation mit Vollbild-Fallback, Tastatursteuerung, Staffelübersichten, Episoden- und Inhaltsblockfolien, Reflexion, Quellen und Credits |
 | Dateien | Versionierte `.seriescreator`-Projektdatei, eigenständige Offline-HTML-Präsentation mit Staffelansichten und Browser-Druck/PDF |
-| Beispiele | Zwei vollständige Schulprojekte zu Klima und Weimar, jeweils auf Deutsch und Englisch, mit eingebetteten Bildern sowie Text- und Bildinhaltsblöcken |
-| Sprache | Deutsche und englische Oberfläche, Startinhalte und Inhaltsseiten |
+| Beispiele | Zwei vollständige Schulprojekte zu Klima und Weimar in Deutsch, Englisch, Französisch, Spanisch und Niederländisch, mit eingebetteten Bildern sowie Text- und Bildinhaltsblöcken |
+| Sprache | Fünfsprachige Oberfläche, Startinhalte und Inhaltsseiten; Sprachwechsel erhält Projektdaten |
 | Speicherung | Automatische lokale Sicherung in `localStorage`; kein Konto und keine serverseitige Speicherung von Projektinhalten |
 
 Die verbindliche Definition mit Akzeptanzkriterien, Grenzen und Nicht-Zielen
@@ -83,8 +83,11 @@ npm run dev
 | `npm run build:examples` | Importierbare Beispieldateien erzeugen und validieren |
 | `npm test` | Vitest-Tests ausführen |
 | `npm run build` | Produktions-Build nach `dist/` erstellen |
+| `npm run deploy:stage` | Den aktuellen Commit auf `stage.seriescreator.haak3.de` bereitstellen |
+| `npm run smoke:stage` | Stage-Routen, Header und bereitgestellten Commit prüfen |
 | `npm run test:e2e:chromium` | Schnelle Browserprüfung in Chromium |
 | `npm run test:e2e` | Release-Flows in Chromium, Firefox, WebKit und Mobile Chrome prüfen |
+| `npm run test:e2e:stage` | Dieselben Flows gegen die bereitgestellte Stage-Version prüfen |
 | `npm run verify` | Lint, Typprüfung, Beispiele, Unit-Tests, Build und Browser-E2E |
 | `npm audit --audit-level=low` | Abhängigkeiten gegen bekannte Schwachstellen prüfen |
 | `npm run smoke:production` | Live-Routen und zentrale Security-Header prüfen |
@@ -103,6 +106,18 @@ npm run smoke:production -- https://example.workers.dev
 - SPA-Fallback: `single-page-application`
 - Runtime-Header: `public/_headers`
 
+Stage wird vom geprüften, sauberen Commit mit `npm run deploy:stage` über die
+Cloudflare-Anmeldung lokal bereitgestellt. `npm run smoke:stage` prüft danach
+die direkte Navigation und die im HTML eingetragene Commit-ID. Die
+Stage-Konfiguration verwendet `seriescreator-stage` und die Domain
+`stage.seriescreator.haak3.de`; die Produktionsroute wird dabei nicht geändert.
+`npm run test:e2e:stage` prüft anschließend die Browser-Flows. Commit,
+Worker-Version und Testergebnis gehören in das Release-Protokoll.
+Wenn danach nur die Dokumentation committet wird, lässt sich der bereits
+bereitgestellte Build mit `npm run smoke:production --
+https://stage.seriescreator.haak3.de/ <bereitgestellte-commit-id>` erneut
+gegen seine ursprüngliche Commit-ID prüfen.
+
 Das automatisierte Release-Gate läuft in GitHub Actions. Manuelle
 Zielbrowser-, Screenreader-, Rechts- und Endgeräteprüfungen bleiben getrennt in
 [docs/manual-release-checks.md](docs/manual-release-checks.md) dokumentiert.
@@ -114,6 +129,7 @@ Zielbrowser-, Screenreader-, Rechts- und Endgeräteprüfungen bleiben getrennt i
 - [Funktionsspezifikation](docs/features.md)
 - [Architektur](docs/architecture.md)
 - [UI-Konzept](docs/ui-concept.md)
+- [Redesign-Befunde und Umsetzung](docs/redesign-2026-11-26.md)
 - [Projektdateiformat](docs/project-file-format.md)
 - [Release-Review](docs/review-checklist.md)
 - [Standard-Konformität](docs/standard-conformance.md)

@@ -90,7 +90,7 @@ test('collapses secondary actions behind a menu, keeping Save reachable', async 
   await expect(menu).toBeHidden();
 
   // Save is deliberately outside the menu — no accounts, no server copy.
-  await expect(page.getByRole('button', { name: 'Save', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Save project file', exact: true })).toBeVisible();
 
   const editorTop = await page.evaluate(() =>
     document.querySelector('.editor-sidebar')!.getBoundingClientRect().top / window.innerHeight);

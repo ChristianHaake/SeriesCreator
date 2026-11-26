@@ -2,9 +2,9 @@ import { parseProjectJson, type ProjectParseResult } from './projectCodec';
 
 export const IMPORT_WORKER_TIMEOUT_MS = 10_000;
 
-export function parseProjectTextInWorker(text: string, seasonFallback: string): Promise<ProjectParseResult> {
+export function parseProjectTextInWorker(text: string, seasonFallback: string, episodeFallback = 'New Episode'): Promise<ProjectParseResult> {
   if (typeof Worker === 'undefined') {
-    return Promise.resolve(parseProjectJson(text, seasonFallback));
+    return Promise.resolve(parseProjectJson(text, seasonFallback, episodeFallback));
   }
 
   return new Promise((resolve) => {
@@ -15,7 +15,7 @@ export function parseProjectTextInWorker(text: string, seasonFallback: string): 
         { type: 'module' },
       );
     } catch {
-      resolve(parseProjectJson(text, seasonFallback));
+      resolve(parseProjectJson(text, seasonFallback, episodeFallback));
       return;
     }
     let settled = false;
@@ -31,8 +31,8 @@ export function parseProjectTextInWorker(text: string, seasonFallback: string): 
     };
 
     worker.addEventListener('message', (event: MessageEvent<ProjectParseResult>) => finish(event.data));
-    worker.addEventListener('error', () => finish(parseProjectJson(text, seasonFallback)));
-    worker.addEventListener('messageerror', () => finish(parseProjectJson(text, seasonFallback)));
-    worker.postMessage({ text, seasonFallback });
+    worker.addEventListener('error', () => finish(parseProjectJson(text, seasonFallback, episodeFallback)));
+    worker.addEventListener('messageerror', () => finish(parseProjectJson(text, seasonFallback, episodeFallback)));
+    worker.postMessage({ text, seasonFallback, episodeFallback });
   });
 }
