@@ -1,5 +1,11 @@
 import { expect, test } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
 import { clickHeaderAction } from './helpers';
+import { de } from '../../src/i18n/de';
+import { en } from '../../src/i18n/en';
+import { fr } from '../../src/i18n/fr';
+import { es } from '../../src/i18n/es';
+import { nl } from '../../src/i18n/nl';
 
 /** Episode fields live in a dialog opened from the list row. */
 async function openEpisode(page: import('@playwright/test').Page, index = 0) {
@@ -104,8 +110,41 @@ test('keeps the draft and localized help available in all five languages', async
     await expect(page.getByRole('button', { name: saveLabel })).toBeVisible();
     await page.getByRole('link', { name: helpLabel, exact: true }).click();
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(helpLabel);
+    await expect(page.getByRole('link', { name: 'apps@haak3.de' })).toHaveAttribute(
+      'href', 'mailto:apps@haak3.de?subject=SeriesCreator%20Feedback',
+    );
     await page.locator('.content-page__back').click();
     await expect(page.getByLabel(titleLabel)).toHaveValue('An unchanged student draft');
+  }
+});
+
+test('localizes error, status and export artifacts in all five languages', async ({ page }) => {
+  await page.goto('/');
+  await page.getByLabel(en.lblTitle).fill('');
+  const importInput = page.locator('.app-header input[type="file"]');
+  const broken = { name: 'broken.seriescreator', mimeType: 'application/json', buffer: Buffer.from('{') };
+
+  for (const [locale, t] of Object.entries({ de, en, fr, es, nl })) {
+    await page.locator('.language-switcher').selectOption(locale);
+    await expect(page.locator('html')).toHaveAttribute('lang', locale);
+
+    await importInput.setInputFiles(broken);
+    await expect(page.locator('.app-status')).toHaveText(t.importErrorInvalidJson);
+
+    const projectDownload = page.waitForEvent('download');
+    await page.getByRole('button', { name: t.btnSave }).click();
+    expect((await projectDownload).suggestedFilename()).toBe(`${t.projectFileFallbackName}.seriescreator`);
+    await expect(page.locator('.app-status')).toHaveText(t.msgExportSuccess);
+
+    const htmlDownload = page.waitForEvent('download');
+    await clickHeaderAction(page, t.btnHtml);
+    const htmlFile = await htmlDownload;
+    expect(htmlFile.suggestedFilename().normalize('NFC')).toBe(`SeriesCreator-${t.exportPresentation}.html`);
+    const html = await readFile(await htmlFile.path(), 'utf8');
+    expect(html).toContain(`<html lang="${locale}">`);
+    expect(html).toContain(`<title>SeriesCreator - ${t.exportPresentation}</title>`);
+    await expect(page.locator('.app-status')).toHaveText(t.msgHtmlExportSuccess);
+    await expect(page.getByRole('button', { name: t.btnPdf, includeHidden: true })).toHaveCount(1);
   }
 });
 
