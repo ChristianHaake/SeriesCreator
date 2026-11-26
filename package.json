@@ -19,12 +19,15 @@
     "dev": "vite",
     "build:examples": "node scripts/export-examples.mjs",
     "build": "tsc -b && vite build",
+    "deploy:stage": "node scripts/assert-clean-tree.mjs && BUILD_COMMIT=$(git rev-parse HEAD) npm run build && wrangler deploy --env stage",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
     "test:e2e": "playwright test",
+    "test:e2e:stage": "PLAYWRIGHT_BASE_URL=https://stage.seriescreator.haak3.de/ playwright test",
     "test:e2e:chromium": "playwright test --project=chromium",
     "smoke:production": "node scripts/smoke-production.mjs",
+    "smoke:stage": "node scripts/smoke-production.mjs https://stage.seriescreator.haak3.de/ $(git rev-parse HEAD)",
     "typecheck": "tsc -b --pretty false",
     "verify": "npm run lint && npm run typecheck && npm run build:examples && npm run test && npm run build && npm run test:e2e"
   },
@@ -57,6 +60,7 @@
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.59.2",
     "vite": "^8.3.6",
-    "vitest": "^4.1.12"
+    "vitest": "^4.1.12",
+    "wrangler": "4.168.0"
   }
 }

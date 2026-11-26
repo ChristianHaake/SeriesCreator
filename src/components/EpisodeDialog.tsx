@@ -4,7 +4,7 @@ import { ArrowDown, ArrowUp, Image as ImageIcon, Plus, Trash2, X } from 'lucide-
 import { fieldLimits, resourceLimits } from '../domain/constraints';
 import { useTranslation } from '../i18n';
 import { EpisodeCard } from './EpisodeCard';
-import { processImageUpload } from '../domain/imageUpload';
+import { processImageUpload, type ImageUploadError } from '../domain/imageUpload';
 
 interface Props {
   episode: Episode;
@@ -28,7 +28,7 @@ export function EpisodeDialog({ episode, seasonId, index, onUpdate, onClose }: P
   const { t } = useTranslation();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const contentImageInputRef = useRef<HTMLInputElement>(null);
-  const [imageError, setImageError] = useState('');
+  const [imageError, setImageError] = useState<ImageUploadError | 'contentBlocksLimit' | null>(null);
   const uploadLifecycle = useRef(0);
   const thumbnailRevision = useRef(0);
   useEffect(() => () => { uploadLifecycle.current += 1; }, []);
@@ -76,11 +76,11 @@ export function EpisodeDialog({ episode, seasonId, index, onUpdate, onClose }: P
     if (!file) return;
     const lifecycle = uploadLifecycle.current;
     const revision = ++thumbnailRevision.current;
-    setImageError('');
+    setImageError(null);
     const result = await processImageUpload(file, resourceLimits.episodeOutputWidth, 0.7);
     if (lifecycle !== uploadLifecycle.current || revision !== thumbnailRevision.current) return;
     if (result.ok) change({ thumbnailUrl: result.url });
-    else setImageError(t[result.error]);
+    else setImageError(result.error);
     input.value = '';
   };
 
@@ -89,7 +89,7 @@ export function EpisodeDialog({ episode, seasonId, index, onUpdate, onClose }: P
     const file = input.files?.[0];
     if (!file) return;
     const lifecycle = uploadLifecycle.current;
-    setImageError('');
+    setImageError(null);
     const result = await processImageUpload(file, resourceLimits.episodeOutputWidth, 0.7);
     if (lifecycle !== uploadLifecycle.current) return;
     if (result.ok) {
@@ -99,8 +99,8 @@ export function EpisodeDialog({ episode, seasonId, index, onUpdate, onClose }: P
         if (blocks.length >= resourceLimits.maxContentBlocksPerEpisode) return {};
         return { contentBlocks: [...blocks, { id, type: 'image', imageUrl: result.url, altText: '' }] };
       });
-      if (applied === false) setImageError(t.contentBlocksLimit.replace('{count}', String(resourceLimits.maxContentBlocksPerEpisode)));
-    } else setImageError(t[result.error]);
+      if (applied === false) setImageError('contentBlocksLimit');
+    } else setImageError(result.error);
     input.value = '';
   };
 
@@ -233,7 +233,9 @@ export function EpisodeDialog({ episode, seasonId, index, onUpdate, onClose }: P
             </label>
             {imageError && (
               <p id={`ep-image-error-${episode.id}`} className="field-error" role="alert">
-                {imageError}
+                {imageError === 'contentBlocksLimit'
+                  ? t.contentBlocksLimit.replace('{count}', String(resourceLimits.maxContentBlocksPerEpisode))
+                  : t[imageError]}
               </p>
             )}
             {episode.thumbnailUrl && (

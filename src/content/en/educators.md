@@ -47,7 +47,7 @@ Visual design and streaming aesthetics may support the work, but do not replace 
 
 User content is processed locally in the browser. Nevertheless:
 
-- **Copyright:** Third-party images may only be used if the license (e.g., CC0, Public Domain) permits. There are exceptions for classroom use, but publishing the export requires strict copyright compliance.
+- **Copyright:** Before adding or sharing third-party images, check whether their usage rights permit it. Review those rights again for any publication.
 - **Personality Rights:** When depicting real people, personality rights must always be respected.
 
 ## FAQ
@@ -58,7 +58,7 @@ No. Text, images, and configurations are processed locally in your browser. Clou
 
 ### May I use images from the internet?
 
-Only when the license (e.g. CC0/Pixabay) permits the intended use. Prefer original or public-domain material.
+Check the rights for the specific image and the conditions of the intended use. Self-created images avoid many questions about third-party image rights.
 
 ### Can results be published?
 

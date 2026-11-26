@@ -50,3 +50,9 @@ Ergebnis vor der Weitergabe im Zielbrowser.
 
 Nutze fiktive Namen, Inhalte und Bilder. Lade keine privaten Fotos, realen
 personenbezogenen Daten oder nicht freigegebenen Materialien hoch.
+
+## Fehler melden und Ideen vorschlagen
+
+Schreibe an [apps@haak3.de](mailto:apps@haak3.de?subject=SeriesCreator%20Feedback).
+Nenne Browser und Arbeitsschritte, aber sende keine Projektinhalte oder
+personenbezogenen Daten mit.

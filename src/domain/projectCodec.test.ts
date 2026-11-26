@@ -42,6 +42,19 @@ describe('projectCodec', () => {
     }
   });
 
+  it('uses the selected locale for an imported episode without a title', () => {
+    const result = parseProjectJson(JSON.stringify({
+      ...initialProjectData,
+      seasons: [{ id: 's1', title: '', episodes: [{ id: 'e1', title: '', summary: '' }] }],
+    }), 'Saison', 'Nouvel épisode');
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.data.seasons[0].title).toBe('Saison 1');
+      expect(result.data.seasons[0].episodes[0].title).toBe('Nouvel épisode');
+    }
+  });
+
   it('rejects unsupported future schema versions', () => {
     const result = parseProjectJson(
       JSON.stringify({
@@ -227,6 +240,8 @@ describe('projectCodec', () => {
 
   it('creates stable SeriesCreator backup filenames', () => {
     expect(makeProjectFilename('Meine Serie!')).toBe('Meine-Serie.seriescreator');
+    expect(makeProjectFilename('Le collège: épisode 1')).toBe('Le-collège-épisode-1.seriescreator');
+    expect(makeProjectFilename('El código climático')).toBe('El-código-climático.seriescreator');
     // The fallback is supplied by the caller so it can follow the interface
     // language; the default keeps the function usable on its own.
     expect(makeProjectFilename('')).toBe('SeriesCreator-Project.seriescreator');

@@ -48,10 +48,10 @@ test('preserves a noisy portrait JPEG cover through a project export and import'
   expect(encodedLength).toBeLessThanOrEqual(1_500_000);
 
   const projectDownload = page.waitForEvent('download');
-  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await page.getByRole('button', { name: 'Save project file', exact: true }).click();
   const projectPath = await (await projectDownload).path();
   const projectFile = await readFile(projectPath!);
-  await page.getByRole('button', { name: 'New / Clear' }).click();
+  await clickHeaderAction(page, 'New / Clear');
   await page.locator('dialog.confirm-dialog').getByRole('button', { name: 'Delete', exact: true }).click();
   await page.locator('input[type="file"][aria-label="Load"]').setInputFiles({
     name: 'noisy-portrait.seriescreator',
@@ -76,7 +76,7 @@ test('keeps the last edit across immediate Help navigation and clears an unreada
   await page.goto('/');
   await expect(page.getByLabel('Series Title')).toHaveValue('Last edit before leaving');
 
-  await page.getByRole('button', { name: 'New / Clear' }).click();
+  await clickHeaderAction(page, 'New / Clear');
   await page.locator('dialog.confirm-dialog').getByRole('button', { name: 'Delete', exact: true }).click();
   await expect.poll(() => page.evaluate(() => window.localStorage.getItem('series_creator_data.unreadable'))).toBeNull();
 });

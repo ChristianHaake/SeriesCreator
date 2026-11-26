@@ -1,8 +1,8 @@
 ## Bildungszweck
 
-SeriesCreator dient der Erstellung fiktiver digitaler
-Kommunikationssituationen für Bildung, Medienreflexion und Unterricht. Die
-Anwendung ist keine echte Social-Media-Plattform.
+SeriesCreator dient dazu, Unterrichtsthemen als fiktive Streaming-Serien mit
+Staffeln und Episoden zu planen und zu präsentieren. Die Anwendung ist keine
+Streaming-Plattform und veröffentlicht keine Serien.
 
 ## Verantwortung der Nutzenden
 
@@ -21,14 +21,13 @@ Untersagt ist insbesondere:
 - Veröffentlichung privater Nachrichten oder personenbezogener Daten
 - Verletzung von Urheber-, Marken- oder Persönlichkeitsrechten
 - Nutzung für rechtswidrige, kommerzielle oder schädigende Zwecke
-- Entfernen oder Verdecken der automatischen Exportkennzeichnung
 
 ## Exportierte Inhalte
 
-Exporte werden sichtbar als Simulation gekennzeichnet. Diese Kennzeichnung
-entbindet Nutzende nicht von ihrer Verantwortung. Dateien sollen nur im
-vereinbarten Bildungskontext verwendet und nicht irreführend weitergegeben
-werden.
+Projektdateien und Präsentationen können lokal exportiert und anschließend
+weitergegeben werden. Nutzende sollten dabei deutlich machen, dass es sich um
+ein fiktives Unterrichtsprojekt handelt, und keine fremden oder
+personenbezogenen Inhalte ohne Berechtigung verbreiten.
 
 ## Verfügbarkeit und Haftung
 

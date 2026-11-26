@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 import { getExampleProjects } from './exampleProjects';
 import { exportProjectToHtml } from './exportHtml';
+import { de } from '../i18n/de';
+import { en } from '../i18n/en';
+import { fr } from '../i18n/fr';
+import { es } from '../i18n/es';
+import { nl } from '../i18n/nl';
 
 const translations = {
   exportPresentation: 'Presentation',
@@ -22,6 +27,16 @@ const translations = {
 };
 
 describe('exportProjectToHtml', () => {
+  it('labels the standalone presentation in each supported language', () => {
+    for (const [locale, dictionary] of Object.entries({ de, en, fr, es, nl })) {
+      const project = getExampleProjects(locale as 'de' | 'en' | 'fr' | 'es' | 'nl')[0].project;
+      const html = exportProjectToHtml(project, dictionary, locale);
+      expect(html).toContain(`<html lang="${locale}">`);
+      expect(html).toContain(`${project.title} - ${dictionary.exportPresentation}`);
+      expect(html).toContain(dictionary.episodeLearningDepthLabel);
+    }
+  });
+
   it('exports a responsive presentation without forced credits motion', () => {
     const project = getExampleProjects('en')[0].project;
     const html = exportProjectToHtml(project, translations, 'en');

@@ -34,7 +34,7 @@ Bildungskontexten.
 
 Serienmetadaten, Staffeln, Episoden, lokale Bilder, Präsentationsmodus,
 Offline-HTML, PDF-Druck und versionierte `.seriescreator`-Projektdateien sind
-funktionsfähig. Ein schulisches Beispielprojekt zeigt den vollständigen Ablauf.
+funktionsfähig. Zwei schulische Beispielprojekte zeigen den vollständigen Ablauf.
 
 ## Quellcode
 

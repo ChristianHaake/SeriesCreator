@@ -1,7 +1,7 @@
 ## Vor dem Einsatz
 
 - Lernziel und fiktiven Rahmen ausdrücklich benennen.
-- Nur erfundene Profile, Namen, Bilder und Situationen zulassen.
+- Fiktive Namen und Situationen verwenden; Bilder nur mit geeigneten Rechten nutzen.
 - Grenzen für Sprache, Konflikte und sensible Themen vereinbaren.
 - Persönlichkeits-, Urheber- und Datenschutzrechte besprechen.
 - Klären, ob Ergebnisse nur im Kurs bleiben oder gezeigt werden dürfen.
@@ -24,16 +24,16 @@
 
 ## Reflexionsfragen
 
-- Woran ist die Simulation zu erkennen?
+- Woran ist zu erkennen, dass es sich um ein fiktives Serienprojekt handelt?
 - Wer könnte den Inhalt missverstehen oder dadurch geschädigt werden?
 - Welche reale Person oder Gruppe könnte sich gemeint fühlen?
-- Welche Wirkung erzeugen Profilbild, Zeitstempel und Interaktionszahlen?
+- Wie beeinflussen Cover, Episodenbilder und Reihenfolge die Aussage?
 - Welche Informationen fehlen für eine faire Bewertung?
 - Wie verändert sich der Inhalt, wenn er ohne Unterrichtskontext geteilt wird?
 
 ## Gute Praxis
 
-- Fiktive Standardprofile statt realer Namen verwenden.
+- Fiktive Namen statt Namen realer Personen verwenden.
 - Sachverhalte aus mehreren Perspektiven darstellen.
 - Quellen und Unsicherheiten sichtbar machen.
 - Schwierige Szenarien mit klaren Ausstiegsmöglichkeiten bearbeiten.

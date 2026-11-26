@@ -1,8 +1,16 @@
 import { readFileSync } from 'node:fs';
 
 const baseUrl = new URL(process.argv[2] || 'https://seriescreator.haak3.de/');
+const expectedCommit = process.argv[3];
+if (expectedCommit && !/^[a-f0-9]{40}$/.test(expectedCommit)) {
+  throw new Error('Expected commit must be a 40-character Git SHA.');
+}
 const { version } = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
-const routes = ['/', '/hilfe', '/datenschutz', '/impressum'];
+const routes = [
+  '/', '/hilfe', '/beispiele', '/ueber', '/lehrkraefte',
+  '/verantwortungsvoll', '/unterstuetzung', '/nutzungsbedingungen',
+  '/datenschutz', '/impressum',
+];
 const exampleAssetPath = '/example-assets/school-climate-code-cover.jpg';
 const rootSecurityHeaders = {
   'content-security-policy': [
@@ -44,6 +52,9 @@ for (const route of routes) {
 
     if (!html.includes(`<meta name="app-version" content="${version}"`)) {
       throw new Error(`Deployed document does not report version ${version}.`);
+    }
+    if (expectedCommit && !html.includes(`<meta name="build-commit" content="${expectedCommit}"`)) {
+      throw new Error(`Deployed document does not report commit ${expectedCommit}.`);
     }
 
     for (const [header, expectedValues] of Object.entries(rootSecurityHeaders)) {

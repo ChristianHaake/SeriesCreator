@@ -1,8 +1,9 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { LocaleProvider } from '../i18n';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { LocaleProvider, useTranslation } from '../i18n';
+import { nl } from '../i18n/nl';
 import type { Episode } from '../types';
 import { processImageUpload } from '../domain/imageUpload';
 import { EpisodeDialog } from './EpisodeDialog';
@@ -21,6 +22,7 @@ function Harness() {
   return (
     <LocaleProvider>
       <output data-testid="episode-state">{JSON.stringify(episode)}</output>
+      <LocaleSwitch />
       <button onClick={() => setMounted(false)}>Unmount dialog</button>
       {mounted && <EpisodeDialog
         episode={episode}
@@ -36,13 +38,32 @@ function Harness() {
   );
 }
 
+function LocaleSwitch() {
+  const { setLocale } = useTranslation();
+  return <button onClick={() => setLocale('nl')}>Use Dutch</button>;
+}
+
 function contentImageInput() {
   return document.querySelector<HTMLInputElement>('input[aria-label="Add image block"]')!;
 }
 
+beforeEach(() => window.localStorage.setItem('series-creator-locale', 'en'));
 afterEach(() => vi.clearAllMocks());
 
 describe('EpisodeDialog image uploads', () => {
+  it('translates an existing image upload error when the locale changes', async () => {
+    vi.mocked(processImageUpload).mockResolvedValue({ ok: false, error: 'imageErrorUnsupported' });
+    render(<Harness />);
+
+    fireEvent.change(screen.getByLabelText('Choose thumbnail'), {
+      target: { files: [new File(['text'], 'image.txt', { type: 'text/plain' })] },
+    });
+    expect(await screen.findByRole('alert')).toHaveTextContent('Choose a PNG, JPG, or WebP image.');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Use Dutch' }));
+    expect(screen.getByRole('alert')).toHaveTextContent(nl.imageErrorUnsupported);
+  });
+
   it('appends a completed image upload to text edits made while processing', async () => {
     const upload = deferred<{ ok: true; url: string }>();
     vi.mocked(processImageUpload).mockReturnValue(upload.promise);

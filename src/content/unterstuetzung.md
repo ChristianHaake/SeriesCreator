@@ -18,3 +18,7 @@ Du kannst [Fehler auf GitHub melden](https://github.com/ChristianHaake/SeriesCre
 Verbesserungen vorschlagen oder das Projekt mit anderen Lehrkräften teilen.
 Beschreibe bei Fehlermeldungen Browser und Arbeitsschritte. Veröffentliche dabei
 keine personenbezogenen Daten aus Schulprojekten.
+
+Für Fehlerberichte und Funktionsideen erreichst du uns auch unter
+[apps@haak3.de](mailto:apps@haak3.de?subject=SeriesCreator%20Feedback).
+Sende keine Projektinhalte oder personenbezogenen Daten mit.

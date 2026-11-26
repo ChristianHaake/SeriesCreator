@@ -1,14 +1,18 @@
 :root {
-  /* Core brand colors */
-  --brand-primary: #0056b3; /* Haak3 Blue Accent */
+  /* haak3 shell tokens; the streaming preview keeps its own dark palette. */
+  --brand: #ff9000;
+  --on-brand: #24211e;
+  --brand-primary: #b84a00;
+  --primary-hover: #943900;
+  --primary-soft: #fff0df;
   
   /* Light mode tokens (Editor area) */
-  --color-bg-workspace: #f8f9fa; /* Softer neutral gray */
+  --color-bg-workspace: #f4f2ef;
   --color-bg-surface: #ffffff;
-  --color-text-primary: #111827;
-  --color-text-secondary: #6b7280;
-  --color-border: #d1d5db;
-  --color-ring: rgba(0, 86, 179, 0.3);
+  --color-text-primary: #24211e;
+  --color-text-secondary: #645c53;
+  --color-border: #dfdad4;
+  --color-ring: rgba(148, 57, 0, 0.3);
   
   /* Dark mode tokens (Streaming Preview area) */
   --color-bg-dark: #141414;
@@ -29,10 +33,8 @@
   
   --accent-color: var(--brand-primary);
 
-  /* Brand colours used as *text* need a value per ground: the orange fails on
-     light, the blue fails on dark. Redefined in every dark scope below. */
-  --accent-on-surface: #c2410c; /* 4.91:1 on #f8f9fa, 5.18:1 on #fff */
-  --link-on-surface: var(--brand-primary); /* 7.04:1 on #fff */
+  --accent-on-surface: var(--brand-primary);
+  --link-on-surface: var(--brand-primary);
 
   color-scheme: light dark;
 }
@@ -45,7 +47,7 @@
     --color-text-muted: var(--color-text-dark-secondary);
     --border-color: var(--color-border-dark);
     --accent-on-surface: #fb923c; /* 8.14:1 on #141414 */
-    --link-on-surface: #5b9bff; /* 6.65:1 on #141414; brand blue is 2.62:1 */
+    --link-on-surface: #ffb36b;
   }
 }
 
@@ -58,7 +60,7 @@
   --color-text-muted: var(--color-text-dark-secondary);
   --border-color: var(--color-border-dark);
   --accent-on-surface: #fb923c;
-  --link-on-surface: #5b9bff;
+  --link-on-surface: #ffb36b;
 
   background-color: var(--color-bg);
   color: var(--color-text);
@@ -129,7 +131,7 @@ button {
   gap: 0.5rem;
   justify-content: center;
   line-height: 1.2;
-  min-height: 2.5rem;
+  min-height: 44px;
   text-decoration: none;
   transition:
     background-color 0.15s ease-out,
@@ -146,7 +148,7 @@ button {
 .ui-icon-button {
   aspect-ratio: 1;
   padding: 0.4rem;
-  width: 2.5rem;
+  width: 44px;
 }
 
 .ui-button:has(> svg) {
@@ -157,6 +159,18 @@ button {
 .ui-button:hover,
 .ui-icon-button:hover {
   background: var(--color-bg);
+}
+
+.ui-button--primary,
+.ui-button--primary:hover {
+  background: var(--brand-primary);
+  border-color: var(--brand-primary);
+  color: white;
+}
+
+.ui-button--primary:hover {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
 }
 
 .ui-button:not(.ui-button--static):active:not(:disabled),
@@ -208,9 +222,9 @@ button {
 
 .editor-step-button.is-active {
   background: var(--color-surface);
-  border-color: #f97316;
+  border-color: var(--brand-primary);
   color: var(--color-text);
-  box-shadow: inset 0 3px 0 #f97316;
+  box-shadow: inset 0 3px 0 var(--brand-primary);
 }
 
 .editor-step-button:not(.is-active) {
@@ -502,13 +516,13 @@ button {
 }
 
 .example-card__use {
-  background: #111827;
-  border-color: #111827;
+  background: var(--brand-primary);
+  border-color: var(--brand-primary);
   color: white;
 }
 
 .example-card__use:hover {
-  background: #374151;
+  background: var(--primary-hover);
 }
 
 .mobile-panel-switch {
@@ -537,11 +551,9 @@ button {
 }
 
 .mobile-panel-switch button.is-active {
-  background: #f97316;
-  border-color: #f97316;
-  /* White on this orange is 2.8:1; the dark label reaches 6.57:1 and keeps
-     the brand colour. */
-  color: #141414;
+  background: var(--brand);
+  border-color: var(--brand);
+  color: var(--on-brand);
 }
 
 .completion-control {
@@ -1002,14 +1014,13 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
   --color-text: var(--color-text-primary);
   --color-text-muted: var(--color-text-secondary);
   align-items: center;
-  background: color-mix(in srgb, var(--color-surface) 94%, transparent);
+  background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
-  backdrop-filter: blur(14px);
   display: flex;
   flex-shrink: 0;
   gap: 1.25rem;
   justify-content: space-between;
-  min-height: 88px;
+  min-height: 76px;
   padding: 0.55rem clamp(1rem, 4vw, 4rem);
   position: relative;
   z-index: 20;
@@ -1018,14 +1029,22 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
 .brand {
   align-items: center;
   display: inline-flex;
-  min-height: 64px;
+  gap: 0.8rem;
+  min-height: 56px;
   text-decoration: none;
 }
 
 .brand__logo {
-  height: 72px;
+  height: 56px;
   width: auto;
   object-fit: contain;
+}
+
+.brand__tagline {
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  max-width: 12rem;
 }
 
 .header-meta {
@@ -1053,44 +1072,15 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
 }
 
 .language-switcher {
-  align-items: center;
-  background: #fff;
-  border: 1px solid var(--color-border);
-  border-radius: 999px;
-  display: inline-flex;
-  gap: 3px;
-  padding: 3px;
-}
-
-.language-switcher__option {
-  align-items: center;
-  background: transparent;
-  border: 0;
-  border-radius: 999px;
-  color: var(--color-text-muted);
-  display: inline-flex;
-  font-size: 0.78rem;
-  font-weight: 800;
-  justify-content: center;
-  letter-spacing: 0;
-  min-height: 40px;
-  min-width: 40px;
-  padding: 0 0.62rem;
-}
-
-.language-switcher__option:hover {
-  background: var(--color-bg-workspace);
-  color: var(--color-text);
-}
-
-.language-switcher__option.is-active {
-  background: #2563d6;
-  color: white;
-}
-
-.language-switcher__option:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px var(--color-ring);
+  background: var(--color-bg-surface);
+  border: 1px solid #887b6b;
+  border-radius: 8px;
+  color: var(--color-text-primary);
+  font: inherit;
+  height: 44px;
+  min-height: 44px;
+  min-width: 9.5rem;
+  padding: 0 0.65rem;
 }
 
 .local-badge {
@@ -1108,7 +1098,7 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
 
 .btn-header {
   font-size: 0.84rem;
-  min-height: 2.5rem;
+  min-height: 44px;
 }
 
 .btn-header:not(.ui-button--danger):hover {
@@ -1149,8 +1139,10 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
   }
 
   .brand__logo {
-    height: 56px;
+    height: 48px;
   }
+
+  .brand__tagline { font-size: 0.8rem; }
 
   .local-badge {
     width: 100%;
@@ -1161,7 +1153,7 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
   }
 }
 
-@media (max-width: 720px) {
+@media (max-width: 900px) {
   .app-shell {
     height: auto;
     min-height: 100vh;
@@ -1259,8 +1251,7 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
   flex-wrap: wrap;
   row-gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  background: color-mix(in srgb, var(--color-surface) 94%, transparent);
-  backdrop-filter: blur(14px);
+  background: var(--color-bg-surface);
   border-top: 1px solid var(--border-color);
   min-height: 50px;
   flex-shrink: 0;
@@ -1270,21 +1261,31 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
 }
 
 .app-footer__right {
+  align-items: center;
+  display: flex;
   flex-wrap: wrap;
+  gap: 0.5rem 1rem;
   row-gap: 0.5rem;
+}
+
+.app-footer__identity {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75rem;
 }
 
 .app-footer nav {
   display: flex;
   flex-wrap: wrap;
-  gap: 1.5rem;
+  gap: 0.4rem 1rem;
   align-items: center;
 }
 
 .app-footer a {
   align-items: center;
   display: inline-flex;
-  min-height: 2.5rem;
+  min-height: 44px;
   text-decoration: none;
   color: var(--color-text);
   font-weight: 500;
@@ -1300,23 +1301,43 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
   font-weight: 500;
 }
 
-/* The brand yellow as text was 1.34:1 on the light footer. As a filled badge —
-   which is also how Buy Me a Coffee renders it — the dark label is 13.68:1 and
-   works on either theme. */
 .app-footer a.app-footer__coffee,
 .app-footer a.app-footer__coffee:hover {
-  background: #ffdd00;
-  border-radius: 999px;
-  color: #141414;
+  background: var(--brand-primary);
+  border-radius: 8px;
+  color: white;
   font-weight: 700;
   gap: 0.4rem;
   padding-inline: 0.75rem;
 }
 
 .github-link {
-  display: flex;
   align-items: center;
-  gap: 0.3rem;
+  display: inline-flex;
+  justify-content: center;
+  min-width: 44px;
+  position: relative;
+}
+
+.github-link__tooltip {
+  background: var(--color-text-primary);
+  border-radius: 6px;
+  color: white;
+  display: none;
+  font-size: 0.75rem;
+  max-width: 10rem;
+  padding: 0.35rem 0.5rem;
+}
+
+.github-link:hover .github-link__tooltip,
+.github-link:focus-visible .github-link__tooltip {
+  display: block;
+}
+
+.language-switcher:focus-visible,
+.app-footer a:focus-visible {
+  outline: 3px solid var(--primary-hover);
+  outline-offset: 2px;
 }
 
 .editor-sidebar img {
@@ -1689,7 +1710,7 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
 @media (pointer: coarse) {
   .ui-button,
   .ui-icon-button,
-  .language-switcher__option,
+  .language-switcher,
   .btn-header,
   .completion-control__toggle,
   .preview-header__print,
@@ -2029,11 +2050,9 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
    the toggle is hidden. Everything that makes it look like a panel must stay
    inside the narrow media query.
 
-   The breakpoint is set by measurement, not by the mobile layout: all seven
-   actions need 1320px to sit on one line in English and 1400px in German.
-   Below that the row wrapped to two lines and left the header 163px tall, so
-   the menu takes over up to 1440px. */
-@media (max-width: 1439px) {
+   The longer project-file label and five-language selector need more room than
+   the old two-language header. Keep the compact menu through 1699px. */
+@media (max-width: 1699px) {
   .header-actions__menu {
     background: var(--color-surface);
     border: 1px solid var(--border-color);
@@ -2074,7 +2093,7 @@ input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:foc
   }
 }
 
-@media (min-width: 1440px) {
+@media (min-width: 1700px) {
   /* display:contents keeps the buttons as direct flex children of the toolbar,
      so the wide row is untouched. !important overrides the UA rule that hides a
      closed popover. */

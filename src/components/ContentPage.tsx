@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { contentPages, type ContentPath } from '../content';
@@ -11,13 +12,24 @@ import { useTranslation } from '../i18n';
 export default function ContentPage({ pathname }: { pathname: ContentPath }) {
   const { locale, t } = useTranslation();
   const page = contentPages[locale][pathname];
+  const mainRef = useRef<HTMLElement>(null);
+
+  useEffect(() => { mainRef.current?.focus(); }, [pathname]);
 
   return (
-    <main id="main-content" tabIndex={-1} className="content-page">
+    <main ref={mainRef} id="main-content" tabIndex={-1} className="content-page">
       <a href="/" className="content-page__back">{t.backToApp}</a>
       <div className="markdown-content">
         <h1>{page.title}</h1>
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{page.content}</ReactMarkdown>
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          components={{
+            a: ({ href, ...props }) => {
+              const external = href?.startsWith('https://') || href?.startsWith('http://');
+              return <a href={href} {...props} target={external ? '_blank' : undefined} rel={external ? 'noopener noreferrer' : undefined} />;
+            },
+          }}
+        >{page.content}</ReactMarkdown>
       </div>
     </main>
   );

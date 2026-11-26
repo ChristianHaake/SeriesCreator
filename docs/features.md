@@ -139,7 +139,8 @@ Akzeptiert, wenn:
 
 ### F-09 Beispiele
 
-Die App enthält Klima- und Weimar-Projekte in Deutsch und Englisch.
+Die App enthält Klima- und Weimar-Projekte in Deutsch, Englisch, Französisch,
+Spanisch und Niederländisch.
 
 Akzeptiert, wenn:
 
@@ -153,14 +154,17 @@ Akzeptiert, wenn:
 
 ### F-10 Sprache und Inhaltsseiten
 
-Oberfläche, Startinhalte und Pflichtseiten stehen auf Deutsch und Englisch zur
-Verfügung.
+Oberfläche, Startinhalte und Pflichtseiten stehen auf Deutsch, Englisch,
+Französisch, Spanisch und Niederländisch zur Verfügung.
 
 Akzeptiert, wenn:
 
 - Sprachwahl lokal gespeichert wird und `document.lang` aktualisiert;
+- ein Sprachwechsel vorhandene Projekteingaben erhält und keine unvollständige
+  Sprachfassung anbietet;
 - Hilfe, Über, Lehrkräfte, verantwortungsvoller Einsatz,
   Nutzungsbedingungen, Unterstützung, Datenschutz und Impressum direkt aufrufbar sind;
+- die Beispielgalerie unter `/beispiele` direkt erreichbar ist;
 - Markdown kein Raw HTML ausführt.
 
 ## Technische Grenzen

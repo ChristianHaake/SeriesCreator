@@ -44,7 +44,7 @@ test('completes the primary workflow and downloads both portable formats', async
   await expect(preview.getByText('The class distinguishes an observation from evidence and records a supporting source.')).toBeVisible();
 
   const projectDownload = page.waitForEvent('download');
-  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await page.getByRole('button', { name: 'Save project file', exact: true }).click();
   expect((await projectDownload).suggestedFilename()).toBe(
     'Release-Test-Series.seriescreator',
   );
@@ -86,6 +86,47 @@ test('supports direct content routes and narrow responsive editing', async ({ pa
   await page.goto('/hilfe');
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Help');
   await expect(page.getByRole('link', { name: /Back to App/i })).toHaveAttribute('href', '/');
+});
+
+test('keeps the draft and localized help available in all five languages', async ({ page }) => {
+  await page.goto('/');
+  await page.getByLabel('Series Title').fill('An unchanged student draft');
+  for (const [locale, titleLabel, helpLabel, saveLabel] of [
+    ['de', 'Serientitel', 'Hilfe', 'Projektdatei speichern'],
+    ['en', 'Series Title', 'Help', 'Save project file'],
+    ['fr', 'Titre de la série', 'Aide', 'Enregistrer le fichier projet'],
+    ['es', 'Título de la serie', 'Ayuda', 'Guardar archivo del proyecto'],
+    ['nl', 'Serietitel', 'Hulp', 'Projectbestand opslaan'],
+  ] as const) {
+    await page.locator('.language-switcher').selectOption(locale);
+    await expect(page.locator('html')).toHaveAttribute('lang', locale);
+    await expect(page.getByLabel(titleLabel)).toHaveValue('An unchanged student draft');
+    await expect(page.getByRole('button', { name: saveLabel })).toBeVisible();
+    await page.getByRole('link', { name: helpLabel, exact: true }).click();
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(helpLabel);
+    await page.locator('.content-page__back').click();
+    await expect(page.getByLabel(titleLabel)).toHaveValue('An unchanged student draft');
+  }
+});
+
+test('keeps the shell usable from 320px to desktop', async ({ page }) => {
+  await page.goto('/');
+  for (const width of [320, 360, 390, 768, 1440]) {
+    await page.setViewportSize({ width, height: 800 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), `${width}px overflow`).toBeLessThanOrEqual(1);
+    await expect(page.locator('.language-switcher')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Save project file' })).toBeVisible();
+    if (width <= 768) {
+      await expect(page.getByRole('button', { name: 'Preview', exact: true })).toBeVisible();
+      await expect(page.locator('.preview-main')).toBeHidden();
+    }
+    for (const name of ['Help', 'Examples', 'About', 'Terms of use', 'Privacy Policy', 'Imprint', 'Support']) {
+      await expect(page.locator('.app-footer').getByRole('link', { name, exact: true }), `${width}px ${name}`).toBeVisible();
+    }
+    const targets = await page.locator('.language-switcher, .app-footer a, .app-header__controls button:visible').evaluateAll((elements) =>
+      elements.map((element) => ({ label: element.getAttribute('aria-label') || element.textContent, size: element.getBoundingClientRect().height })));
+    expect(targets.filter((target) => target.size < 44), `${width}px touch targets`).toEqual([]);
+  }
 });
 
 test('loads a complete current example through the gallery', async ({ page }) => {
@@ -220,7 +261,7 @@ test('gives every content page one h1, a matching tab title and a localized desc
   const description = page.locator('meta[name="description"]');
   await expect(description).toHaveAttribute('content', /Plan fictional classroom series/);
 
-  await page.getByRole('button', { name: 'DE', exact: true }).click();
+  await page.getByRole('combobox', { name: 'Select language' }).selectOption('de');
   await expect(description).toHaveAttribute('content', /Plane fiktive Unterrichtsserien/);
 });
 
@@ -332,7 +373,7 @@ test('shows a not-found page for unknown routes', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Page not found');
   await expect(page.getByRole('link', { name: /Back to App/i })).toHaveAttribute('href', '/');
   await expect(page).toHaveTitle('Page not found · SeriesCreator');
-  await page.getByRole('button', { name: 'DE', exact: true }).click();
+  await page.getByRole('combobox', { name: 'Select language' }).selectOption('de');
   await expect(page).toHaveTitle('Seite nicht gefunden · SeriesCreator');
   // The editor must not be what a dead link renders.
   await expect(page.locator('.editor-sidebar')).toHaveCount(0);
@@ -397,9 +438,7 @@ test('still autosaves normally after a clean load', async ({ page }) => {
 });
 
 test('keeps the full action row inline on a wide viewport', async ({ page }) => {
-  // Above the measured breakpoint: all seven actions need 1320px in English and
-  // 1400px in German before they fit on one line.
-  await page.setViewportSize({ width: 1500, height: 800 });
+  await page.setViewportSize({ width: 1800, height: 800 });
   await page.goto('/');
 
   // The overflow menu is a narrow-viewport affordance; desktop is unchanged.
@@ -410,7 +449,7 @@ test('keeps the full action row inline on a wide viewport', async ({ page }) => 
     '.app-header__controls button.btn-header:not(.header-actions__toggle), .app-header__controls a.btn-header',
   );
   await expect(actions).toHaveText([
-    'Save', 'Load', 'Examples', 'Download as HTML', 'Print / Save as PDF', 'For Teachers', 'New / Clear',
+    'Save project file', 'Load', 'Examples', 'Download as HTML', 'Print / Save as PDF', 'For Teachers', 'New / Clear',
   ]);
 
   // Geometry, not just text: the panel's full-width rows once leaked out of the
@@ -495,7 +534,7 @@ test('reports import failures in the interface language', async ({ page }) => {
 
   // The codec runs in a worker and cannot reach the translator, so it returns a
   // code that the UI maps — this is what proves the mapping is wired.
-  await page.getByRole('button', { name: 'DE', exact: true }).click();
+  await page.getByRole('combobox', { name: 'Select language' }).selectOption('de');
   await importInput.setInputFiles(broken);
   await expect(page.locator('.app-status')).toHaveText('Die Projektdatei enthält keine gültigen Staffeln.');
 });
@@ -508,7 +547,7 @@ test('reloads a project it saved itself', async ({ page }) => {
   await expect(page.locator('.completion-score')).toHaveText('Project status 100%');
 
   const download = page.waitForEvent('download');
-  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await page.getByRole('button', { name: 'Save project file', exact: true }).click();
   const saved = await (await download).path();
 
   // Wipe and re-import the very file the app produced.

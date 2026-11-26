@@ -3,15 +3,18 @@
 Standard:
 https://github.com/ChristianHaake/DEV-Memory/tree/main/standards/haak3-webapps
 
-Standard version: `1.0.0-draft`
+Standard version: `1.1.0-draft`
 
-The link above points to the current private standard (currently 1.1.0-draft); the version recorded here reflects this app’s earlier adoption.
-
-Last reviewed: `2026-11-09`
+Last reviewed: `2026-11-26`
 
 ## Exceptions
 
 None.
+
+The orange application shell retains the product-specific dark streaming preview.
+The project schema, storage keys, and export formats remain unchanged.
+Release evidence and the exact rollback target must be recorded in
+`docs/release-record-2.0.0.md` before production deployment.
 
 ### Resolved
 
@@ -45,3 +48,4 @@ Resolved: 2026-07-16
   those upstream ranges select a patched release themselves.
 - Localized support information is served at `/unterstuetzung`; translation
   keys, nonempty values and placeholders are checked by the regular test gate.
+  Help and support expose `apps@haak3.de` for feedback in all five languages.

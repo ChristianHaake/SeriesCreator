@@ -24,6 +24,8 @@ export interface StoredProjectLoad {
 export function loadStoredProject(
   storage: Storage | null,
   fallback: ProjectData = initialProjectData,
+  seasonFallback = 'Season',
+  episodeFallback = 'New Episode',
 ): StoredProjectLoad {
   if (!storage) return { data: fallback, unreadable: false, backupPreserved: false };
   let saved: string | null;
@@ -37,7 +39,7 @@ export function loadStoredProject(
   if (!saved) return { data: fallback, unreadable: false, backupPreserved: false };
 
   try {
-    const parsed = normalizeProject(JSON.parse(saved));
+    const parsed = normalizeProject(JSON.parse(saved), seasonFallback, episodeFallback);
     if (parsed.ok) return { data: parsed.data, unreadable: false, backupPreserved: false };
   } catch {
     // Unparseable JSON falls through to the same preservation path as data
@@ -87,7 +89,7 @@ export function useProjectStore(onSaveError?: () => void) {
       storageReadFailed = true;
     }
     return {
-      load: loadStoredProject(storage, createInitialProjectData(locale)),
+      load: loadStoredProject(storage, createInitialProjectData(locale), t.seasonFallbackLabel, t.newEpisode),
       storageUnavailable: !storage || storageReadFailed,
       storedBytes,
     };

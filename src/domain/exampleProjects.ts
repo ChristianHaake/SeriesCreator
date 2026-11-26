@@ -1,5 +1,9 @@
 import type { EpisodeContentBlock, ProjectData } from '../types';
 import { PROJECT_SCHEMA_VERSION } from './projectCodec';
+import type { Language } from '../i18n';
+import { getFrenchExampleProjects } from './exampleProjects.fr';
+import { getSpanishExampleProjects } from './exampleProjects.es';
+import { getDutchExampleProjects } from './exampleProjects.nl';
 
 type ExampleLocale = 'de' | 'en';
 
@@ -451,7 +455,10 @@ function withLearningDepth(project: ProjectData, locale: ExampleLocale): Project
   };
 }
 
-export function getExampleProjects(locale: ExampleLocale): ExampleProject[] {
+export function getExampleProjects(locale: Language): ExampleProject[] {
+  if (locale === 'fr') return getFrenchExampleProjects();
+  if (locale === 'es') return getSpanishExampleProjects();
+  if (locale === 'nl') return getDutchExampleProjects();
   const climate = withLearningDepth(climateProject(locale), locale);
   const weimar = withLearningDepth(weimarProject(locale), locale);
 
@@ -560,6 +567,6 @@ export function getExampleProjects(locale: ExampleLocale): ExampleProject[] {
   ];
 }
 
-export function createSchoolEnergyExampleProject(locale: ExampleLocale): ProjectData {
-  return withLearningDepth(climateProject(locale), locale);
+export function createSchoolEnergyExampleProject(locale: Language): ProjectData {
+  return getExampleProjects(locale)[0].project;
 }

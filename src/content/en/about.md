@@ -31,7 +31,7 @@ and others working in formal and informal education.
 
 Series metadata, seasons, episodes, local images, presentation mode, offline
 HTML, PDF printing, and versioned `.seriescreator` project files are functional.
-A school example project demonstrates the full workflow.
+Two school example projects demonstrate the full workflow.
 
 ## Source code
 

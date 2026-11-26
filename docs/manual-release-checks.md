@@ -3,6 +3,12 @@
 Automated tests reduce regressions, but they do not replace target-device,
 assistive-technology, legal or final production review.
 
+## Stage candidate
+
+- [ ] Reviewed commit deployed to `https://stage.seriescreator.haak3.de/`
+- [ ] `npm run smoke:stage` passed for that commit; Worker version and URL recorded
+- [ ] Stage browser flows completed before any production deployment
+
 ## Target browsers and devices
 
 - [ ] Chrome desktop: complete editor → save → HTML → print/PDF flow
@@ -29,6 +35,15 @@ iPad behavior.
 - [ ] Standalone HTML opens offline and navigates by keyboard
 - [ ] PDF title, episodes, images and page breaks are readable in each target browser
 - [ ] Long text and maximum-size projects do not clip essential content
+
+## Five-language review
+
+- [ ] Deutsch, Englisch, Französisch, Spanisch und Niederländisch: Sprachmenü,
+      erhaltene Eingaben, Editor, Hilfe, Beispiele, Status- und Fehlermeldungen
+      sowie Projektdatei-, HTML- und Druckbeschriftungen auf Stage geprüft
+- [ ] Unbeabsichtigte Rückfälle auf eine andere Sprache je Fassung geprüft;
+      Ergebnis und Anzahl vollständig geprüfter Sprachfassungen von fünf
+      dokumentiert
 
 ## Legal and production
 

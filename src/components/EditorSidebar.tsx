@@ -5,9 +5,9 @@ import { EpisodeDialog } from './EpisodeDialog';
 import { ConfirmDialog } from './ConfirmDialog';
 import { useProjectStore } from '../store/useProjectStore';
 import { fieldLimits, resourceLimits } from '../domain/constraints';
-import { useTranslation } from '../i18n';
+import { useTranslation, type Language } from '../i18n';
 import { calculateProjectCompletion } from '../domain/completion';
-import { processImageUpload } from '../domain/imageUpload';
+import { processImageUpload, type ImageUploadError } from '../domain/imageUpload';
 
 interface Props {
   activeSeasonId: string;
@@ -17,7 +17,7 @@ interface Props {
 
 // Localized preset genres. A genre stored in the other language falls through to
 // the free-text input, so switching locale never silently mismatches the select.
-const GENRE_OPTIONS: Record<'de' | 'en', string[]> = {
+const GENRE_OPTIONS: Record<Language, string[]> = {
   de: [
     'Dokumentation', 'Erklärvideo', 'Kurzfilm', 'Reportage',
     'Nachrichten', 'Interview', 'Hörspiel', 'Podcast',
@@ -30,26 +30,32 @@ const GENRE_OPTIONS: Record<'de' | 'en', string[]> = {
     'Animation', 'Stop motion', 'Tutorial',
     'Drama', 'Comedy', 'Stage play', 'Poem adaptation',
   ],
+  fr: ['Documentaire', 'Vidéo explicative', 'Court métrage', 'Reportage', 'Actualités', 'Entretien', 'Fiction radiophonique', 'Podcast', 'Animation', 'Stop motion', 'Tutoriel', 'Drame', 'Comédie', 'Pièce de théâtre', 'Adaptation de poème'],
+  es: ['Documental', 'Vídeo explicativo', 'Cortometraje', 'Reportaje', 'Noticias', 'Entrevista', 'Radioteatro', 'Pódcast', 'Animación', 'Stop motion', 'Tutorial', 'Drama', 'Comedia', 'Obra de teatro', 'Adaptación de poema'],
+  nl: ['Documentaire', 'Uitlegvideo', 'Korte film', 'Reportage', 'Nieuws', 'Interview', 'Hoorspel', 'Podcast', 'Animatie', 'Stop motion', 'Handleiding', 'Drama', 'Komedie', 'Toneelstuk', 'Gedichtverfilming'],
 };
 
 // FSK-style age ratings per locale.
-const AGE_OPTIONS: Record<'de' | 'en', string[]> = {
+const AGE_OPTIONS: Record<Language, string[]> = {
   de: ['ab 0', 'ab 6', 'ab 12', 'ab 16', 'ab 18'],
   en: ['0+', '6+', '12+', '16+', '18+'],
+  fr: ['0+', '6+', '12+', '16+', '18+'],
+  es: ['0+', '6+', '12+', '16+', '18+'],
+  nl: ['0+', '6+', '12+', '16+', '18+'],
 };
 
 export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Props) {
   const { data, updateData, addEpisode, updateEpisode, removeEpisode, moveEpisode, updateSeason, removeSeason } = store;
   const [editorStep, setEditorStep] = useState<1 | 2 | 3>(1);
   const [customGenreSelected, setCustomGenreSelected] = useState(false);
-  const [coverError, setCoverError] = useState('');
-  const [seasonError, setSeasonError] = useState('');
+  const [coverError, setCoverError] = useState<ImageUploadError | null>(null);
+  const [seasonError, setSeasonError] = useState(false);
   // 'rename' opens the dialog in prompt mode; 'delete' as a confirmation.
   const [seasonDialog, setSeasonDialog] = useState<'rename' | 'delete' | null>(null);
   // Which episode is open in the editor dialog, if any.
   const [openEpisodeId, setOpenEpisodeId] = useState<string | null>(null);
   const [episodePendingDelete, setEpisodePendingDelete] = useState<string | null>(null);
-  const [episodeAnnouncement, setEpisodeAnnouncement] = useState('');
+  const [episodeAnnouncement, setEpisodeAnnouncement] = useState<{ title: string; position: number } | null>(null);
   const focusAfterEpisodeDeleteRef = useRef<string | 'add' | null>(null);
   const episodeDeleteLauncherRef = useRef<string | null>(null);
   const coverInputRef = useRef<HTMLInputElement | null>(null);
@@ -78,7 +84,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
     moveEpisode(seasonId, episodeId, direction);
     const episode = season.episodes[index];
     const position = direction === 'up' ? index : index + 2;
-    setEpisodeAnnouncement(t.episodeMoved.replace('{title}', episode.title || t.lblUntitled).replace('{position}', String(position)));
+    setEpisodeAnnouncement({ title: episode.title, position });
   };
 
   const handleEpisodeDeleteConfirm = () => {
@@ -104,11 +110,11 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
     const file = input.files?.[0];
     if (!file) return;
     const revision = ++coverUploadRevision.current;
-    setCoverError('');
+    setCoverError(null);
     const result = await processImageUpload(file, resourceLimits.coverOutputWidth, 0.78);
     if (revision !== coverUploadRevision.current) return;
     if (result.ok) updateData({ coverUrl: result.url });
-    else setCoverError(t[result.error]);
+    else setCoverError(result.error);
     input.value = '';
   };
 
@@ -217,7 +223,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
                   className="ui-button ui-button--danger"
                   onClick={() => {
                     coverUploadRevision.current += 1;
-                    setCoverError('');
+                    setCoverError(null);
                     updateData({ coverUrl: undefined });
                   }}
                 >
@@ -244,7 +250,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
             </button>
             {coverError && (
               <p id="cover-upload-error" className="field-error" role="alert">
-                {coverError}
+                {t[coverError]}
               </p>
             )}
           </div>
@@ -494,10 +500,10 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
               type="button"
               onClick={() => {
                 if (activeSeason?.episodes.length > 0) {
-                  setSeasonError(t.errorDeleteSeason);
+                  setSeasonError(true);
                   return;
                 }
-                setSeasonError('');
+                setSeasonError(false);
                 setSeasonDialog('delete');
               }}
               className="ui-icon-button ui-icon-button--danger"
@@ -508,7 +514,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
             </button>
           </div>
           {seasonError && (
-            <p className="field-error" role="alert">{seasonError}</p>
+            <p className="field-error" role="alert">{t.errorDeleteSeason}</p>
           )}
           {seasonDialog === 'rename' && (
             <ConfirmDialog
@@ -548,7 +554,11 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
             onMove={handleEpisodeMove}
           />
         ))}
-        <p className="visually-hidden" role="status" aria-live="polite">{episodeAnnouncement}</p>
+        <p className="visually-hidden" role="status" aria-live="polite">
+          {episodeAnnouncement && t.episodeMoved
+            .replace('{title}', episodeAnnouncement.title || t.lblUntitled)
+            .replace('{position}', String(episodeAnnouncement.position))}
+        </p>
         {activeSeason && episodePendingDelete && (() => {
           const episode = activeSeason.episodes.find((item) => item.id === episodePendingDelete);
           if (!episode) return null;

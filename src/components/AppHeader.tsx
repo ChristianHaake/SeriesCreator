@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { CheckCircle2, MoreHorizontal, Download, FileText, GraduationCap, Trash2, Upload, Printer } from "lucide-react";
 import type { ProjectData } from "../types";
-import { useTranslation } from "../i18n";
+import { useTranslation, type Language } from "../i18n";
 import { PROJECT_FILE_EXTENSION } from '../domain/projectCodec';
 import { resourceLimits } from '../domain/constraints';
 import type { ProjectParseError } from '../domain/projectCodec';
@@ -9,6 +9,14 @@ import { parseProjectTextInWorker } from '../domain/projectImport';
 import { BrandLogo } from './BrandLogo';
 
 export type ProjectImportFailure = ProjectParseError | 'readFailed';
+
+const languageNames = {
+  de: 'Deutsch',
+  en: 'English',
+  fr: 'Français',
+  es: 'Español',
+  nl: 'Nederlands',
+} satisfies Record<Language, string>;
 
 interface Props {
   onExport?: () => void;
@@ -49,7 +57,7 @@ export function AppHeader({
     onImportStart?.();
     try {
       const content = await file.text();
-      const parsed = await parseProjectTextInWorker(content, t.seasonFallbackLabel);
+      const parsed = await parseProjectTextInWorker(content, t.seasonFallbackLabel, t.newEpisode);
       if (parsed.ok) {
         onImportValidated?.(parsed.data);
       } else {
@@ -65,25 +73,23 @@ export function AppHeader({
 
   return (
     <header className="app-header">
-      <a href="/" className="brand" aria-label={t.appTitle} title={t.appSubtitle}>
+      <a href="/" className="brand" aria-label={t.appTitle} aria-describedby="brand-tagline">
         <BrandLogo className="brand__logo" />
+        <span id="brand-tagline" className="brand__tagline">{t.appSubtitle}</span>
       </a>
 
       <div className="header-meta">
         <div className="header-meta__top">
-          <div className="language-switcher" role="group" aria-label={t.languageLabel}>
-            {(['de', 'en'] as const).map((option) => (
-              <button
-                key={option}
-                type="button"
-                onClick={() => setLocale(option)}
-                className={`language-switcher__option${locale === option ? ' is-active' : ''}`}
-                aria-pressed={locale === option}
-              >
-                {option.toUpperCase()}
-              </button>
+          <select
+            className="language-switcher"
+            aria-label={t.languageLabel}
+            value={locale}
+            onChange={(event) => setLocale(event.currentTarget.value as Language)}
+          >
+            {Object.entries(languageNames).map(([language, name]) => (
+              <option key={language} value={language} lang={language}>{name}</option>
             ))}
-          </div>
+          </select>
 
           <span className="local-badge">
             <CheckCircle2 aria-hidden="true" size={16} strokeWidth={2.5} />
@@ -95,7 +101,7 @@ export function AppHeader({
           {/* Save stays out of the menu: this app has no accounts and no server
               copy, so the action that preserves work must never be buried. */}
           {onExport && (
-            <button type="button" className="btn-header ui-button" onClick={onExport} aria-label={t.btnSave} title={t.btnSave}>
+            <button type="button" className="btn-header ui-button ui-button--primary" onClick={onExport} aria-label={t.btnSave} title={t.btnSave}>
               <Download size={16} />
               <span>{t.btnSave}</span>
             </button>
