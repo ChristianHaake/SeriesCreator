@@ -20,7 +20,7 @@ Zustandsintegrität sowie UI/Performance. Befunde wurden anhand von Aufrufern,
 Tests und gezielten Reproduktionen gegengeprüft.
 
 Grundlagen: README, Architektur, Funktionsspezifikation, Projektdateiformat,
-Release-Checklisten und der lokal verfügbare `haak3-webapp-standard`.
+Release-Checklisten und der lokal verfügbare `haak3 Web App Standard`.
 Vergleichspfade für Persistenz und Downloads wurden in SocialMediaCreator,
 Feedbackbogen-Generator und StoryboardCreator untersucht. Ein Verzeichnis
 `StoryboardDesigner` liegt lokal nicht vor; StoryboardCreator wurde als
