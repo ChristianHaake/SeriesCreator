@@ -450,7 +450,7 @@ describe('App', () => {
   it('keeps a persistence error visible after confirming an import', async () => {
     const user = userEvent.setup();
     renderApp();
-    const writes = vi.spyOn(window.localStorage, 'setItem').mockImplementation(() => { throw new Error('quota'); });
+    const writes = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('quota'); });
     try {
       const input = screen.getByLabelText('Load', { selector: 'input' });
       await user.upload(input, new File([serializeProject({ ...initialProjectData, title: 'Unsaved import' })], 'import.seriescreator', { type: 'application/json' }));
