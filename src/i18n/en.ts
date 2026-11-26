@@ -98,7 +98,6 @@ export const en: Record<TranslationKey, string> = {
   footerTeachers: "Teachers",
   footerPrivacyPolicy: "Privacy Policy",
   footerImprint: "Imprint",
-  coffee: "Buy me a coffee",
   backToApp: "← Back to App",
   allSeasons: "All seasons",
   home: "Home",
