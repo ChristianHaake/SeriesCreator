@@ -245,7 +245,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
               ) : (
                 <div className="cover-art-field__placeholder">
                   <ImageIcon size={22} />
-                  <span>{t.noCover}</span>
+                  <span>{t.btnChooseCoverFromPreview}</span>
                 </div>
               )}
             </button>
