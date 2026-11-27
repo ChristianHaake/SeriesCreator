@@ -51,6 +51,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
   const [coverError, setCoverError] = useState<ImageUploadError | null>(null);
   const [seasonError, setSeasonError] = useState(false);
   // 'rename' opens the dialog in prompt mode; 'delete' as a confirmation.
+  const dialogTriggerRef = useRef<HTMLElement>(null);
   const [seasonDialog, setSeasonDialog] = useState<'rename' | 'delete' | null>(null);
   // Which episode is open in the editor dialog, if any.
   const [openEpisodeId, setOpenEpisodeId] = useState<string | null>(null);
@@ -489,7 +490,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
             )}
             <button
               type="button"
-              onClick={() => setSeasonDialog('rename')}
+              onClick={event => { dialogTriggerRef.current = event.currentTarget; setSeasonDialog('rename'); }}
               className="ui-icon-button"
               aria-label={t.renameSeason}
               title={t.renameSeason}
@@ -498,12 +499,13 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
             </button>
             <button
               type="button"
-              onClick={() => {
+              onClick={event => {
                 if (activeSeason?.episodes.length > 0) {
                   setSeasonError(true);
                   return;
                 }
                 setSeasonError(false);
+                dialogTriggerRef.current = event.currentTarget;
                 setSeasonDialog('delete');
               }}
               className="ui-icon-button ui-icon-button--danger"
@@ -518,6 +520,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
           )}
           {seasonDialog === 'rename' && (
             <ConfirmDialog
+              returnFocus={dialogTriggerRef}
               message={t.promptRename}
               defaultValue={activeSeason?.title || ''}
               confirmLabel={t.btnRename}
@@ -527,6 +530,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
           )}
           {seasonDialog === 'delete' && (
             <ConfirmDialog
+              returnFocus={dialogTriggerRef}
               message={t.confirmDeleteSeason}
               confirmLabel={t.btnDelete}
               destructive
@@ -564,6 +568,7 @@ export function EditorSidebar({ activeSeasonId, setActiveSeasonId, store }: Prop
           if (!episode) return null;
           return (
             <ConfirmDialog
+              returnFocus={dialogTriggerRef}
               message={t.confirmDeleteEpisode.replace('{title}', episode.title || t.lblUntitled)}
               confirmLabel={t.btnDelete}
               destructive

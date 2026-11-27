@@ -1,3 +1,4 @@
+import { CreatorStatus } from './creator/CreatorShell';
 import { useState, useEffect, useMemo, useRef, lazy, Suspense, type KeyboardEvent } from 'react';
 import { flushSync } from 'react-dom';
 import { useProjectStore } from './store/useProjectStore';
@@ -73,6 +74,7 @@ function App() {
   const [currentPath, setCurrentPath] = useState(window.location.pathname.replace(/\/+$/, "") || "/");
   const [mobilePanel, setMobilePanel] = useState<MobilePanel>('editor');
   // Pending destructive action awaiting confirmation in the dialog.
+  const dialogTriggerRef = useRef<HTMLElement>(null);
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
   const examples = useMemo(() => getExampleProjects(locale), [locale]);
 
@@ -340,6 +342,7 @@ function App() {
             },
           });
         }}
+        dialogTriggerRef={dialogTriggerRef}
         onImportStart={() => { setStatus(null); setImportStatus('importing'); }}
         onImportFailure={(failure) => { setStatus(null); setImportStatus(failure); }}
         onShowExamples={openExamples}
@@ -351,6 +354,7 @@ function App() {
       />
       {pendingAction && (
         <ConfirmDialog
+              returnFocus={dialogTriggerRef}
           message={t[pendingAction.messageKey]}
           confirmLabel={t[pendingAction.confirmLabelKey]}
           destructive
@@ -368,13 +372,11 @@ function App() {
           onClose={closeExamples}
         />
       )}
-      <div
+      <CreatorStatus
         className={`app-status${visibleStatus ? ` app-status--${visibleStatus.tone}` : ''}`}
-        role="status"
-        aria-live="polite"
       >
         {visibleStatus?.message}
-      </div>
+      </CreatorStatus>
       <div className="mobile-panel-switch" role="group" aria-label={t.mobilePanelSwitchLabel}>
         <button
           type="button"
