@@ -1,9 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
+import { CreatorDialog } from '../creator/CreatorShell';
 import { useTranslation } from '../i18n';
 
 interface Props {
   /** The question to answer. */
   message: string;
+  returnFocus: React.RefObject<HTMLElement | null>;
   /** Present for a rename-style prompt; omit for a plain confirmation. */
   defaultValue?: string;
   /** Label for the affirmative button; falls back to a generic confirm. */
@@ -14,78 +16,29 @@ interface Props {
   onCancel: () => void;
 }
 
-/**
- * Built on the native <dialog> element, which supplies the focus trap, Escape
- * handling, inert background and top-layer stacking that a hand-rolled modal
- * has to reimplement.
- */
-export function ConfirmDialog({
-  message,
-  defaultValue,
-  confirmLabel,
-  destructive,
-  onConfirm,
-  onCancel,
-}: Props) {
+export function ConfirmDialog({ message, returnFocus, defaultValue, confirmLabel, destructive, onConfirm, onCancel }: Props) {
   const { t } = useTranslation();
-  const dialogRef = useRef<HTMLDialogElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const isPrompt = defaultValue !== undefined;
   const [value, setValue] = useState(defaultValue ?? '');
-
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog?.isConnected || dialog.open) return;
-    dialog.showModal();
-    if (isPrompt) inputRef.current?.select();
-  }, [isPrompt]);
-
+  const input = useRef<HTMLInputElement>(null);
+  const formId = useId();
+  const isPrompt = defaultValue !== undefined;
+  useEffect(() => { if (isPrompt) input.current?.select(); }, [isPrompt]);
+  const confirm = () => {
+    if (isPrompt && !value.trim()) { input.current?.focus(); return; }
+    onConfirm(value.trim());
+  };
   return (
-    <dialog
-      ref={dialogRef}
-      className="confirm-dialog"
-      aria-labelledby="confirm-dialog-message"
-      // Fires for Escape and for form method="dialog" alike.
-      onCancel={onCancel}
-      onClose={onCancel}
-    >
-      <form
-        method="dialog"
-        onSubmit={(event) => {
-          // A prompt must not submit an empty name.
-          if (isPrompt && value.trim() === '') {
-            event.preventDefault();
-            inputRef.current?.focus();
-            return;
-          }
-          onConfirm(value.trim());
-        }}
-      >
-        <p id="confirm-dialog-message" className="confirm-dialog__message">{message}</p>
-
-        {isPrompt && (
-          <input
-            ref={inputRef}
-            type="text"
-            className="confirm-dialog__input"
-            aria-label={message}
-            value={value}
-            onChange={(event) => setValue(event.target.value)}
-          />
-        )}
-
-        <div className="confirm-dialog__actions">
-          <button type="button" className="ui-button" onClick={onCancel}>
-            {t.btnCancel}
-          </button>
-          <button
-            type="submit"
-            className={`ui-button${destructive ? ' ui-button--danger' : ''}`}
-          >
-            {confirmLabel ?? t.btnConfirm}
-          </button>
-        </div>
+    <CreatorDialog open returnFocus={returnFocus} title={message} className="confirm-dialog" onCancel={onCancel}
+      cancelLabel={t.btnCancel} actions={
+        <button type="submit" form={formId}
+          className={`ui-button${destructive ? ' ui-button--danger' : ''}`}>
+          {confirmLabel ?? t.btnConfirm}
+        </button>
+      }>
+      <form id={formId} onSubmit={event => { event.preventDefault(); confirm(); }}>
+        {isPrompt && <input ref={input} type="text" className="confirm-dialog__input"
+          aria-label={message} value={value} onChange={event => setValue(event.target.value)} />}
       </form>
-    </dialog>
+    </CreatorDialog>
   );
 }

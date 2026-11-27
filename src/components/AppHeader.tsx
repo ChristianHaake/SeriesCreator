@@ -1,7 +1,8 @@
+import { CreatorHeader, CreatorLanguageMenu } from '../creator/CreatorShell';
 import React, { useRef, useState } from 'react';
 import { CheckCircle2, MoreHorizontal, Download, FileText, GraduationCap, Trash2, Upload, Printer } from "lucide-react";
 import type { ProjectData } from "../types";
-import { useTranslation, type Language } from "../i18n";
+import { useTranslation } from "../i18n";
 import { PROJECT_FILE_EXTENSION } from '../domain/projectCodec';
 import { resourceLimits } from '../domain/constraints';
 import type { ProjectParseError } from '../domain/projectCodec';
@@ -10,15 +11,8 @@ import { BrandLogo } from './BrandLogo';
 
 export type ProjectImportFailure = ProjectParseError | 'readFailed';
 
-const languageNames = {
-  de: 'Deutsch',
-  en: 'English',
-  fr: 'Français',
-  es: 'Español',
-  nl: 'Nederlands',
-} satisfies Record<Language, string>;
-
 interface Props {
+  dialogTriggerRef?: React.RefObject<HTMLElement | null>;
   onExport?: () => void;
   onHtmlExport?: () => void;
   onImportValidated?: (data: ProjectData) => void;
@@ -30,6 +24,7 @@ interface Props {
 }
 
 export function AppHeader({
+  dialogTriggerRef,
   onExport,
   onHtmlExport,
   onImportValidated,
@@ -72,24 +67,17 @@ export function AppHeader({
   };
 
   return (
-    <header className="app-header">
-      <a href="/" className="brand" aria-label={t.appTitle} aria-describedby="brand-tagline">
-        <BrandLogo className="brand__logo" />
-        <span id="brand-tagline" className="brand__tagline">{t.appSubtitle}</span>
+    <CreatorHeader className="app-header" identity={
+      <a href="/" className="brand">
+        <BrandLogo className="brand__logo" label={t.appTitle} />
+        <span className="brand__tagline">{t.appSubtitle}</span>
       </a>
-
+    } controls={
       <div className="header-meta">
         <div className="header-meta__top">
-          <select
-            className="language-switcher"
-            aria-label={t.languageLabel}
-            value={locale}
-            onChange={(event) => setLocale(event.currentTarget.value as Language)}
-          >
-            {Object.entries(languageNames).map(([language, name]) => (
-              <option key={language} value={language} lang={language}>{name}</option>
-            ))}
-          </select>
+          <CreatorLanguageMenu value={locale} onChange={setLocale}
+            languages={['de', 'en', 'fr', 'es', 'nl']} label={t.languageLabel}
+            selectClassName="language-switcher" />
 
           <span className="local-badge">
             <CheckCircle2 aria-hidden="true" size={16} strokeWidth={2.5} />
@@ -138,7 +126,7 @@ export function AppHeader({
                 <button
                   type="button"
                   className="btn-header ui-button"
-                  onClick={() => importInputRef.current?.click()}
+                  onClick={event => { if (dialogTriggerRef) dialogTriggerRef.current = event.currentTarget; importInputRef.current?.click(); }}
                   aria-label={t.btnLoad}
                   title={t.btnLoad}
                   disabled={isImporting}
@@ -160,7 +148,7 @@ export function AppHeader({
               </>
             )}
             {onShowExamples && (
-              <button type="button" className="btn-header ui-button" onClick={onShowExamples} aria-label={t.btnExamples} title={t.btnExamples}>
+              <button type="button" className="btn-header ui-button" onClick={event => { if (dialogTriggerRef) dialogTriggerRef.current = event.currentTarget; onShowExamples(); }} aria-label={t.btnExamples} title={t.btnExamples}>
                 <FileText size={16} />
                 <span>{t.btnExamples}</span>
               </button>
@@ -183,7 +171,7 @@ export function AppHeader({
             </a>
             {/* Destructive, so it sits last rather than first as it did before. */}
             {onReset && (
-              <button type="button" className="btn-header ui-button ui-button--danger" onClick={onReset} aria-label={t.btnReset} title={t.btnReset}>
+              <button type="button" className="btn-header ui-button ui-button--danger" onClick={event => { if (dialogTriggerRef) dialogTriggerRef.current = event.currentTarget; onReset(); }} aria-label={t.btnReset} title={t.btnReset}>
                 <Trash2 size={16} />
                 <span>{t.btnReset}</span>
               </button>
@@ -191,6 +179,6 @@ export function AppHeader({
           </div>
         </div>
       </div>
-    </header>
+    } />
   );
 }

@@ -1,15 +1,16 @@
+import { CreatorFooter } from '../creator/CreatorFooter';
 import { useTranslation } from '../i18n';
 
 export function AppFooter({ onShowExamples }: { onShowExamples?: () => void }) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   return (
-    <footer className="app-footer">
-      <div className="app-footer__identity">
+    <CreatorFooter className="app-footer" innerClassName="app-footer__right"
+      navClassName="app-footer__nav" locale={locale} navigationLabel={t.footerNavigation}
+      identity={<div className="app-footer__identity">
         <a href="https://haak3.de/">haak3</a>
         <span className="app-footer__privacy">{t.footerPrivacy}</span>
-      </div>
-      <div className="app-footer__right">
-        <nav className="app-footer__nav" aria-label={t.footerNavigation}>
+      </div>}
+      links={<>
           <a href="/hilfe">{t.footerHelp}</a>
           <a href="/beispiele" onClick={(event) => {
             if (!onShowExamples || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
@@ -33,7 +34,8 @@ export function AppFooter({ onShowExamples }: { onShowExamples?: () => void }) {
             </svg>
             <span className="github-link__tooltip" aria-hidden="true">{t.footerGitHub}</span>
           </a>
-        </nav>
+      </>}
+      actions={
         <a
           className="app-footer__coffee"
           href="/unterstuetzung"
@@ -43,7 +45,7 @@ export function AppFooter({ onShowExamples }: { onShowExamples?: () => void }) {
           </svg>
           <span>{t.footerSupport}</span>
         </a>
-      </div>
-    </footer>
+      }
+    />
   );
 }
