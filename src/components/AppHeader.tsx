@@ -68,8 +68,8 @@ export function AppHeader({
 
   return (
     <CreatorHeader className="app-header" identity={
-      <a href="/" className="brand" aria-label={`${t.appTitle} – ${t.appSubtitle}`}>
-        <BrandLogo className="brand__logo" />
+      <a href="/" className="brand">
+        <BrandLogo className="brand__logo" label={t.appTitle} />
         <span className="brand__tagline">{t.appSubtitle}</span>
       </a>
     } controls={
